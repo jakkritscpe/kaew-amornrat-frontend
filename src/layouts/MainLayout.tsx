@@ -38,6 +38,7 @@ export function MainLayout() {
         if (path.includes('/attendance/employees')) return 'จัดการพนักงาน';
         if (path.includes('/attendance/locations')) return 'สถานที่ตั้ง (GPS)';
         if (path.includes('/attendance/ot-approvals')) return 'อนุมัติ OT';
+        if (path.includes('/attendance/ot-calculator')) return 'คำนวณค่าล่วงเวลา';
         if (path.includes('/attendance/reports')) return 'รายงานการทำงาน';
         return 'แดชบอร์ด';
     };

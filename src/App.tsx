@@ -19,6 +19,7 @@ import { AdminAttendanceLogs } from './features/attendance/pages/admin/AdminAtte
 import { AdminEmployees } from './features/attendance/pages/admin/AdminEmployees';
 import { AdminLocations } from './features/attendance/pages/admin/AdminLocations';
 import { AdminOTApprovals } from './features/attendance/pages/admin/AdminOTApprovals';
+import { AdminOTCalculator } from './features/attendance/pages/admin/AdminOTCalculator';
 import { AdminReports } from './features/attendance/pages/admin/AdminReports';
 import { EmployeeLayout } from './layouts/EmployeeLayout';
 import { EmployeeToday } from './features/attendance/pages/employee/EmployeeToday';
@@ -53,6 +54,7 @@ function App() {
                   <Route path="attendance/employees" element={<AdminEmployees />} />
                   <Route path="attendance/locations" element={<AdminLocations />} />
                   <Route path="attendance/ot-approvals" element={<AdminOTApprovals />} />
+                  <Route path="attendance/ot-calculator" element={<AdminOTCalculator />} />
                   <Route path="attendance/reports" element={<AdminReports />} />
                 </Route>
               </Route>

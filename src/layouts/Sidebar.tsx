@@ -17,7 +17,8 @@ import {
   FileCheck2,
   BarChart3,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Calculator,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '../features/auth/hooks/useAuth';
@@ -51,6 +52,7 @@ const menuItems: MenuItem[] = [
       { id: 'attendance/employees', label: 'พนักงาน', icon: Users },
       { id: 'attendance/locations', label: 'สถานที่', icon: MapPin },
       { id: 'attendance/ot-approvals', label: 'อนุมัติ OT', icon: FileCheck2 },
+      { id: 'attendance/ot-calculator', label: 'คำนวณ OT', icon: Calculator },
       { id: 'attendance/reports', label: 'รายงานเวลา', icon: BarChart3 },
     ]
   },

@@ -21,7 +21,8 @@ const INITIAL_USERS: User[] = [
             'attendance/employees',
             'attendance/logs',
             'attendance/locations',
-            'attendance/ot-approvals'
+            'attendance/ot-approvals',
+            'attendance/ot-calculator'
         ],
     }
 ];

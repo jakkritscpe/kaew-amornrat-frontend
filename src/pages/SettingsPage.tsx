@@ -17,6 +17,7 @@ const MENU_GROUPS = [
             { id: 'attendance/employees', label: 'จัดการพนักงาน (ลงเวลา)' },
             { id: 'attendance/locations', label: 'สถานที่ (GPS)' },
             { id: 'attendance/ot-approvals', label: 'อนุมัติ OT' },
+            { id: 'attendance/ot-calculator', label: 'คำนวณ OT' },
             { id: 'attendance/reports', label: 'รายงานเวลาทำงาน' },
         ]
     },
