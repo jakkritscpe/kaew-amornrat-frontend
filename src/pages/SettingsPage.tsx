@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
-import { Shield, ShieldAlert, Check, Settings2 } from 'lucide-react';
+import { Shield, ShieldAlert, Check, Settings2, DollarSign } from 'lucide-react';
+import { useAttendance } from '../features/attendance/contexts/AttendanceContext';
 
 const MENU_GROUPS = [
     { id: 'dashboard', label: 'แดชบอร์ดหลัก' },
@@ -24,6 +25,7 @@ const MENU_GROUPS = [
 
 export function SettingsPage() {
     const { user, getAllAdmins, updateUserPermissions } = useAuth();
+    const { companySettings, updateCompanySettings } = useAttendance() ?? {};
     const [savedUserId, setSavedUserId] = useState<string | null>(null);
 
     // If not super_admin, show placeholder or access denied
@@ -217,6 +219,60 @@ export function SettingsPage() {
                             ))}
                         </div>
                     )}
+                </div>
+            </div>
+
+            {/* Compensation Settings Section */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                    <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
+                        <DollarSign className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900">การตั้งค่าสวัสดิการและค่าตอบแทน</h2>
+                        <p className="text-sm text-gray-500">กำหนดอัตราค่าล่วงเวลา (OT) เริ่มต้นของบริษัท</p>
+                    </div>
+                </div>
+                <div className="p-6">
+                    <div className="max-w-xl space-y-5">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                รูปแบบการคิดค่าล่วงเวลา (OT Type)
+                            </label>
+                            <select
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                                value={companySettings?.defaultOtRateType || 'multiplier'}
+                                onChange={e => updateCompanySettings?.({ defaultOtRateType: e.target.value as 'multiplier' | 'fixed' })}
+                            >
+                                <option value="multiplier">คิดเป็น "เท่า" ของค่าจ้างเฉลี่ยต่อชั่วโมง</option>
+                                <option value="fixed">คิดเหมาจ่ายเป็น "บาท/ชั่วโมง"</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                อัตราเริ่มต้น (Default Rate)
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                                    value={companySettings?.defaultOtRateValue || 1.5}
+                                    onChange={e => updateCompanySettings?.({ defaultOtRateValue: parseFloat(e.target.value) || 0 })}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none bg-gray-50 border-l border-gray-200 rounded-r-lg">
+                                    <span className="text-gray-500 text-sm font-medium w-12 text-center">
+                                        {companySettings?.defaultOtRateType === 'multiplier' ? 'เท่า' : 'บาท/ชม.'}
+                                    </span>
+                                </div>
+                            </div>
+                            <p className="mt-2 text-sm text-gray-500 flex items-center gap-1.5">
+                                <Check className="w-4 h-4 text-emerald-500" />
+                                ค่านี้จะถูกตั้งเป็นตัวเลือกแรกเมื่อเพิ่มพนักงานใหม่เสมอ
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

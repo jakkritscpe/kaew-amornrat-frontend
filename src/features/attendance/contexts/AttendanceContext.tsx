@@ -3,11 +3,17 @@ import type { ReactNode } from 'react';
 import type { Employee, AttendanceLog, WorkLocation, OTRequest } from '../types';
 import { mockEmployees, mockAttendanceLogs, mockLocations, mockOTRequests } from '../mockData';
 
+export interface CompanySettings {
+    defaultOtRateType: 'multiplier' | 'fixed';
+    defaultOtRateValue: number;
+}
+
 interface AttendanceContextType {
     employees: Employee[];
     logs: AttendanceLog[];
     locations: WorkLocation[];
     otRequests: OTRequest[];
+    companySettings: CompanySettings;
 
     // Actions
     addLog: (log: Omit<AttendanceLog, 'id'>) => void;
@@ -18,6 +24,7 @@ interface AttendanceContextType {
     addLocation: (loc: Omit<WorkLocation, 'id'>) => void;
     updateOTStatus: (id: string, status: OTRequest['status']) => void;
     submitOTRequest: (req: Omit<OTRequest, 'id' | 'status'>) => void;
+    updateCompanySettings: (settings: Partial<CompanySettings>) => void;
 }
 
 const AttendanceContext = createContext<AttendanceContextType | undefined>(undefined);
@@ -27,6 +34,10 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
     const [logs, setLogs] = useState<AttendanceLog[]>(mockAttendanceLogs);
     const [locations, setLocations] = useState<WorkLocation[]>(mockLocations);
     const [otRequests, setOtRequests] = useState<OTRequest[]>(mockOTRequests);
+    const [companySettings, setCompanySettings] = useState<CompanySettings>({
+        defaultOtRateType: 'multiplier',
+        defaultOtRateValue: 1.5,
+    });
 
     const addLog = useCallback((log: Omit<AttendanceLog, 'id'>) => {
         const newLog: AttendanceLog = {
@@ -77,12 +88,17 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
         setOtRequests(prev => [...prev, newReq]);
     }, []);
 
+    const updateCompanySettings = useCallback((updates: Partial<CompanySettings>) => {
+        setCompanySettings(prev => ({ ...prev, ...updates }));
+    }, []);
+
     return (
         <AttendanceContext.Provider value={{
             employees,
             logs,
             locations,
             otRequests,
+            companySettings,
             addLog,
             updateLog,
             addEmployee,
@@ -90,7 +106,8 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
             removeEmployee,
             addLocation,
             updateOTStatus,
-            submitOTRequest
+            submitOTRequest,
+            updateCompanySettings
         }}>
             {children}
         </AttendanceContext.Provider>

@@ -8,6 +8,7 @@ import {
     Plus, QrCode, X, Search, FileDown, Clock,
     Building2, ImagePlus, Trash2, Camera, SwitchCamera,
     CheckCircle2, AlertCircle, XCircle, MinusCircle, Users, Pencil,
+    MapPin, DollarSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,7 +33,7 @@ const STAT_ICONS: Record<string, React.ReactNode> = {
 type AvatarMode = 'idle' | 'camera';
 
 export function AdminEmployees() {
-    const { employees, logs, addEmployee, updateEmployee, removeEmployee } = useAttendance();
+    const { employees, logs, locations, addEmployee, updateEmployee, removeEmployee, companySettings } = useAttendance();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showQRModal, setShowQRModal] = useState<string | null>(null);
@@ -42,6 +43,11 @@ export function AdminEmployees() {
     const [form, setForm] = useState({
         name: '', nickname: '', email: '', department: '', position: '',
         shiftStartTime: '09:00', shiftEndTime: '18:00',
+        locationId: '' as string,
+        baseWage: '' as string | number,
+        otUseDefault: true,
+        otType: 'multiplier' as 'multiplier' | 'fixed',
+        otValue: '' as string | number,
     });
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [avatarMode, setAvatarMode] = useState<AvatarMode>('idle');
@@ -134,10 +140,17 @@ export function AdminEmployees() {
     const openAddForm = useCallback(() => {
         setIsEditing(false);
         setEditingId(null);
-        setForm({ name: '', nickname: '', email: '', department: '', position: '', shiftStartTime: '09:00', shiftEndTime: '18:00' });
+        setForm({
+            name: '', nickname: '', email: '', department: '', position: '',
+            shiftStartTime: '09:00', shiftEndTime: '18:00',
+            locationId: '', baseWage: '',
+            otUseDefault: true,
+            otType: companySettings.defaultOtRateType,
+            otValue: companySettings.defaultOtRateValue,
+        });
         setAvatarPreview(null);
         setShowFormModal(true);
-    }, []);
+    }, [companySettings]);
 
     const openEditForm = useCallback((id: string) => {
         const emp = employees.find(e => e.id === id);
@@ -145,13 +158,18 @@ export function AdminEmployees() {
         setForm({
             name: emp.name, nickname: emp.nickname || '', email: emp.email || '',
             department: emp.department, position: emp.position,
-            shiftStartTime: emp.shiftStartTime || '09:00', shiftEndTime: emp.shiftEndTime || '18:00'
+            shiftStartTime: emp.shiftStartTime || '09:00', shiftEndTime: emp.shiftEndTime || '18:00',
+            locationId: emp.locationId || '',
+            baseWage: emp.baseWage ?? '',
+            otUseDefault: emp.otRateConfig?.useDefault ?? true,
+            otType: emp.otRateConfig?.type || companySettings.defaultOtRateType,
+            otValue: emp.otRateConfig?.value ?? companySettings.defaultOtRateValue,
         });
         setAvatarPreview(emp.avatarUrl || null);
         setIsEditing(true);
         setEditingId(id);
         setShowFormModal(true);
-    }, [employees]);
+    }, [employees, companySettings]);
 
     const closeFormModal = useCallback(() => {
         stopCamera();
@@ -159,10 +177,17 @@ export function AdminEmployees() {
         setAvatarPreview(null);
         setAvatarMode('idle');
         setCameraError(null);
-        setForm({ name: '', nickname: '', email: '', department: '', position: '', shiftStartTime: '09:00', shiftEndTime: '18:00' });
+        setForm({
+            name: '', nickname: '', email: '', department: '', position: '',
+            shiftStartTime: '09:00', shiftEndTime: '18:00',
+            locationId: '', baseWage: '',
+            otUseDefault: true,
+            otType: companySettings.defaultOtRateType,
+            otValue: companySettings.defaultOtRateValue,
+        });
         setIsEditing(false);
         setEditingId(null);
-    }, [stopCamera]);
+    }, [stopCamera, companySettings]);
 
     // ── Secure Action + PIN ──
     const closeSecureAction = useCallback(() => {
@@ -218,10 +243,27 @@ export function AdminEmployees() {
 
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const payload = {
+            name: form.name,
+            nickname: form.nickname,
+            email: form.email,
+            department: form.department,
+            position: form.position,
+            shiftStartTime: form.shiftStartTime,
+            shiftEndTime: form.shiftEndTime,
+            avatarUrl: avatarPreview ?? undefined,
+            locationId: form.locationId || undefined,
+            baseWage: form.baseWage ? Number(form.baseWage) : undefined,
+            otRateConfig: {
+                useDefault: form.otUseDefault,
+                type: form.otUseDefault ? companySettings.defaultOtRateType : form.otType,
+                value: form.otUseDefault ? companySettings.defaultOtRateValue : (Number(form.otValue) || 0),
+            },
+        };
         if (isEditing && editingId) {
-            updateEmployee(editingId, { ...form, avatarUrl: avatarPreview ?? undefined });
+            updateEmployee(editingId, payload);
         } else {
-            addEmployee({ ...form, role: 'employee', avatarUrl: avatarPreview ?? undefined });
+            addEmployee({ ...payload, role: 'employee' });
         }
         closeFormModal();
     };
@@ -647,6 +689,96 @@ export function AdminEmployees() {
                                                     <Input id="shift-start" name="shiftStartTime" type="time" value={form.shiftStartTime} onChange={e => setForm({ ...form, shiftStartTime: e.target.value })} required className="flex-1 tabular-nums" />
                                                     <span className="text-slate-400 text-sm shrink-0">ถึง</span>
                                                     <Input id="shift-end" name="shiftEndTime" type="time" value={form.shiftEndTime} onChange={e => setForm({ ...form, shiftEndTime: e.target.value })} required className="flex-1 tabular-nums" />
+                                                </div>
+                                            </div>
+
+                                            {/* Location Zone */}
+                                            <div>
+                                                <label htmlFor="emp-location" className="text-sm font-medium text-slate-700 block mb-1.5">
+                                                    <MapPin className="w-3.5 h-3.5 inline-block mr-1 text-slate-400" />
+                                                    โซนสถานที่ทำงาน <span className="text-slate-400 font-normal text-xs">(ไม่บังคับ)</span>
+                                                </label>
+                                                <select
+                                                    id="emp-location"
+                                                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                                                    value={form.locationId}
+                                                    onChange={e => setForm({ ...form, locationId: e.target.value })}
+                                                >
+                                                    <option value="">— ไม่กำหนดโซน (ลงเวลาได้ทุกที่) —</option>
+                                                    {locations.map(loc => (
+                                                        <option key={loc.id} value={loc.id}>{loc.name} (รัศมี {loc.radiusMeters}m)</option>
+                                                    ))}
+                                                </select>
+                                                <p className="mt-1 text-xs text-slate-400">หากเลือกโซน พนักงานต้องอยู่ในรัศมีที่กำหนดจึงจะเช็คอินได้</p>
+                                            </div>
+
+                                            {/* ── Compensation ── */}
+                                            <div className="border-t border-slate-100 pt-4 mt-2">
+                                                <h4 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-1.5">
+                                                    <DollarSign className="w-4 h-4 text-emerald-500" />
+                                                    ค่าตอบแทนและล่วงเวลา
+                                                </h4>
+
+                                                {/* Base Wage */}
+                                                <div className="mb-3">
+                                                    <label htmlFor="emp-base-wage" className="text-sm font-medium text-slate-700 block mb-1.5">
+                                                        ค่าจ้างพื้นฐาน (บาท/เดือน) <span className="text-slate-400 font-normal text-xs">(ไม่บังคับ)</span>
+                                                    </label>
+                                                    <Input
+                                                        id="emp-base-wage" type="number" min="0" step="100"
+                                                        value={form.baseWage}
+                                                        onChange={e => setForm({ ...form, baseWage: e.target.value })}
+                                                        placeholder="เช่น 15000"
+                                                    />
+                                                </div>
+
+                                                {/* OT Rate Toggle */}
+                                                <div className="space-y-3">
+                                                    <label className="text-sm font-medium text-slate-700 block">อัตราค่าล่วงเวลา (OT Rate)</label>
+                                                    <label className="flex items-center gap-2.5 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                            checked={form.otUseDefault}
+                                                            onChange={e => setForm({ ...form, otUseDefault: e.target.checked })}
+                                                        />
+                                                        <span className="text-sm text-slate-600">
+                                                            ใช้อัตราตามนโยบายบริษัท
+                                                            <span className="ml-1.5 text-xs font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                                                                {companySettings.defaultOtRateValue} {companySettings.defaultOtRateType === 'multiplier' ? 'เท่า' : 'บาท/ชม.'}
+                                                            </span>
+                                                        </span>
+                                                    </label>
+
+                                                    {!form.otUseDefault && (
+                                                        <div className="pl-6 border-l-2 border-blue-100 space-y-3 animate-in slide-in-from-top-1">
+                                                            <div>
+                                                                <label className="text-xs font-medium text-slate-600 block mb-1">ประเภทการคิดเงิน OT</label>
+                                                                <select
+                                                                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                                                                    value={form.otType}
+                                                                    onChange={e => setForm({ ...form, otType: e.target.value as 'multiplier' | 'fixed' })}
+                                                                >
+                                                                    <option value="multiplier">คิดเป็น "เท่า" (Multiplier)</option>
+                                                                    <option value="fixed">เหมาจ่าย "บาท/ชั่วโมง" (Fixed)</option>
+                                                                </select>
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-xs font-medium text-slate-600 block mb-1">อัตรา</label>
+                                                                <div className="relative">
+                                                                    <Input
+                                                                        type="number" step="0.1" min="0"
+                                                                        value={form.otValue}
+                                                                        onChange={e => setForm({ ...form, otValue: e.target.value })}
+                                                                        placeholder={form.otType === 'multiplier' ? 'เช่น 1.5' : 'เช่น 50'}
+                                                                    />
+                                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">
+                                                                        {form.otType === 'multiplier' ? 'เท่า' : 'บาท/ชม.'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

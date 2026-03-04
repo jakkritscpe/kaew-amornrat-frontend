@@ -13,6 +13,13 @@ export interface Employee {
     shiftStartTime: string; // e.g. "09:00"
     shiftEndTime: string;   // e.g. "18:00"
     avatarUrl?: string; // Additional for UI
+    locationId?: string; // Optional: linked work location zone
+    baseWage?: number;
+    otRateConfig?: {
+        useDefault: boolean;
+        type: 'multiplier' | 'fixed';
+        value: number;
+    };
 }
 
 export interface AttendanceLog {
