@@ -3,14 +3,48 @@ import type { ReactNode } from 'react';
 import type { User } from '../types';
 import { AuthContext } from './AuthContextObject';
 
-const MOCK_USER: User = {
-    id: '1',
-    username: 'admin',
-    name: 'แอดมิน ระบบ',
-    role: 'admin',
-};
+// Mock database of users
+const INITIAL_USERS: User[] = [
+    {
+        id: '1',
+        username: 'superadmin',
+        name: 'Super Admin',
+        role: 'super_admin',
+        accessibleMenus: [], // super_admin has access to everything by default
+    },
+    {
+        id: '2',
+        username: 'admin',
+        name: 'แอดมิน ระบบ',
+        role: 'admin',
+        accessibleMenus: [
+            'attendance/employees',
+            'attendance/logs',
+            'attendance/locations',
+            'attendance/ot-approvals'
+        ],
+    }
+];
+
+// const fullAccessibleMenus = [
+//     // 📊 หมวดหมู่หลัก
+//     'dashboard',             // แดชบอร์ดหลัก
+//     'requests',              // รายการแจ้งซ่อม
+//     'jobs',                  // ระบบใบงาน
+//     'technicians',           // ทีมช่าง
+//     'settings',              // ตั้งค่าระบบ
+
+//     // ⏱️ หมวดหมู่ระบบลงเวลาทำงาน (Attendance)
+//     'attendance/dashboard',  // แดชบอร์ดลงเวลา
+//     'attendance/logs',       // ประวัติลงเวลา
+//     'attendance/employees',  // จัดการพนักงาน (ลงเวลา)
+//     'attendance/locations',  // สถานที่ (GPS)
+//     'attendance/ot-approvals', // อนุมัติ OT
+//     'attendance/reports'     // รายงานเวลาทำงาน
+// ];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const [mockUsers, setMockUsers] = useState<User[]>(INITIAL_USERS);
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -34,9 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Simulate API call
             await new Promise((resolve) => setTimeout(resolve, 800));
 
-            if (username === 'admin') {
-                setUser(MOCK_USER);
-                localStorage.setItem('repairhub_user', JSON.stringify(MOCK_USER));
+            const foundUser = mockUsers.find(u => u.username === username);
+
+            if (foundUser) {
+                setUser(foundUser);
+                localStorage.setItem('repairhub_user', JSON.stringify(foundUser));
             } else {
                 throw new Error('Invalid credentials');
             }
@@ -50,12 +86,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('repairhub_user');
     };
 
+    const updateUserPermissions = (userId: string, targetMenus: string[]) => {
+        setMockUsers(prev => {
+            const updatedUsers = prev.map(u =>
+                u.id === userId ? { ...u, accessibleMenus: targetMenus } : u
+            );
+
+            // If the updated user is the currently logged-in user, refresh their session
+            if (user?.id === userId) {
+                const refreshedUser = updatedUsers.find(u => u.id === userId);
+                if (refreshedUser) {
+                    setUser(refreshedUser);
+                    localStorage.setItem('repairhub_user', JSON.stringify(refreshedUser));
+                }
+            }
+            return updatedUsers;
+        });
+    };
+
+    const getAllAdmins = () => {
+        return mockUsers.filter(u => u.role === 'admin' || u.role === 'super_admin');
+    };
+
     const value = {
         user,
         isAuthenticated: !!user,
         isLoading,
         login,
         logout,
+        updateUserPermissions,
+        getAllAdmins
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

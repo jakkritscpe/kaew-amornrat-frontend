@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
     Plus, QrCode, X, Search, FileDown, Clock,
     Building2, ImagePlus, Trash2, Camera, SwitchCamera,
-    CheckCircle2, AlertCircle, XCircle, MinusCircle, Users,
+    CheckCircle2, AlertCircle, XCircle, MinusCircle, Users, Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,11 +32,13 @@ const STAT_ICONS: Record<string, React.ReactNode> = {
 type AvatarMode = 'idle' | 'camera';
 
 export function AdminEmployees() {
-    const { employees, logs, addEmployee, removeEmployee } = useAttendance();
+    const { employees, logs, addEmployee, updateEmployee, removeEmployee } = useAttendance();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showQRModal, setShowQRModal] = useState<string | null>(null);
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [showFormModal, setShowFormModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [form, setForm] = useState({
         name: '', nickname: '', email: '', department: '', position: '',
         shiftStartTime: '09:00', shiftEndTime: '18:00',
@@ -45,9 +47,10 @@ export function AdminEmployees() {
     const [avatarMode, setAvatarMode] = useState<AvatarMode>('idle');
     const [cameraError, setCameraError] = useState<string | null>(null);
 
-    // Delete + PIN
-    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-    const [deleteStep, setDeleteStep] = useState<'confirm' | 'pin'>('confirm');
+    // Secure Action (Edit/Delete) + PIN
+    const [secureActionId, setSecureActionId] = useState<string | null>(null);
+    const [secureActionType, setSecureActionType] = useState<'delete' | 'edit' | null>(null);
+    const [secureStep, setSecureStep] = useState<'confirm' | 'pin'>('confirm');
     const [pinInput, setPinInput] = useState('');
     const [pinError, setPinError] = useState('');
     const [pinAttempts, setPinAttempts] = useState(0);
@@ -76,12 +79,15 @@ export function AdminEmployees() {
         const log = logs.find(l => l.employeeId === empId && l.date === todayDate);
         return log ? log.status : 'none';
     };
-    const stats = {
-        present: employees.filter(e => getStatus(e.id) === 'present').length,
-        late: employees.filter(e => getStatus(e.id) === 'late').length,
-        absent: employees.filter(e => getStatus(e.id) === 'absent').length,
-        none: employees.filter(e => getStatus(e.id) === 'none').length,
-    };
+
+    const stats = employees.reduce((acc, currentEmployee) => {
+        const status = getStatus(currentEmployee.id);
+        if (status === 'present') acc.present++;
+        else if (status === 'late') acc.late++;
+        else if (status === 'absent') acc.absent++;
+        else acc.none++;
+        return acc;
+    }, { present: 0, late: 0, absent: 0, none: 0 });
 
     // ── GSAP ──
     useEffect(() => {
@@ -125,19 +131,44 @@ export function AdminEmployees() {
         stopCamera();
     }, [stopCamera]);
 
-    const closeAddModal = useCallback(() => {
+    const openAddForm = useCallback(() => {
+        setIsEditing(false);
+        setEditingId(null);
+        setForm({ name: '', nickname: '', email: '', department: '', position: '', shiftStartTime: '09:00', shiftEndTime: '18:00' });
+        setAvatarPreview(null);
+        setShowFormModal(true);
+    }, []);
+
+    const openEditForm = useCallback((id: string) => {
+        const emp = employees.find(e => e.id === id);
+        if (!emp) return;
+        setForm({
+            name: emp.name, nickname: emp.nickname || '', email: emp.email || '',
+            department: emp.department, position: emp.position,
+            shiftStartTime: emp.shiftStartTime || '09:00', shiftEndTime: emp.shiftEndTime || '18:00'
+        });
+        setAvatarPreview(emp.avatarUrl || null);
+        setIsEditing(true);
+        setEditingId(id);
+        setShowFormModal(true);
+    }, [employees]);
+
+    const closeFormModal = useCallback(() => {
         stopCamera();
-        setShowAddModal(false);
+        setShowFormModal(false);
         setAvatarPreview(null);
         setAvatarMode('idle');
         setCameraError(null);
         setForm({ name: '', nickname: '', email: '', department: '', position: '', shiftStartTime: '09:00', shiftEndTime: '18:00' });
+        setIsEditing(false);
+        setEditingId(null);
     }, [stopCamera]);
 
-    // ── Delete + PIN ──
-    const closeDelete = useCallback(() => {
-        setConfirmDeleteId(null);
-        setDeleteStep('confirm');
+    // ── Secure Action + PIN ──
+    const closeSecureAction = useCallback(() => {
+        setSecureActionId(null);
+        setSecureActionType(null);
+        setSecureStep('confirm');
         setPinInput('');
         setPinError('');
         setPinAttempts(0);
@@ -152,14 +183,18 @@ export function AdminEmployees() {
         if (next.length < 4) PIN_REFS[next.length]?.current?.focus();
         if (next.length === 4) {
             if (next === ADMIN_PIN) {
-                removeEmployee(confirmDeleteId!);
-                closeDelete();
+                if (secureActionType === 'delete') {
+                    removeEmployee(secureActionId!);
+                } else if (secureActionType === 'edit') {
+                    openEditForm(secureActionId!);
+                }
+                closeSecureAction();
             } else {
-                const a = pinAttempts + 1;
-                setPinAttempts(a);
+                const newAttempts = pinAttempts + 1;
+                setPinAttempts(newAttempts);
                 setPinInput('');
                 PIN_REFS[0]?.current?.focus();
-                setPinError(a >= 3 ? 'ถูกล็อค – ลองใหม่ภายหลัง' : `PIN ไม่ถูกต้อง (${3 - a} ครั้งที่เหลือ)`);
+                setPinError(newAttempts >= 3 ? 'ถูกล็อค – ลองใหม่ภายหลัง' : `PIN ไม่ถูกต้อง (${3 - newAttempts} ครั้งที่เหลือ)`);
             }
         }
     };
@@ -181,10 +216,14 @@ export function AdminEmployees() {
         reader.readAsDataURL(file);
     };
 
-    const handleCreate = (e: React.FormEvent) => {
+    const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        addEmployee({ ...form, role: 'employee', avatarUrl: avatarPreview ?? undefined });
-        closeAddModal();
+        if (isEditing && editingId) {
+            updateEmployee(editingId, { ...form, avatarUrl: avatarPreview ?? undefined });
+        } else {
+            addEmployee({ ...form, role: 'employee', avatarUrl: avatarPreview ?? undefined });
+        }
+        closeFormModal();
     };
 
     const downloadQR = () => {
@@ -211,22 +250,22 @@ export function AdminEmployees() {
             {/* ── Page header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">จัดการพนักงาน</h1>
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight text-balance">จัดการพนักงาน</h1>
                     <p className="text-sm text-slate-500 mt-0.5">ทั้งหมด {employees.length} คน · สืบค้นและจัดการรายชื่อพนักงาน</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                    <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <div className="relative w-full sm:w-auto group focus-within:ring-4 focus-within:ring-blue-500/20 rounded-md transition-all">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none group-focus-within:text-blue-500 transition-colors" />
                         <Input
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                             placeholder="ค้นหาชื่อ ชื่อเล่น หรือแผนก…"
-                            className="pl-9 w-full sm:w-64 bg-white border-slate-200 focus:border-blue-400 transition-colors"
+                            className="pl-9 w-full sm:w-64 bg-white border-slate-200 focus:border-blue-400 focus-visible:ring-4 focus-visible:ring-blue-500/20 transition-all"
                             autoComplete="off"
                             spellCheck={false}
                         />
                     </div>
-                    <Button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm shrink-0">
+                    <Button onClick={openAddForm} className="bg-blue-600 hover:bg-blue-700 shadow-sm shrink-0">
                         <Plus className="w-4 h-4 mr-2" /> เพิ่มพนักงาน
                     </Button>
                 </div>
@@ -255,7 +294,7 @@ export function AdminEmployees() {
                 {filteredEmployees.map(emp => {
                     const todayLog = logs.find(l => l.employeeId === emp.id && l.date === todayDate);
                     const status = getStatus(emp.id);
-                    const cfg = STATUS_CONFIG[status];
+                    const statusConfig = STATUS_CONFIG[status];
 
                     return (
                         <div key={emp.id} className={cn(
@@ -263,18 +302,23 @@ export function AdminEmployees() {
                             'hover:shadow-md hover:shadow-slate-200/60 hover:-translate-y-0.5',
                             'transition-all duration-300 flex flex-col',
                         )}>
-                            {/* ── Delete icon (top-right) ── */}
-                            <button
-                                onClick={() => { setConfirmDeleteId(emp.id); setDeleteStep('confirm'); }}
-                                aria-label="ลบพนักงาน"
-                                className={cn(
-                                    'absolute top-3 right-3 w-7 h-7 rounded-lg flex items-center justify-center',
-                                    'opacity-0 group-hover:opacity-100 transition-opacity',
-                                    'text-slate-300 hover:text-red-500 hover:bg-red-50',
-                                )}
-                            >
-                                <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            {/* ── Action icons (top-right) ── */}
+                            <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => { setSecureActionId(emp.id); setSecureActionType('edit'); setSecureStep('pin'); setTimeout(() => PIN_REFS[0]?.current?.focus(), 50); }}
+                                    aria-label="แก้ไขพนักงาน"
+                                    className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                    onClick={() => { setSecureActionId(emp.id); setSecureActionType('delete'); setSecureStep('confirm'); }}
+                                    aria-label="ลบพนักงาน"
+                                    className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
 
                             {/* ── Card body ── */}
                             <div className="p-5 flex-1 flex flex-col gap-4">
@@ -288,7 +332,7 @@ export function AdminEmployees() {
                                         loading="lazy"
                                     />
                                     <div className="min-w-0 flex-1">
-                                        <h4 className="font-semibold text-slate-900 truncate leading-snug">
+                                        <h4 className="font-semibold text-slate-900 truncate leading-snug text-balance">
                                             {emp.name}
                                             {emp.nickname && (
                                                 <span className="ml-1.5 font-normal text-slate-400 text-sm">({emp.nickname})</span>
@@ -298,10 +342,10 @@ export function AdminEmployees() {
                                         {/* Status badge */}
                                         <span className={cn(
                                             'mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium ring-1',
-                                            cfg.badge,
+                                            statusConfig.badge,
                                         )}>
-                                            <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', cfg.dot)} />
-                                            {cfg.label}
+                                            <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', statusConfig.dot)} />
+                                            {statusConfig.label}
                                         </span>
                                     </div>
                                 </div>
@@ -359,20 +403,20 @@ export function AdminEmployees() {
                 })}
 
                 {/* Empty state */}
-                {filteredEmployees.length === 0 && (
+                {filteredEmployees.length === 0 ? (
                     <div className="col-span-3 py-20 text-center">
                         <Users className="w-12 h-12 mx-auto mb-3 text-slate-200" />
                         <p className="text-slate-500 font-medium">ไม่พบพนักงานที่ตรงกับการค้นหา</p>
                         <p className="text-sm text-slate-400 mt-1">ลองใช้คำค้นหาอื่น หรือกด <span className="font-medium">เพิ่มพนักงาน</span></p>
                     </div>
-                )}
+                ) : null}
             </div>
 
             {/* ════ MODALS (Portal to body) ════ */}
             {typeof document !== 'undefined' && createPortal(
                 <>
                     {/* ════ QR Modal ════ */}
-                    {showQRModal && (
+                    {showQRModal ? (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
                             <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden relative">
                                 <button onClick={() => setShowQRModal(null)} className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors z-10">
@@ -382,37 +426,40 @@ export function AdminEmployees() {
                                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
                                         <QrCode className="w-6 h-6 text-blue-600" />
                                     </div>
-                                    <h3 className="text-lg font-bold text-slate-900">QR Code สำหรับลงเวลา</h3>
-                                    {selectedEmp && <p className="text-sm text-blue-600 font-medium mt-0.5">{selectedEmp.name}</p>}
+                                    <h3 className="text-lg font-bold text-slate-900 mb-1">QR Code สำหรับลงเวลา</h3>
+                                    {selectedEmp ? <p className="text-sm text-blue-600 font-medium">{selectedEmp.name}</p> : null}
                                     <p className="text-xs text-slate-400 mt-1 mb-5">สแกน QR Code เพื่อบันทึกเวลาเข้า-ออกงาน</p>
                                     <div className="p-4 bg-white rounded-xl border border-slate-100 shadow-inner mb-5">
                                         <QRCodeSVG value={`${window.location.origin}/qr-checkin/${showQRModal}`} size={192} level="H" includeMargin ref={qrRef} />
                                     </div>
-                                    <Button onClick={downloadQR} className="w-full bg-slate-900 hover:bg-slate-800">
+                                    <Button onClick={downloadQR} className="w-full bg-slate-900 hover:bg-slate-800 focus-visible:ring-4 focus-visible:ring-slate-900/20 transition-all">
                                         <FileDown className="w-4 h-4 mr-2" /> ดาวน์โหลด QR Code
                                     </Button>
-                                    <Button variant="ghost" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/qr-checkin/${showQRModal}`); alert('คัดลอกลิงก์แล้ว!'); }} className="w-full mt-1.5 text-slate-500 text-sm">
+                                    <Button variant="ghost" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/qr-checkin/${showQRModal}`); alert('คัดลอกลิงก์แล้ว!'); }} className="w-full mt-1.5 text-slate-500 text-sm focus-visible:ring-2 focus-visible:ring-slate-200 transition-all">
                                         คัดลอกลิงก์สาธารณะ
                                     </Button>
                                 </div>
                             </div>
                         </div>
-                    )}
+                    ) : null}
 
-                    {/* ════ Confirm Delete Modal (2-step + PIN) ════ */}
-                    {confirmDeleteId && (() => {
-                        const target = employees.find(e => e.id === confirmDeleteId);
+                    {/* ════ Secure Action Modal (Confirm + PIN) ════ */}
+                    {secureActionId ? (() => {
+                        const target = employees.find(e => e.id === secureActionId);
                         const locked = pinAttempts >= 3;
+                        const isDelete = secureActionType === 'delete';
                         return (
                             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
                                 <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden relative">
                                     {/* Step bar */}
-                                    <div className="flex h-1">
-                                        <div className={`flex-1 transition-colors duration-300 ${deleteStep === 'confirm' ? 'bg-red-400' : 'bg-red-200'}`} />
-                                        <div className={`flex-1 transition-colors duration-300 ${deleteStep === 'pin' ? 'bg-red-500' : 'bg-slate-100'}`} />
-                                    </div>
+                                    {isDelete && (
+                                        <div className="flex h-1">
+                                            <div className={`flex-1 transition-colors duration-300 ${secureStep === 'confirm' ? 'bg-red-400' : 'bg-red-200'}`} />
+                                            <div className={`flex-1 transition-colors duration-300 ${secureStep === 'pin' ? 'bg-red-500' : 'bg-slate-100'}`} />
+                                        </div>
+                                    )}
                                     <div className="p-6 text-center">
-                                        {deleteStep === 'confirm' ? (
+                                        {secureStep === 'confirm' && isDelete ? (
                                             <>
                                                 <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
                                                     <Trash2 className="w-7 h-7 text-red-500" />
@@ -428,22 +475,22 @@ export function AdminEmployees() {
                                                     <span className="text-red-500 text-xs mt-1 block">การกระทำนี้ไม่สามารถย้อนกลับได้</span>
                                                 </p>
                                                 <div className="flex gap-3">
-                                                    <Button variant="outline" className="flex-1" onClick={closeDelete}>ยกเลิก</Button>
+                                                    <Button variant="outline" className="flex-1" onClick={closeSecureAction}>ยกเลิก</Button>
                                                     <Button className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                                                        onClick={() => { setDeleteStep('pin'); setTimeout(() => PIN_REFS[0]?.current?.focus(), 50); }}>
+                                                        onClick={() => { setSecureStep('pin'); setTimeout(() => PIN_REFS[0]?.current?.focus(), 50); }}>
                                                         ดำเนินการต่อ
                                                     </Button>
                                                 </div>
                                             </>
                                         ) : (
                                             <>
-                                                <div className={cn('w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4', locked ? 'bg-slate-100' : 'bg-amber-100')}>
-                                                    <svg className={cn('w-7 h-7', locked ? 'text-slate-400' : 'text-amber-500')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <div className={cn('w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4', locked ? 'bg-slate-100' : (isDelete ? 'bg-red-50' : 'bg-amber-100'))}>
+                                                    <svg className={cn('w-7 h-7', locked ? 'text-slate-400' : (isDelete ? 'text-red-500' : 'text-amber-500'))} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                                     </svg>
                                                 </div>
-                                                <h3 className="text-lg font-bold text-slate-900 mb-1">ยืนยันตัวตน</h3>
-                                                <p className="text-sm text-slate-500 mb-5">กรอก PIN 4 หลักเพื่อยืนยันการลบ</p>
+                                                <h3 className="text-lg font-bold text-slate-900 mb-1 text-balance">ยืนยันตัวตน</h3>
+                                                <p className="text-sm text-slate-500 mb-5">กรอก PIN 4 หลักเพื่อยืนยันการ{isDelete ? 'ลบ' : 'แก้ไข'}ข้อมูล</p>
 
                                                 {/* PIN dots */}
                                                 <div className="flex justify-center gap-3 mb-4">
@@ -479,32 +526,32 @@ export function AdminEmployees() {
                                                             )
                                                     )}
                                                 </div>
-                                                <Button variant="ghost" className="w-full text-slate-500 text-sm" onClick={closeDelete}>ยกเลิก</Button>
+                                                <Button variant="ghost" className="w-full text-slate-500 text-sm" onClick={closeSecureAction}>ยกเลิก</Button>
                                             </>
                                         )}
                                     </div>
                                 </div>
                             </div>
                         );
-                    })()}
+                    })() : null}
 
-                    {/* ════ Add Employee Modal ════ */}
-                    {showAddModal && (
+                    {/* ════ Form Modal ════ */}
+                    {showFormModal ? (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
                             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
 
                                 {/* Header */}
                                 <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0">
                                     <div>
-                                        <h2 className="text-xl font-bold text-slate-900">เพิ่มพนักงานใหม่</h2>
-                                        <p className="text-sm text-slate-400 mt-0.5">กรอกข้อมูลพนักงานให้ครบถ้วน</p>
+                                        <h2 className="text-xl font-bold text-slate-900 text-balance">{isEditing ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}</h2>
+                                        <p className="text-sm text-slate-400 mt-0.5">{isEditing ? 'ปรับปรุงข้อมูลพนักงานในระบบให้เป็นปัจจุบัน' : 'กรอกข้อมูลพนักงานให้ครบถ้วน'}</p>
                                     </div>
-                                    <button type="button" onClick={closeAddModal} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                                    <button type="button" onClick={closeFormModal} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
 
-                                <form onSubmit={handleCreate} className="overflow-y-auto">
+                                <form onSubmit={handleFormSubmit} className="overflow-y-auto">
                                     <div className="px-6 py-5 flex flex-col md:flex-row gap-6">
 
                                         {/* LEFT: Avatar */}
@@ -516,7 +563,7 @@ export function AdminEmployees() {
                                                 {avatarMode === 'camera'
                                                     ? <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
                                                     : avatarPreview
-                                                        ? <img src={avatarPreview} alt="preview" className="w-full h-full object-cover" />
+                                                        ? <img src={avatarPreview} alt="รูปโปรไฟล์" width={160} height={160} className="w-full h-full object-cover" />
                                                         : <div className="flex flex-col items-center gap-2 text-slate-300">
                                                             <ImagePlus className="w-10 h-10" />
                                                             <span className="text-xs">ยังไม่มีรูป</span>
@@ -556,38 +603,38 @@ export function AdminEmployees() {
                                             {/* Name + Nickname */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="text-sm font-medium text-slate-700 block mb-1.5">
+                                                    <label htmlFor="emp-name" className="text-sm font-medium text-slate-700 block mb-1.5">
                                                         ชื่อ-นามสกุล <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="สมชาย ใจดี" required autoComplete="off" />
+                                                    <Input id="emp-name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="สมชาย ใจดี" required autoComplete="name" spellCheck={false} />
                                                 </div>
                                                 <div>
-                                                    <label className="text-sm font-medium text-slate-700 block mb-1.5">ชื่อเล่น</label>
-                                                    <Input value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} placeholder="ชาย" autoComplete="off" />
+                                                    <label htmlFor="emp-nickname" className="text-sm font-medium text-slate-700 block mb-1.5">ชื่อเล่น</label>
+                                                    <Input id="emp-nickname" name="nickname" value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} placeholder="ชาย" autoComplete="nickname" spellCheck={false} />
                                                 </div>
                                             </div>
 
                                             {/* Email */}
                                             <div>
-                                                <label className="text-sm font-medium text-slate-700 block mb-1.5">
+                                                <label htmlFor="emp-email" className="text-sm font-medium text-slate-700 block mb-1.5">
                                                     อีเมล <span className="text-red-500">*</span>
                                                 </label>
-                                                <Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="somchai@company.com" required autoComplete="off" spellCheck={false} />
+                                                <Input id="emp-email" name="email" type="email" inputMode="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="somchai@company.com" required autoComplete="email" spellCheck={false} />
                                             </div>
 
                                             {/* Department + Position */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="text-sm font-medium text-slate-700 block mb-1.5">
+                                                    <label htmlFor="emp-department" className="text-sm font-medium text-slate-700 block mb-1.5">
                                                         แผนก <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="Engineering" required autoComplete="off" />
+                                                    <Input id="emp-department" name="department" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="Engineering" required autoComplete="organization-title" />
                                                 </div>
                                                 <div>
-                                                    <label className="text-sm font-medium text-slate-700 block mb-1.5">
+                                                    <label htmlFor="emp-position" className="text-sm font-medium text-slate-700 block mb-1.5">
                                                         ตำแหน่ง <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="Developer" required autoComplete="off" />
+                                                    <Input id="emp-position" name="position" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="Developer" required autoComplete="organization-title" />
                                                 </div>
                                             </div>
 
@@ -597,9 +644,9 @@ export function AdminEmployees() {
                                                     เวลาทำงาน <span className="text-red-500">*</span>
                                                 </label>
                                                 <div className="flex items-center gap-3">
-                                                    <Input type="time" value={form.shiftStartTime} onChange={e => setForm({ ...form, shiftStartTime: e.target.value })} required className="flex-1" />
+                                                    <Input id="shift-start" name="shiftStartTime" type="time" value={form.shiftStartTime} onChange={e => setForm({ ...form, shiftStartTime: e.target.value })} required className="flex-1 tabular-nums" />
                                                     <span className="text-slate-400 text-sm shrink-0">ถึง</span>
-                                                    <Input type="time" value={form.shiftEndTime} onChange={e => setForm({ ...form, shiftEndTime: e.target.value })} required className="flex-1" />
+                                                    <Input id="shift-end" name="shiftEndTime" type="time" value={form.shiftEndTime} onChange={e => setForm({ ...form, shiftEndTime: e.target.value })} required className="flex-1 tabular-nums" />
                                                 </div>
                                             </div>
                                         </div>
@@ -609,14 +656,14 @@ export function AdminEmployees() {
                                     <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
                                         <p className="text-xs text-slate-400"><span className="text-red-400">*</span> จำเป็นต้องกรอก</p>
                                         <div className="flex gap-3">
-                                            <Button type="button" variant="outline" onClick={closeAddModal}>ยกเลิก</Button>
-                                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 px-6">บันทึกข้อมูล</Button>
+                                            <Button type="button" variant="outline" onClick={closeFormModal}>ยกเลิก</Button>
+                                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 px-6">{isEditing ? 'อัปเดตข้อมูล' : 'บันทึกข้อมูล'}</Button>
                                         </div>
                                     </div>
                                 </form>
                             </div>
                         </div>
-                    )}
+                    ) : null}
                 </>,
                 document.body
             )}

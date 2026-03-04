@@ -136,7 +136,16 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
 
         {/* Nav items */}
         <nav ref={menuRef} className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5" aria-label="เมนูหลัก">
-          {menuItems.map((item) => {
+          {menuItems.filter(item => {
+            if (user?.role === 'super_admin') return true;
+            if (user?.role === 'admin') {
+              const allowed = user.accessibleMenus || [];
+              // Allow exact match or if the item id starts with an allowed base menu (e.g., 'attendance')
+              return allowed.some(menu => item.id === menu || item.id.startsWith(menu + '/'));
+            }
+            // For other roles (e.g. technician), filter accordingly if needed. For now assume no access to admin menus.
+            return false;
+          }).map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname.includes(item.id);
 

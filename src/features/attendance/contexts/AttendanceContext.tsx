@@ -13,6 +13,7 @@ interface AttendanceContextType {
     addLog: (log: Omit<AttendanceLog, 'id'>) => void;
     updateLog: (id: string, updates: Partial<AttendanceLog>) => void;
     addEmployee: (emp: Omit<Employee, 'id'>) => void;
+    updateEmployee: (id: string, updates: Partial<Employee>) => void;
     removeEmployee: (id: string) => void;
     addLocation: (loc: Omit<WorkLocation, 'id'>) => void;
     updateOTStatus: (id: string, status: OTRequest['status']) => void;
@@ -45,6 +46,10 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
             id: `emp-${Date.now()}`
         };
         setEmployees(prev => [...prev, newEmp]);
+    }, []);
+
+    const updateEmployee = useCallback((id: string, updates: Partial<Employee>) => {
+        setEmployees(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
     }, []);
 
     const removeEmployee = useCallback((id: string) => {
@@ -81,6 +86,7 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
             addLog,
             updateLog,
             addEmployee,
+            updateEmployee,
             removeEmployee,
             addLocation,
             updateOTStatus,
