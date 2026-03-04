@@ -33,7 +33,12 @@ export function MainLayout() {
         if (path.includes('/requests')) return 'รายการแจ้งซ่อม';
         if (path.includes('/technicians')) return 'ทีมช่าง';
         if (path.includes('/settings')) return 'ตั้งค่า';
-        if (path.includes('/jobs')) return 'ระบบใบงาน';
+        if (path.includes('/attendance/dashboard')) return 'แดชบอร์ดลงเวลา';
+        if (path.includes('/attendance/logs')) return 'ประวัติลงเวลา';
+        if (path.includes('/attendance/employees')) return 'จัดการพนักงาน';
+        if (path.includes('/attendance/locations')) return 'สถานที่ตั้ง (GPS)';
+        if (path.includes('/attendance/ot-approvals')) return 'อนุมัติ OT';
+        if (path.includes('/attendance/reports')) return 'รายงานการทำงาน';
         return 'แดชบอร์ด';
     };
 

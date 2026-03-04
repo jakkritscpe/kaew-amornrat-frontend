@@ -12,6 +12,10 @@ import {
   LogOut,
   FileText,
   X,
+  Clock,
+  MapPin,
+  FileCheck2,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '../features/auth/hooks/useAuth';
@@ -28,6 +32,12 @@ const menuItems = [
   { id: 'requests', label: 'รายการแจ้งซ่อม', icon: ClipboardList },
   { id: 'jobs', label: 'ระบบใบงาน', icon: FileText },
   { id: 'technicians', label: 'ช่าง', icon: Users },
+  { id: 'attendance/dashboard', label: 'แดชบอร์ดลงเวลา', icon: Clock },
+  { id: 'attendance/logs', label: 'ประวัติลงเวลา', icon: ClipboardList },
+  { id: 'attendance/employees', label: 'พนักงาน (ลงเวลา)', icon: Users },
+  { id: 'attendance/locations', label: 'สถานที่ (GPS)', icon: MapPin },
+  { id: 'attendance/ot-approvals', label: 'อนุมัติ OT', icon: FileCheck2 },
+  { id: 'attendance/reports', label: 'รายงานเวลา', icon: BarChart3 },
   { id: 'settings', label: 'ตั้งค่า', icon: Settings },
 ];
 
