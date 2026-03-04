@@ -2,7 +2,8 @@ export interface User {
     id: string;
     username: string;
     name: string;
-    role: 'admin' | 'technician';
+    role: 'super_admin' | 'admin' | 'technician';
+    accessibleMenus?: string[];
 }
 
 export interface AuthContextType {
@@ -11,4 +12,6 @@ export interface AuthContextType {
     isLoading: boolean;
     login: (username: string) => Promise<void>;
     logout: () => void;
+    updateUserPermissions?: (userId: string, menus: string[]) => void;
+    getAllAdmins?: () => User[];
 }

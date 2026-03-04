@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { Search, Bell, Menu } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Bell, Menu } from 'lucide-react';
 
 interface HeaderProps {
   onNewRequest: () => void;
@@ -11,9 +10,8 @@ interface HeaderProps {
   onMenuClick: () => void;
 }
 
-export default function Header({ searchQuery, setSearchQuery, title, onMenuClick }: HeaderProps) {
+export default function Header({ title, onMenuClick }: HeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -47,7 +45,7 @@ export default function Header({ searchQuery, setSearchQuery, title, onMenuClick
         {/* Search — Expanded on desktop, icon toggle on mobile */}
         <div className="relative">
           {/* Desktop search bar */}
-          <div className="hidden md:flex relative items-center">
+          {/* <div className="hidden md:flex relative items-center">
             <Search className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none" aria-hidden="true" />
             <Input
               type="search"
@@ -57,10 +55,10 @@ export default function Header({ searchQuery, setSearchQuery, title, onMenuClick
               className="pl-9 pr-4 h-9 w-52 lg:w-64 bg-gray-50 border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-400"
               aria-label="ค้นหารายการแจ้งซ่อม"
             />
-          </div>
+          </div> */}
 
           {/* Mobile search toggle */}
-          {!isSearchOpen && (
+          {/* {!isSearchOpen && (
             <button
               className="md:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400"
               onClick={() => setIsSearchOpen(true)}
@@ -69,7 +67,7 @@ export default function Header({ searchQuery, setSearchQuery, title, onMenuClick
             >
               <Search className="w-5 h-5 text-gray-600" aria-hidden="true" />
             </button>
-          )}
+          )} */}
         </div>
 
         {/* Mobile search overlay (full width) */}
