@@ -200,8 +200,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                       'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group w-full text-left relative border-l-4',
                       isCollapsed ? 'justify-center border-transparent' : 'justify-between border-transparent',
                       isActive && !isOpen
-                        ? 'bg-blue-50 border-[#2075f8] text-[#2075f8] font-medium'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-[#2075f8] hover:border-blue-200'
+                        ? 'bg-[#f0f5ff] border-[#2075f8] text-[#2075f8] font-medium'
+                        : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8] hover:border-[#2075f8]/30'
                     )}
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
@@ -267,8 +267,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                   'menu-item flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative border-l-4',
                   isCollapsed ? 'justify-center border-transparent' : 'border-transparent',
                   isActive
-                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium border-blue-600'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-[#2075f8] hover:border-blue-200'
+                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium border-[#2075f8]'
+                    : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8] hover:border-[#2075f8]/30'
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >
