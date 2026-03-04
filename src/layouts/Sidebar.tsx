@@ -192,12 +192,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
               const isOpen = openSubmenus[item.id] && !isCollapsed;
 
               return (
-                <div key={item.id} className="menu-item flex flex-col pt-1">
+                <div key={item.id} className="menu-item flex flex-col">
                   <button
                     onClick={() => toggleSubmenu(item.id)}
                     title={isCollapsed ? item.label : undefined}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group w-full text-left relative border-l-4 pt-1',
+                      'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group w-full text-left relative border-l-4',
                       isCollapsed ? 'justify-center border-transparent' : 'justify-between border-transparent',
                       isActive && !isOpen
                         ? 'bg-blue-50 border-[#2075f8] text-[#2075f8] font-medium'
@@ -264,7 +264,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                 onClick={onMobileClose}
                 title={isCollapsed ? item.label : undefined}
                 className={cn(
-                  'menu-item flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative pt-1 border-l-4',
+                  'menu-item flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative border-l-4',
                   isCollapsed ? 'justify-center border-transparent' : 'border-transparent',
                   isActive
                     ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium border-blue-600'
