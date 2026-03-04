@@ -227,6 +227,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                     >
                       <div className="flex flex-col gap-1 pl-[44px] pr-2 py-1">
                         {item.subItems.map(subItem => {
+                          const SubIcon = subItem.icon;
                           const isSubActive = location.pathname.includes(subItem.id);
                           return (
                             <Link
@@ -240,6 +241,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                                   : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
                               )}
                             >
+                              <SubIcon className={cn('w-4 h-4 shrink-0', !isSubActive && 'group-hover:scale-110')} aria-hidden="true" />
                               <span className="whitespace-nowrap truncate">{subItem.label}</span>
                             </Link>
                           );
