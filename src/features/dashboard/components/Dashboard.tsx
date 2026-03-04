@@ -3,7 +3,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import StatsGrid from './StatsGrid';
 import PipelineBoard from './PipelineBoard';
-import RequestsTable from '../../repair-requests/components/RequestsTable';
 import type { Stats } from '../types';
 import type { RepairRequest } from '../../repair-requests/types';
 
@@ -13,16 +12,12 @@ interface DashboardProps {
   stats: Stats;
   requests: RepairRequest[];
   onViewRequest: (request: RepairRequest) => void;
-  onEditRequest: (request: RepairRequest) => void;
-  onUpdateStatus: (id: string, status: string) => void;
 }
 
 export default function Dashboard({
   stats,
   requests,
   onViewRequest,
-  onEditRequest,
-  onUpdateStatus,
 }: DashboardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 

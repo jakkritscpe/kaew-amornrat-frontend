@@ -6,8 +6,6 @@ export function DashboardPage() {
         stats,
         filteredRequests,
         handleViewRequest,
-        handleEditClick,
-        handleUpdateStatus
     } = useRepairRequests();
 
     return (
@@ -15,8 +13,6 @@ export function DashboardPage() {
             stats={stats}
             requests={filteredRequests}
             onViewRequest={handleViewRequest}
-            onEditRequest={handleEditClick}
-            onUpdateStatus={handleUpdateStatus}
         />
     );
 }
