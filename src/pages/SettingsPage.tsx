@@ -2,17 +2,23 @@ import { useState } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { Shield, ShieldAlert, Check, Settings2 } from 'lucide-react';
 
-const MENU_OPTIONS = [
+const MENU_GROUPS = [
     { id: 'dashboard', label: 'แดชบอร์ดหลัก' },
     { id: 'requests', label: 'รายการแจ้งซ่อม' },
     { id: 'jobs', label: 'ระบบใบงาน' },
     { id: 'technicians', label: 'ทีมช่าง' },
-    { id: 'attendance/dashboard', label: 'แดชบอร์ดลงเวลา' },
-    { id: 'attendance/logs', label: 'ประวัติลงเวลา' },
-    { id: 'attendance/employees', label: 'จัดการพนักงาน (ลงเวลา)' },
-    { id: 'attendance/locations', label: 'สถานที่ (GPS)' },
-    { id: 'attendance/ot-approvals', label: 'อนุมัติ OT' },
-    { id: 'attendance/reports', label: 'รายงานเวลาทำงาน' },
+    {
+        id: 'attendance',
+        label: 'ระบบลงเวลา',
+        subMenus: [
+            { id: 'attendance/dashboard', label: 'แดชบอร์ดลงเวลา' },
+            { id: 'attendance/logs', label: 'ประวัติลงเวลา' },
+            { id: 'attendance/employees', label: 'จัดการพนักงาน (ลงเวลา)' },
+            { id: 'attendance/locations', label: 'สถานที่ (GPS)' },
+            { id: 'attendance/ot-approvals', label: 'อนุมัติ OT' },
+            { id: 'attendance/reports', label: 'รายงานเวลาทำงาน' },
+        ]
+    },
     { id: 'settings', label: 'ตั้งค่าระบบ' },
 ];
 
@@ -35,12 +41,49 @@ export function SettingsPage() {
 
     const admins = getAllAdmins ? getAllAdmins().filter(a => a.role === 'admin') : [];
 
-    const handleTogglePermission = (adminId: string, menuId: string, currentMenus: string[]) => {
+    const handleTogglePermission = (adminId: string, menuId: string, currentMenus: string[], isParent = false, childIds: string[] = []) => {
         if (!updateUserPermissions) return;
 
-        const newMenus = currentMenus.includes(menuId)
-            ? currentMenus.filter(id => id !== menuId)
-            : [...currentMenus, menuId];
+        let newMenus = [...currentMenus];
+
+        if (isParent) {
+            const isCurrentlyChecked = currentMenus.includes(menuId);
+            if (isCurrentlyChecked) {
+                // Remove parent and all children
+                newMenus = newMenus.filter(id => id !== menuId && !childIds.includes(id));
+            } else {
+                // Add parent and all children
+                newMenus.push(menuId);
+                childIds.forEach(id => {
+                    if (!newMenus.includes(id)) newMenus.push(id);
+                });
+            }
+        } else {
+            // Normal toggle for individual or child items
+            if (newMenus.includes(menuId)) {
+                newMenus = newMenus.filter(id => id !== menuId);
+
+                // If it's a child and we just unchecked it, check if ALL children of its parent are now unchecked
+                // If so, we can optionally remove the parent, but keeping it simple: just let parent be unchecked 
+                // if the user explicitly unchecks it or unchecks all. Actually, let's keep it simple:
+                // Only toggle the specific child. If a child is checked, ensure parent is checked.
+            } else {
+                newMenus.push(menuId);
+                // Automatically add parent 'attendance' if a child is checked
+                if (menuId.startsWith('attendance/') && !newMenus.includes('attendance')) {
+                    newMenus.push('attendance');
+                }
+            }
+
+            // Cleanup: if all attendance children are unchecked, remove attendance parent
+            if (menuId.startsWith('attendance/') && newMenus.includes('attendance')) {
+                const attendanceChildren = MENU_GROUPS.find(g => g.id === 'attendance')?.subMenus?.map(s => s.id) || [];
+                const anyChildChecked = attendanceChildren.some(id => newMenus.includes(id));
+                if (!anyChildChecked) {
+                    newMenus = newMenus.filter(id => id !== 'attendance');
+                }
+            }
+        }
 
         updateUserPermissions(adminId, newMenus);
 
@@ -90,26 +133,80 @@ export function SettingsPage() {
                                     </div>
                                     <div className="p-5 bg-white">
                                         <h4 className="text-sm font-semibold text-gray-700 mb-4 tracking-wide uppercase">สิทธิ์การเข้าถึงเมนู</h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6">
-                                            {MENU_OPTIONS.map(menu => {
-                                                const hasAccess = admin.accessibleMenus?.includes(menu.id) || false;
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+                                            {MENU_GROUPS.map(group => {
+                                                if (group.subMenus) {
+                                                    const groupChildIds = group.subMenus.map(s => s.id);
+                                                    const checkedChildrenCount = groupChildIds.filter(id => admin.accessibleMenus?.includes(id)).length;
+                                                    const isAllChecked = checkedChildrenCount === groupChildIds.length;
+                                                    const isPartiallyChecked = checkedChildrenCount > 0 && !isAllChecked;
+                                                    const isGroupChecked = admin.accessibleMenus?.includes(group.id) || isPartiallyChecked;
+
+                                                    return (
+                                                        <div key={group.id} className="col-span-1 sm:col-span-2 lg:col-span-3 bg-gray-50/50 rounded-xl border border-gray-200 p-4 space-y-3">
+                                                            <label className="flex items-center gap-3 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                                    checked={isGroupChecked}
+                                                                    ref={input => {
+                                                                        if (input) input.indeterminate = isPartiallyChecked;
+                                                                    }}
+                                                                    onChange={() => handleTogglePermission(admin.id, group.id, admin.accessibleMenus || [], true, groupChildIds)}
+                                                                />
+                                                                <div>
+                                                                    <p className="text-sm font-bold text-gray-900">{group.label} (ทั้งหมด)</p>
+                                                                    <p className="text-xs text-gray-500 mt-0.5">เลือก/ยกเลิก เมนูย่อยทั้งหมด</p>
+                                                                </div>
+                                                            </label>
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pl-7 pt-2 border-t border-gray-200/60">
+                                                                {group.subMenus.map(menu => {
+                                                                    const hasAccess = admin.accessibleMenus?.includes(menu.id) || false;
+                                                                    return (
+                                                                        <label
+                                                                            key={menu.id}
+                                                                            className={`flex items-start gap-3 p-2.5 rounded-lg border cursor-pointer transition-all ${hasAccess ? 'border-blue-400 bg-blue-50/50' : 'border-gray-200 bg-white hover:border-blue-200'
+                                                                                }`}
+                                                                        >
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                className="mt-0.5 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                                                checked={hasAccess}
+                                                                                onChange={() => handleTogglePermission(admin.id, menu.id, admin.accessibleMenus || [])}
+                                                                            />
+                                                                            <div>
+                                                                                <p className={`text-sm font-medium ${hasAccess ? 'text-blue-900' : 'text-gray-700'}`}>
+                                                                                    {menu.label}
+                                                                                </p>
+                                                                                <p className="text-[10px] text-gray-400 font-mono mt-0.5">{menu.id.split('/').pop()}</p>
+                                                                            </div>
+                                                                        </label>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                // Normal individual menus
+                                                const hasAccess = admin.accessibleMenus?.includes(group.id) || false;
                                                 return (
                                                     <label
-                                                        key={menu.id}
-                                                        className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${hasAccess ? 'border-blue-500 bg-blue-50/30' : 'border-gray-100 hover:border-blue-200'
+                                                        key={group.id}
+                                                        className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${hasAccess ? 'border-blue-500 bg-blue-50/30' : 'border-gray-100 hover:border-blue-200'
                                                             }`}
                                                     >
                                                         <input
                                                             type="checkbox"
                                                             className="mt-0.5 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                             checked={hasAccess}
-                                                            onChange={() => handleTogglePermission(admin.id, menu.id, admin.accessibleMenus || [])}
+                                                            onChange={() => handleTogglePermission(admin.id, group.id, admin.accessibleMenus || [])}
                                                         />
                                                         <div>
                                                             <p className={`text-sm font-medium ${hasAccess ? 'text-blue-900' : 'text-gray-700'}`}>
-                                                                {menu.label}
+                                                                {group.label}
                                                             </p>
-                                                            <p className="text-[10px] text-gray-400 font-mono mt-0.5">{menu.id}</p>
+                                                            <p className="text-[10px] text-gray-400 font-mono mt-0.5">{group.id}</p>
                                                         </div>
                                                     </label>
                                                 );
