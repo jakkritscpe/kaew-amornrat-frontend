@@ -192,16 +192,16 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
               const isOpen = openSubmenus[item.id] && !isCollapsed;
 
               return (
-                <div key={item.id} className="menu-item flex flex-col">
+                <div key={item.id} className="menu-item flex flex-col pt-1">
                   <button
                     onClick={() => toggleSubmenu(item.id)}
                     title={isCollapsed ? item.label : undefined}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group w-full text-left relative border-l-4',
-                      isCollapsed ? 'justify-center border-transparent' : 'justify-between border-transparent',
+                      'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group w-full text-left relative',
+                      isCollapsed ? 'justify-center' : 'justify-between',
                       isActive && !isOpen
-                        ? 'bg-[#f0f5ff] border-[#2075f8] text-[#2075f8] font-medium'
-                        : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8] hover:border-[#2075f8]/30'
+                        ? 'bg-[#f0f5ff] text-[#2075f8] font-medium'
+                        : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
                     )}
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
@@ -264,17 +264,20 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                 onClick={onMobileClose}
                 title={isCollapsed ? item.label : undefined}
                 className={cn(
-                  'menu-item flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative border-l-4',
-                  isCollapsed ? 'justify-center border-transparent' : 'border-transparent',
+                  'menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative pt-1',
+                  isCollapsed && 'justify-center',
                   isActive
-                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium border-[#2075f8]'
-                    : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8] hover:border-[#2075f8]/30'
+                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium'
+                    : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <Icon className={cn('w-5 h-5 shrink-0 transition-transform duration-200', !isActive && 'group-hover:scale-110')} aria-hidden="true" />
                 {!isCollapsed && (
                   <span className="text-sm whitespace-nowrap font-medium">{item.label}</span>
+                )}
+                {!isActive && !isCollapsed && (
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-[#2075f8] rounded-full transition-all duration-200 group-hover:h-5" />
                 )}
               </Link>
             );
