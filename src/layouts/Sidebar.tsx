@@ -6,7 +6,7 @@ import {
   ClipboardList,
   Users,
   Settings,
-  Globe,
+  MonitorSmartphone,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -93,7 +93,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2075f8] to-[#1a64d4] flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
-              <Globe className="w-5 h-5 text-white" aria-hidden="true" />
+              <MonitorSmartphone className="w-5 h-5 text-white" aria-hidden="true" />
             </div>
             {!isCollapsed && (
               <div className="flex flex-col">

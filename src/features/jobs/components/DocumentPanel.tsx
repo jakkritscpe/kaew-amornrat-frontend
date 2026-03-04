@@ -260,10 +260,10 @@ function DocumentHeader({ title, job, docNumber }: { title: string; job: JobForm
                 <p className="text-sm text-gray-500">วันที่: {formatDate(job.createdAt)}</p>
             </div>
             <div className="text-right">
-                <p className="font-bold text-lg text-blue-700">RepairHub</p>
-                <p className="text-sm text-gray-500">บริษัท รีแพร์ฮับ จำกัด</p>
-                <p className="text-sm text-gray-500">123 ถนนพระราม 4 กรุงเทพฯ 10500</p>
-                <p className="text-sm text-gray-500">โทร: 02-000-0000</p>
+                <p className="font-bold text-lg text-[#00223A]">หจก.แก้วอมรรัตน์</p>
+                <p className="text-sm text-gray-500">บริการไอทีครบวงจร มืออาชีพ มาถึงที่</p>
+                <p className="text-sm text-gray-500">พื้นที่ให้บริการ: กรุงเทพมหานคร และปริมณฑล</p>
+                <p className="text-sm text-gray-500">บริการ 24 ชั่วโมง</p>
             </div>
         </div>
     );

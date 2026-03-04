@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Globe, Menu, X, PhoneCall } from 'lucide-react';
+import { MonitorSmartphone, Menu, X, PhoneCall } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -31,7 +31,7 @@ export function Navbar() {
                     {/* Logo */}
                     <div className="flex items-center gap-2">
                         <div className={cn("p-2 rounded-lg", isScrolled ? "bg-[#044F88]/10" : "bg-white/10")}>
-                            <Globe className={cn("w-6 h-6", isScrolled ? "text-[#044F88]" : "text-white")} />
+                            <MonitorSmartphone className={cn("w-6 h-6", isScrolled ? "text-[#044F88]" : "text-white")} />
                         </div>
                         <span className={cn(
                             "font-bold text-xl",
@@ -54,7 +54,7 @@ export function Navbar() {
                                     isScrolled ? "border-[#C2410C] text-[#C2410C]" : "border-white text-[#C2410C] hover:border-transparent"
                                 )}
                             >
-                                เข้าสู่ระบบแจ้งซ่อม
+                                เข้าสู่ระบบพนักงาน
                             </Button>
                         </Link>
                         <Button className="bg-[#C2410C] hover:bg-[#C2410C]/90 text-white gap-2">
@@ -86,7 +86,7 @@ export function Navbar() {
                     <div className="flex flex-col gap-2 pt-4 border-t border-gray-100">
                         <Link to="/login" className="w-full">
                             <Button variant="outline" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
-                                เข้าสู่ระบบแจ้งซ่อม
+                                เข้าสู่ระบบพนักงาน
                             </Button>
                         </Link>
                         <Button className="w-full bg-[#C2410C] hover:bg-[#C2410C]/90">
