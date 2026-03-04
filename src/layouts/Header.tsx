@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import { Search, Bell, Menu, Plus, X } from 'lucide-react';
+import { Search, Bell, Menu } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   onNewRequest: () => void;
@@ -12,7 +11,7 @@ interface HeaderProps {
   onMenuClick: () => void;
 }
 
-export default function Header({ onNewRequest, searchQuery, setSearchQuery, title, onMenuClick }: HeaderProps) {
+export default function Header({ searchQuery, setSearchQuery, title, onMenuClick }: HeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 

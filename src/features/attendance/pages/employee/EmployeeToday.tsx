@@ -3,7 +3,7 @@ import { useAttendance } from '../../contexts/AttendanceContext';
 import { findMatchingLocation } from '../../utils/geo';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
-import { MapPin, Clock, LogIn, LogOut, Loader2 } from 'lucide-react';
+import { MapPin, LogIn, LogOut, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function EmployeeToday() {
@@ -39,7 +39,7 @@ export function EmployeeToday() {
                 setGeoError(null);
                 setCheckingLoc(false);
             },
-            (err) => {
+            () => {
                 setGeoError('กรุณาเปิด GPS');
                 setCheckingLoc(false);
             },
@@ -140,8 +140,8 @@ export function EmployeeToday() {
                         disabled={checkingLoc || !!geoError || isCheckedOut}
                         onClick={handleAction}
                         className={`w-full py-8 text-xl rounded-2xl shadow-lg transition-transform active:scale-95 ${!isCheckedIn
-                                ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25'
-                                : 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/25'
+                            ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25'
+                            : 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/25'
                             }`}
                     >
                         {!isCheckedIn ? (
