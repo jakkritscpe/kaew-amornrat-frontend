@@ -177,8 +177,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
             if (user?.role === 'super_admin') return true;
             if (user?.role === 'admin') {
               const allowed = user.accessibleMenus || [];
-              // Allow exact match or if the item id starts with an allowed base menu (e.g., 'attendance')
-              return allowed.some(menu => item.id === menu || item.id.startsWith(menu + '/'));
+              // The parent itself is allowed
+              const isDirectlyAllowed = allowed.includes(item.id);
+              // Or any of its subItems are allowed
+              const isAnySubAllowed = item.subItems?.some(sub => allowed.includes(sub.id));
+
+              return isDirectlyAllowed || isAnySubAllowed;
             }
             return false;
           }).map((item) => {
@@ -229,7 +233,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                         {/* Parent connection line indicator */}
                         <div className="absolute left-[23px] top-2 bottom-4 w-px bg-gray-200" />
 
-                        {item.subItems.map(subItem => {
+                        {item.subItems.filter(subItem => {
+                          if (user?.role === 'super_admin') return true;
+                          if (user?.role === 'admin') {
+                            return (user.accessibleMenus || []).includes(subItem.id);
+                          }
+                          return false;
+                        }).map(subItem => {
                           const SubIcon = subItem.icon;
                           const isSubActive = location.pathname.includes(subItem.id);
                           return (
