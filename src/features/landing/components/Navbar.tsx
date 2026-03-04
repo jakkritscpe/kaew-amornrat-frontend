@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MonitorSmartphone, Menu, X, PhoneCall } from 'lucide-react';
+import { Globe, Menu, X, PhoneCall } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -31,7 +31,7 @@ export function Navbar() {
                     {/* Logo */}
                     <div className="flex items-center gap-2">
                         <div className={cn("p-2 rounded-lg", isScrolled ? "bg-[#044F88]/10" : "bg-white/10")}>
-                            <MonitorSmartphone className={cn("w-6 h-6", isScrolled ? "text-[#044F88]" : "text-white")} />
+                            <Globe className={cn("w-6 h-6", isScrolled ? "text-[#044F88]" : "text-white")} />
                         </div>
                         <span className={cn(
                             "font-bold text-xl",
