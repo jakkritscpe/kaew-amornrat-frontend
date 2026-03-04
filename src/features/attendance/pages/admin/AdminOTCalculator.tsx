@@ -94,86 +94,92 @@ export function AdminOTCalculator() {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
 
                 {/* ═══════════ HERO HEADER ═══════════ */}
-                <header className="mb-8 sm:mb-10">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Overtime Report</p>
-                    <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none mb-1">
+                <header className="mb-6 sm:mb-8 lg:mb-10">
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1.5 sm:mb-2">Overtime Report</p>
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-none mb-1">
                         คำนวณค่าล่วงเวลา
                     </h1>
-                    <p className="text-base text-slate-500 font-light">สรุปยอดชั่วโมงและค่าตอบแทน OT</p>
+                    <p className="text-sm sm:text-base text-slate-500 font-light">สรุปยอดชั่วโมงและค่าตอบแทน OT</p>
                 </header>
 
                 {/* ═══════════ PERIOD BAR ═══════════ */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
-                    {/* Left: Mode Tabs */}
-                    <div className="flex items-center gap-0 border border-slate-200 rounded-lg overflow-hidden bg-white">
-                        {(['monthly', 'custom'] as PeriodMode[]).map(mode => (
-                            <button key={mode} type="button"
-                                onClick={() => setPeriodMode(mode)}
-                                className={cn(
-                                    'px-4 py-2 text-sm font-medium transition-colors',
-                                    periodMode === mode
-                                        ? 'bg-slate-900 text-white'
-                                        : 'bg-white text-slate-600 hover:bg-slate-50',
-                                )}
-                            >
-                                {mode === 'monthly' ? 'รายเดือน' : 'กำหนดเอง'}
-                            </button>
-                        ))}
-                    </div>
+                <div className="flex flex-col gap-4 mb-6 sm:mb-8 pb-5 sm:pb-6 border-b border-slate-200">
+                    {/* Row 1 on mobile / inline on desktop: Tabs + Controls */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        {/* Mode Tabs */}
+                        <div className="flex items-center gap-0 border border-slate-200 rounded-lg overflow-hidden bg-white self-start">
+                            {(['monthly', 'custom'] as PeriodMode[]).map(mode => (
+                                <button key={mode} type="button"
+                                    onClick={() => setPeriodMode(mode)}
+                                    className={cn(
+                                        'px-4 py-2.5 sm:py-2 text-sm font-medium transition-colors min-w-[5.5rem] sm:min-w-0',
+                                        periodMode === mode
+                                            ? 'bg-slate-900 text-white'
+                                            : 'bg-white text-slate-600 hover:bg-slate-50',
+                                    )}
+                                >
+                                    {mode === 'monthly' ? 'รายเดือน' : 'กำหนดเอง'}
+                                </button>
+                            ))}
+                        </div>
 
-                    {/* Right: Controls */}
-                    {periodMode === 'monthly' ? (
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => navMonth(-1)} className="w-9 h-9 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-400 active:scale-95 transition-all">
-                                <ChevronLeft className="w-4 h-4" />
-                            </button>
-                            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 h-9">
-                                <select className="appearance-none bg-transparent text-sm font-semibold text-slate-900 pr-1 cursor-pointer focus:outline-none" value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}>
-                                    {MONTHS_FULL.map((m, i) => <option key={i} value={i}>{m}</option>)}
-                                </select>
-                                <span className="text-slate-300">|</span>
-                                <select className="appearance-none bg-transparent text-sm font-semibold text-slate-900 cursor-pointer focus:outline-none" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
-                                    {yearOpts.map(y => <option key={y} value={y}>{y + 543}</option>)}
-                                </select>
+                        {/* Controls */}
+                        {periodMode === 'monthly' ? (
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <button onClick={() => navMonth(-1)} className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-400 active:scale-95 transition-all">
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 h-10 sm:h-9 flex-1 sm:flex-initial">
+                                    <select className="appearance-none bg-transparent text-sm font-semibold text-slate-900 pr-1 cursor-pointer focus:outline-none flex-1 sm:flex-initial" value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}>
+                                        {MONTHS_FULL.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                                    </select>
+                                    <span className="text-slate-300">|</span>
+                                    <select className="appearance-none bg-transparent text-sm font-semibold text-slate-900 cursor-pointer focus:outline-none" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+                                        {yearOpts.map(y => <option key={y} value={y}>{y + 543}</option>)}
+                                    </select>
+                                </div>
+                                <button onClick={() => navMonth(1)} className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-400 active:scale-95 transition-all">
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
                             </div>
-                            <button onClick={() => navMonth(1)} className="w-9 h-9 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-400 active:scale-95 transition-all">
-                                <ChevronRight className="w-4 h-4" />
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <input type="date" className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-slate-400 transition-colors" value={startDate} onChange={e => setStartDate(e.target.value)} />
-                            <span className="text-slate-300 text-sm">→</span>
-                            <input type="date" className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-slate-400 transition-colors" value={endDate} onChange={e => setEndDate(e.target.value)} />
-                        </div>
-                    )}
+                        ) : (
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                                <input type="date" className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-slate-400 transition-colors" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                                <span className="text-slate-300 text-sm text-center hidden sm:block">→</span>
+                                <span className="text-slate-400 text-xs text-center sm:hidden">ถึง</span>
+                                <input type="date" className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-slate-400 transition-colors" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* ═══════════ STATS ROW ═══════════ */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 rounded-xl overflow-hidden mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 rounded-xl overflow-hidden mb-6 sm:mb-8">
                     {[
                         { label: 'ยอดค่า OT รวม', value: `฿${fmt(totPay)}`, accent: 'text-emerald-600' },
                         { label: 'ชั่วโมง OT รวม', value: `${totHrs.toFixed(1)} ชม.`, accent: 'text-slate-900' },
                         { label: 'พนักงานที่มี OT', value: `${pplWithOt} คน`, accent: 'text-slate-900' },
                         { label: 'เฉลี่ยต่อคน', value: `${avgHrs.toFixed(1)} ชม.`, accent: 'text-slate-900' },
                     ].map((s, i) => (
-                        <div key={i} className="bg-white p-4 sm:p-5 lg:p-6">
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">{s.label}</p>
-                            <p className={cn('text-xl sm:text-2xl lg:text-3xl font-black tabular-nums tracking-tight leading-none', s.accent)}>{s.value}</p>
+                        <div key={i} className="bg-white px-3 py-3 sm:p-5 lg:p-6">
+                            <p className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1 sm:mb-2 truncate">{s.label}</p>
+                            <p className={cn('text-lg sm:text-2xl lg:text-3xl font-black tabular-nums tracking-tight leading-none', s.accent)}>{s.value}</p>
                         </div>
                     ))}
                 </div>
 
                 {/* ═══════════ TABLE SECTION ═══════════ */}
-                <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                        <h2 className="text-lg font-bold text-slate-900">รายละเอียดรายบุคคล</h2>
-                        <p className="text-sm text-slate-400 font-light">{otData.length} รายการ · {periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} – ${dateRange.end}`}</p>
+                <div className="mb-4 sm:mb-6 flex flex-col gap-3">
+                    <div className="flex items-start sm:items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                            <h2 className="text-base sm:text-lg font-bold text-slate-900">รายละเอียดรายบุคคล</h2>
+                            <p className="text-xs sm:text-sm text-slate-400 font-light truncate">{otData.length} รายการ · {periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} – ${dateRange.end}`}</p>
+                        </div>
+                        <Button onClick={exportCSV} variant="outline" size="sm" className="border-slate-200 text-slate-600 hover:bg-white hover:text-slate-900 hover:border-slate-400 transition-all h-9 px-3 sm:px-4 shrink-0">
+                            <Download className="w-3.5 h-3.5 sm:mr-1.5" />
+                            <span className="hidden sm:inline">ส่งออก CSV</span>
+                        </Button>
                     </div>
-                    <Button onClick={exportCSV} variant="outline" size="sm" className="border-slate-200 text-slate-600 hover:bg-white hover:text-slate-900 hover:border-slate-400 transition-all h-9 px-4">
-                        <Download className="w-3.5 h-3.5 mr-1.5" />
-                        ส่งออก CSV
-                    </Button>
                 </div>
 
                 {otData.length === 0 ? (
@@ -276,8 +282,9 @@ export function AdminOTCalculator() {
                             </div>
                         </div>
                     </>
-                )}
-            </div>
-        </div>
+                )
+                }
+            </div >
+        </div >
     );
 }
