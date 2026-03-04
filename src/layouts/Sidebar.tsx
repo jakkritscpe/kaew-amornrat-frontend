@@ -100,7 +100,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
       {/* Mobile backdrop */}
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 lg:hidden',
+          'fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] transition-all duration-300 lg:hidden',
           isMobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
         onClick={onMobileClose}
@@ -197,11 +197,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                     onClick={() => toggleSubmenu(item.id)}
                     title={isCollapsed ? item.label : undefined}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group w-full text-left relative',
-                      isCollapsed ? 'justify-center' : 'justify-between',
+                      'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group w-full text-left relative border-l-4 pt-1',
+                      isCollapsed ? 'justify-center border-transparent' : 'justify-between border-transparent',
                       isActive && !isOpen
-                        ? 'bg-[#f0f5ff] text-[#2075f8] font-medium'
-                        : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
+                        ? 'bg-blue-50 border-[#2075f8] text-[#2075f8] font-medium'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-[#2075f8] hover:border-blue-200'
                     )}
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
@@ -225,7 +225,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                         isOpen ? 'max-h-96 opacity-100 mt-1' : 'max-h-0 opacity-0'
                       )}
                     >
-                      <div className="flex flex-col gap-1 pl-[44px] pr-2 py-1">
+                      <div className="flex flex-col gap-1 pl-[44px] pr-2 py-1 relative">
+                        {/* Parent connection line indicator */}
+                        <div className="absolute left-[23px] top-2 bottom-4 w-px bg-gray-200" />
+
                         {item.subItems.map(subItem => {
                           const SubIcon = subItem.icon;
                           const isSubActive = location.pathname.includes(subItem.id);
@@ -238,7 +241,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                                 'sub-item relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-[13px] group',
                                 isSubActive
                                   ? 'bg-[#2075f8] text-white shadow-sm shadow-blue-500/20 font-medium'
-                                  : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
+                                  : 'text-slate-500 hover:bg-slate-50 hover:text-[#2075f8]'
                               )}
                             >
                               <SubIcon className={cn('w-4 h-4 shrink-0', !isSubActive && 'group-hover:scale-110')} aria-hidden="true" />
@@ -261,20 +264,17 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                 onClick={onMobileClose}
                 title={isCollapsed ? item.label : undefined}
                 className={cn(
-                  'menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative pt-1',
-                  isCollapsed && 'justify-center',
+                  'menu-item flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative pt-1 border-l-4',
+                  isCollapsed ? 'justify-center border-transparent' : 'border-transparent',
                   isActive
-                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium'
-                    : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
+                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium border-blue-600'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-[#2075f8] hover:border-blue-200'
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <Icon className={cn('w-5 h-5 shrink-0 transition-transform duration-200', !isActive && 'group-hover:scale-110')} aria-hidden="true" />
                 {!isCollapsed && (
                   <span className="text-sm whitespace-nowrap font-medium">{item.label}</span>
-                )}
-                {!isActive && !isCollapsed && (
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-[#2075f8] rounded-full transition-all duration-200 group-hover:h-5" />
                 )}
               </Link>
             );
