@@ -248,10 +248,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                               to={`/admin/${subItem.id}`}
                               onClick={onMobileClose}
                               className={cn(
-                                'sub-item relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-[13px] group',
+                                'sub-item relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium group',
                                 isSubActive
-                                  ? 'bg-[#2075f8] text-white shadow-sm shadow-blue-500/20 font-medium'
-                                  : 'text-slate-500 hover:bg-slate-50 hover:text-[#2075f8]'
+                                  ? 'bg-[#2075f8] text-white shadow-sm shadow-blue-500/20'
+                                  : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
                               )}
                             >
                               <SubIcon className={cn('w-4 h-4 shrink-0', !isSubActive && 'group-hover:scale-110')} aria-hidden="true" />
