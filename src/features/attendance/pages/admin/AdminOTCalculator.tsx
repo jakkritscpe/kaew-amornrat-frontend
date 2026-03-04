@@ -90,16 +90,13 @@ export function AdminOTCalculator() {
     };
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] bg-[#fafafa]">
+        <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
 
-                {/* ═══════════ HERO HEADER ═══════════ */}
-                <header className="mb-6 sm:mb-8 lg:mb-10">
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1.5 sm:mb-2">Overtime Report</p>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-none mb-1">
-                        คำนวณค่าล่วงเวลา
-                    </h1>
-                    <p className="text-sm sm:text-base text-slate-500 font-light">สรุปยอดชั่วโมงและค่าตอบแทน OT</p>
+                {/* ═══════════ PAGE HEADER ═══════════ */}
+                <header className="mb-5 sm:mb-6">
+                    <h1 className="text-xl sm:text-2xl font-semibold text-[#1d1d1d] mb-0.5">คำนวณค่าล่วงเวลา</h1>
+                    <p className="text-sm text-[#6f6f6f]">สรุปยอดชั่วโมงและค่าตอบแทน OT ของพนักงาน</p>
                 </header>
 
                 {/* ═══════════ PERIOD BAR ═══════════ */}
@@ -154,137 +151,137 @@ export function AdminOTCalculator() {
                 </div>
 
                 {/* ═══════════ STATS ROW ═══════════ */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 rounded-xl overflow-hidden mb-6 sm:mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
                     {[
-                        { label: 'ยอดค่า OT รวม', value: `฿${fmt(totPay)}`, accent: 'text-emerald-600' },
-                        { label: 'ชั่วโมง OT รวม', value: `${totHrs.toFixed(1)} ชม.`, accent: 'text-slate-900' },
-                        { label: 'พนักงานที่มี OT', value: `${pplWithOt} คน`, accent: 'text-slate-900' },
-                        { label: 'เฉลี่ยต่อคน', value: `${avgHrs.toFixed(1)} ชม.`, accent: 'text-slate-900' },
+                        { label: 'ยอดค่า OT รวม', value: `฿${fmt(totPay)}`, sub: 'บาท', color: 'text-emerald-600' },
+                        { label: 'ชั่วโมง OT รวม', value: totHrs.toFixed(1), sub: 'ชั่วโมง', color: 'text-[#1d1d1d]' },
+                        { label: 'พนักงานที่มี OT', value: String(pplWithOt), sub: 'คน', color: 'text-[#1d1d1d]' },
+                        { label: 'เฉลี่ยต่อคน', value: avgHrs.toFixed(1), sub: 'ชม./คน', color: 'text-[#1d1d1d]' },
                     ].map((s, i) => (
-                        <div key={i} className="bg-white px-3 py-3 sm:p-5 lg:p-6">
-                            <p className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1 sm:mb-2 truncate">{s.label}</p>
-                            <p className={cn('text-lg sm:text-2xl lg:text-3xl font-black tabular-nums tracking-tight leading-none', s.accent)}>{s.value}</p>
+                        <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-4 sm:px-5 sm:py-5">
+                            <p className="text-xs text-[#6f6f6f] font-medium mb-2 truncate">{s.label}</p>
+                            <p className={cn('text-xl sm:text-2xl font-semibold tabular-nums leading-none', s.color)}>{s.value}</p>
+                            <p className="text-[11px] text-[#6f6f6f] mt-1">{s.sub}</p>
                         </div>
                     ))}
                 </div>
 
-                {/* ═══════════ TABLE SECTION ═══════════ */}
-                <div className="mb-4 sm:mb-6 flex flex-col gap-3">
-                    <div className="flex items-start sm:items-center justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                            <h2 className="text-base sm:text-lg font-bold text-slate-900">รายละเอียดรายบุคคล</h2>
-                            <p className="text-xs sm:text-sm text-slate-400 font-light truncate">{otData.length} รายการ · {periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} – ${dateRange.end}`}</p>
+                {/* ═══════════ TABLE CARD ═══════════ */}
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    {/* Card Header */}
+                    <div className="p-5 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                            <h3 className="font-semibold text-lg text-[#1d1d1d]">รายละเอียด OT รายบุคคล</h3>
+                            <p className="text-sm text-[#6f6f6f]">{otData.length} รายการ · {periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} – ${dateRange.end}`}</p>
                         </div>
-                        <Button onClick={exportCSV} variant="outline" size="sm" className="border-slate-200 text-slate-600 hover:bg-white hover:text-slate-900 hover:border-slate-400 transition-all h-9 px-3 sm:px-4 shrink-0">
-                            <Download className="w-3.5 h-3.5 sm:mr-1.5" />
-                            <span className="hidden sm:inline">ส่งออก CSV</span>
+                        <Button onClick={exportCSV} variant="outline" className="gap-2 self-start sm:self-auto">
+                            <Download className="w-4 h-4" />
+                            <span>ส่งออก CSV</span>
                         </Button>
                     </div>
-                </div>
 
-                {otData.length === 0 ? (
-                    /* ── Empty State ── */
-                    <div className="rounded-xl border border-dashed border-slate-300 bg-white py-20 text-center">
-                        <CalendarRange className="w-10 h-10 text-slate-300 mx-auto mb-4" />
-                        <p className="text-slate-600 font-semibold">ไม่พบข้อมูล OT ในช่วงเวลานี้</p>
-                        <p className="text-sm text-slate-400 mt-1">ลองเปลี่ยนเดือนหรือช่วงวันที่</p>
-                    </div>
-                ) : (
-                    <>
-                        {/* ── Desktop Table ── */}
-                        <div className="hidden sm:block bg-white rounded-xl border border-slate-200 overflow-hidden">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b border-slate-200 text-left">
-                                        <th className="px-5 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest w-8">#</th>
-                                        <th className="px-5 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest">ชื่อ</th>
-                                        <th className="px-5 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest hidden lg:table-cell">แผนก</th>
-                                        <th className="px-5 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">ชั่วโมง</th>
-                                        <th className="px-5 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center hidden lg:table-cell">อัตรา</th>
-                                        <th className="px-5 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">ค่า OT</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {otData.map((d, i) => (
-                                        <tr key={d.emp.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70 transition-colors">
-                                            <td className="px-5 py-3.5 text-xs text-slate-300 font-mono tabular-nums">{String(i + 1).padStart(2, '0')}</td>
-                                            <td className="px-5 py-3.5">
-                                                <div className="flex items-center gap-3">
-                                                    <img
-                                                        src={d.emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.emp.name)}&background=f1f5f9&color=334155&bold=true&size=36`}
-                                                        alt="" className="w-8 h-8 rounded-lg object-cover bg-slate-100" loading="lazy"
-                                                    />
-                                                    <div className="min-w-0">
-                                                        <p className="font-semibold text-slate-900 truncate text-[13px]">{d.emp.name}</p>
-                                                        <p className="text-[11px] text-slate-400 truncate lg:hidden">{d.emp.department}</p>
+                    {otData.length === 0 ? (
+                        /* ── Empty State ── */
+                        <div className="py-20 text-center">
+                            <CalendarRange className="w-10 h-10 text-gray-300 mx-auto mb-4" />
+                            <p className="text-[#1d1d1d] font-medium">ไม่พบข้อมูล OT ในช่วงเวลานี้</p>
+                            <p className="text-sm text-[#6f6f6f] mt-1">ลองเปลี่ยนเดือนหรือช่วงวันที่</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* ── Desktop Table ── */}
+                            <div className="hidden sm:block overflow-x-auto">
+                                <table className="w-full border-collapse text-sm">
+                                    <thead>
+                                        <tr className="bg-gray-50/50 border-b border-gray-200">
+                                            <th className="w-12 text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider pl-6 pr-4 py-4">#</th>
+                                            <th className="text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4">พนักงาน</th>
+                                            <th className="text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell">แผนก</th>
+                                            <th className="text-right text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4">ชั่วโมง OT</th>
+                                            <th className="text-center text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell">อัตรา</th>
+                                            <th className="text-right text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider pl-4 pr-6 py-4">ค่า OT (฿)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {otData.map((d, i) => (
+                                            <tr key={d.emp.id} className="group border-b border-gray-100 transition-colors duration-200 hover:bg-[#e8f1fe]/30">
+                                                <td className="pl-6 pr-4 py-4 font-mono text-xs text-[#6f6f6f] align-top">{String(i + 1).padStart(2, '0')}</td>
+                                                <td className="px-4 py-4 align-top">
+                                                    <div className="flex items-center gap-3">
+                                                        <img
+                                                            src={d.emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.emp.name)}&background=eff6ff&color=1e3a8a&bold=true&size=36`}
+                                                            alt="" className="w-8 h-8 rounded-full object-cover bg-blue-50 shrink-0" loading="lazy"
+                                                        />
+                                                        <div className="min-w-0">
+                                                            <p className="font-medium text-sm text-[#1d1d1d] group-hover:text-[#2075f8] transition-colors truncate">{d.emp.name}</p>
+                                                            {d.emp.nickname && <p className="text-xs text-[#6f6f6f] truncate">({d.emp.nickname})</p>}
+                                                            <p className="text-xs text-[#6f6f6f] truncate lg:hidden">{d.emp.department}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                </td>
+                                                <td className="px-4 py-4 text-sm text-[#6f6f6f] align-top hidden lg:table-cell">{d.emp.department}</td>
+                                                <td className="px-4 py-4 text-right align-top">
+                                                    <span className="font-semibold text-sm text-[#1d1d1d] tabular-nums">{d.hrs.toFixed(1)}</span>
+                                                    <span className="text-xs text-[#6f6f6f] ml-1">ชม.</span>
+                                                </td>
+                                                <td className="px-4 py-4 text-center align-top hidden lg:table-cell">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-[#6f6f6f]">
+                                                        {d.rVal}{d.rType === 'multiplier' ? '×' : '฿/ชม.'}
+                                                    </span>
+                                                </td>
+                                                <td className="pl-4 pr-6 py-4 text-right align-top">
+                                                    <span className="font-semibold text-sm text-emerald-600 tabular-nums">{fmt(d.pay)}</span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr className="bg-gray-50/50 border-t border-gray-200">
+                                            <td className="pl-6 pr-4 py-4" colSpan={3}>
+                                                <span className="font-semibold text-sm text-[#1d1d1d]">รวมทั้งหมด</span>
                                             </td>
-                                            <td className="px-5 py-3.5 text-slate-500 hidden lg:table-cell">{d.emp.department}</td>
-                                            <td className="px-5 py-3.5 text-right font-bold text-slate-800 tabular-nums font-mono">{d.hrs.toFixed(1)}</td>
-                                            <td className="px-5 py-3.5 text-center hidden lg:table-cell">
-                                                <span className="text-xs font-semibold text-slate-500">
-                                                    {d.rVal}{d.rType === 'multiplier' ? '×' : '฿/ชม.'}
-                                                </span>
+                                            <td className="px-4 py-4 text-right">
+                                                <span className="font-semibold text-sm text-[#1d1d1d] tabular-nums">{totHrs.toFixed(1)} ชม.</span>
                                             </td>
-                                            <td className="px-5 py-3.5 text-right">
-                                                <span className="font-black text-emerald-600 tabular-nums font-mono text-[15px]">{fmt(d.pay)}</span>
+                                            <td className="px-4 py-4 hidden lg:table-cell"></td>
+                                            <td className="pl-4 pr-6 py-4 text-right">
+                                                <span className="font-semibold text-base text-emerald-600 tabular-nums">฿{fmt(totPay)}</span>
                                             </td>
                                         </tr>
-                                    ))}
-                                </tbody>
-                                <tfoot>
-                                    <tr className="bg-slate-50 border-t-2 border-slate-200">
-                                        <td className="px-5 py-4" colSpan={3}>
-                                            <span className="font-bold text-slate-900 text-sm">รวมทั้งหมด</span>
-                                        </td>
-                                        <td className="px-5 py-4 text-right font-bold text-slate-900 tabular-nums font-mono">{totHrs.toFixed(1)}</td>
-                                        <td className="px-5 py-4 hidden lg:table-cell"></td>
-                                        <td className="px-5 py-4 text-right">
-                                            <span className="font-black text-emerald-600 tabular-nums font-mono text-lg">฿{fmt(totPay)}</span>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+                                    </tfoot>
+                                </table>
+                            </div>
 
-                        {/* ── Mobile List ── */}
-                        <div className="sm:hidden space-y-2">
-                            {otData.map((d, i) => (
-                                <div key={d.emp.id} className="bg-white rounded-xl border border-slate-200 p-4">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <span className="text-[10px] font-mono text-slate-300 w-5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                            {/* ── Mobile List ── */}
+                            <div className="sm:hidden divide-y divide-gray-100">
+                                {otData.map((d, i) => (
+                                    <div key={d.emp.id} className="p-4 flex items-center gap-3 hover:bg-[#e8f1fe]/30 transition-colors">
+                                        <span className="text-xs font-mono text-[#6f6f6f] w-5 shrink-0 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
                                         <img
-                                            src={d.emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.emp.name)}&background=f1f5f9&color=334155&bold=true&size=36`}
-                                            alt="" className="w-9 h-9 rounded-lg object-cover bg-slate-100" loading="lazy"
+                                            src={d.emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.emp.name)}&background=eff6ff&color=1e3a8a&bold=true&size=36`}
+                                            alt="" className="w-9 h-9 rounded-full object-cover bg-blue-50 shrink-0" loading="lazy"
                                         />
                                         <div className="min-w-0 flex-1">
-                                            <p className="font-semibold text-slate-900 text-sm truncate">{d.emp.name}</p>
-                                            <p className="text-[11px] text-slate-400">{d.emp.department}</p>
+                                            <p className="font-medium text-sm text-[#1d1d1d] truncate">{d.emp.name}</p>
+                                            <p className="text-xs text-[#6f6f6f] truncate">{d.emp.department} · {d.hrs.toFixed(1)} ชม. · อัตรา {d.rVal}{d.rType === 'multiplier' ? '×' : '฿/ชม.'}</p>
                                         </div>
-                                        <p className="font-black text-emerald-600 tabular-nums font-mono text-base shrink-0">฿{fmt(d.pay)}</p>
+                                        <p className="font-semibold text-sm text-emerald-600 tabular-nums shrink-0">฿{fmt(d.pay)}</p>
                                     </div>
-                                    <div className="flex items-center gap-4 pl-8 text-xs text-slate-400">
-                                        <span><b className="text-slate-700 font-mono">{d.hrs.toFixed(1)}</b> ชม.</span>
-                                        <span className="text-slate-200">|</span>
-                                        <span>อัตรา {d.rVal}{d.rType === 'multiplier' ? '×' : '฿/ชม.'}</span>
+                                ))}
+                                {/* Mobile Total */}
+                                <div className="p-4 sm:p-6 flex items-center justify-between bg-gray-50/50">
+                                    <span className="font-semibold text-sm text-[#1d1d1d]">รวมทั้งหมด</span>
+                                    <div className="text-right">
+                                        <p className="font-semibold text-base text-emerald-600 tabular-nums">฿{fmt(totPay)}</p>
+                                        <p className="text-xs text-[#6f6f6f]">{totHrs.toFixed(1)} ชม. · {pplWithOt} คน</p>
                                     </div>
                                 </div>
-                            ))}
-
-                            {/* Mobile Total */}
-                            <div className="bg-slate-900 text-white rounded-xl p-4 flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">ยอดรวม</p>
-                                    <p className="text-sm text-slate-300 mt-0.5">{totHrs.toFixed(1)} ชม. · {pplWithOt} คน</p>
-                                </div>
-                                <p className="text-2xl font-black tabular-nums font-mono">฿{fmt(totPay)}</p>
                             </div>
-                        </div>
-                    </>
-                )
-                }
-            </div >
-        </div >
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 }
