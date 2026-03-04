@@ -23,43 +23,47 @@ export function AdminLocations() {
 
     return (
         <div className="p-6 bg-slate-50 min-h-[calc(100vh-4rem)]">
-            <div className="flex justify-between items-end mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-end gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900">จัดการสถานที่ทำงาน</h1>
                     <p className="text-sm text-slate-500 mt-1">กำหนดพิกัด GPS และขอบเขตพื้นที่สำหรับการลงเวลา</p>
                 </div>
-                <Button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={() => setShowAddModal(true)} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 shadow-sm">
                     <Plus className="w-4 h-4 mr-2" />
                     เพิ่มสถานที่
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
-                {/* รายการสถานที่ */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden col-span-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-[600px]">
+                {/* รายการสถานที่ (Mobile: Order 2) */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden col-span-1 h-[400px] lg:h-auto order-2 lg:order-1">
                     <div className="p-4 border-b border-slate-100 flex-shrink-0">
-                        <div className="relative w-full">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <div className="relative w-full group focus-within:ring-4 focus-within:ring-blue-500/20 rounded-md transition-all">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none group-focus-within:text-blue-500 transition-colors" />
                             <Input
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 placeholder="ค้นหาสถานที่..."
-                                className="pl-9 bg-slate-50/50"
+                                className="pl-9 bg-slate-50/50 transition-all"
+                                autoComplete="off"
+                                spellCheck={false}
                             />
                         </div>
                     </div>
-                    <div className="overflow-y-auto flex-1 divide-y divide-slate-100">
+                    <div className="overflow-y-auto flex-1 p-2">
                         {filtered.map(loc => (
-                            <div key={loc.id} className="p-4 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <div key={loc.id} className="p-3 mb-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors border border-transparent hover:border-slate-100">
                                 <div className="flex items-start gap-3">
                                     <div className="mt-0.5 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                                         <MapPin className="w-4 h-4 text-blue-600" />
                                     </div>
                                     <div>
-                                        <p className="font-medium text-slate-900 text-sm">{loc.name}</p>
-                                        <p className="text-xs text-slate-500 mt-1 font-mono">ละติจูด: {loc.lat}</p>
-                                        <p className="text-xs text-slate-500 font-mono">ลองจิจูด: {loc.lng}</p>
-                                        <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
+                                        <p className="font-semibold text-slate-900 text-sm leading-tight">{loc.name}</p>
+                                        <div className="mt-1.5 flex flex-wrap gap-2 text-[10px] font-mono text-slate-500">
+                                            <span className="bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">Lat: {loc.lat}</span>
+                                            <span className="bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">Lng: {loc.lng}</span>
+                                        </div>
+                                        <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700">
                                             รัศมี: {loc.radiusMeters} เมตร
                                         </div>
                                     </div>
@@ -67,13 +71,16 @@ export function AdminLocations() {
                             </div>
                         ))}
                         {filtered.length === 0 && (
-                            <div className="p-8 text-center text-slate-500 text-sm">ไม่พบสถานที่</div>
+                            <div className="p-8 text-center text-slate-500 text-sm">
+                                <MapPin className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+                                ไม่พบสถานที่
+                            </div>
                         )}
                     </div>
                 </div>
 
-                {/* แผนที่ */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden col-span-2 relative z-0">
+                {/* แผนที่ (Mobile: Order 1) */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-2 relative z-0 h-[300px] sm:h-[400px] lg:h-auto order-1 lg:order-2">
                     <MapContainer
                         center={[13.78, 100.52]}
                         zoom={11}
