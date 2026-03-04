@@ -74,7 +74,7 @@ export default function Header({ onNewRequest, searchQuery, setSearchQuery, titl
         </div>
 
         {/* Mobile search overlay (full width) */}
-        {isSearchOpen && (
+        {/* {isSearchOpen && (
           <div className="md:hidden fixed inset-x-0 top-0 h-16 bg-white z-50 flex items-center gap-2 px-4 border-b border-gray-100">
             <Search className="w-4 h-4 text-gray-400 shrink-0" aria-hidden="true" />
             <Input
@@ -94,7 +94,7 @@ export default function Header({ onNewRequest, searchQuery, setSearchQuery, titl
               <X className="w-4 h-4 text-gray-500" aria-hidden="true" />
             </button>
           </div>
-        )}
+        )} */}
 
         {/* Notification */}
         <button
@@ -106,7 +106,7 @@ export default function Header({ onNewRequest, searchQuery, setSearchQuery, titl
         </button>
 
         {/* New Request Button */}
-        <button
+        {/* <button
           onClick={onNewRequest}
           className={cn(
             'flex items-center gap-2 px-4 py-2 rounded-xl',
@@ -120,7 +120,7 @@ export default function Header({ onNewRequest, searchQuery, setSearchQuery, titl
           <Plus className="w-4 h-4 shrink-0" aria-hidden="true" />
           <span className="hidden sm:inline">แจ้งซ่อมใหม่</span>
           <span className="sm:hidden">ใหม่</span>
-        </button>
+        </button> */}
       </div>
     </header>
   );
