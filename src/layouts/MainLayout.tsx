@@ -1,0 +1,95 @@
+import { useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import Sidebar from './Sidebar';
+import Header from './Header';
+import { useRepairRequests } from '../features/repair-requests/hooks/useRepairRequests';
+import NewRequestModal from '../features/repair-requests/components/NewRequestModal';
+import RequestDetailModal from '../features/repair-requests/components/RequestDetailModal';
+
+export function MainLayout() {
+    const {
+        searchQuery,
+        setSearchQuery,
+        setIsNewRequestModalOpen,
+        setEditRequest,
+        isNewRequestModalOpen,
+        selectedRequest,
+        isDetailModalOpen,
+        editRequest,
+        setIsDetailModalOpen,
+        setSelectedRequest,
+        handleNewRequest,
+        handleEditRequest,
+        handleUpdateStatus
+    } = useRepairRequests();
+
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const location = useLocation();
+
+    const getPageTitle = () => {
+        const path = location.pathname;
+        if (path.includes('/requests')) return 'รายการแจ้งซ่อม';
+        if (path.includes('/technicians')) return 'ทีมช่าง';
+        if (path.includes('/settings')) return 'ตั้งค่า';
+        if (path.includes('/jobs')) return 'ระบบใบงาน';
+        return 'แดชบอร์ด';
+    };
+
+    return (
+        <div className="min-h-screen bg-[#f8fafc]">
+            {/* Sidebar — CSS transform drawer, no hidden/block toggling */}
+            <Sidebar
+                isCollapsed={isSidebarCollapsed}
+                setIsCollapsed={setIsSidebarCollapsed}
+                isMobileOpen={isMobileSidebarOpen}
+                onMobileClose={() => setIsMobileSidebarOpen(false)}
+            />
+
+            {/* Main content — no margin on mobile, sidebar offset on desktop.
+                ⚠️ IMPORTANT: must use static cn() strings, NOT template literals.
+                Tailwind JIT cannot compile `lg:${variable}` at build time. */}
+            <div className={cn(
+                'transition-all duration-300 min-h-screen flex flex-col',
+                isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[260px]'
+            )}>
+                <Header
+                    onNewRequest={() => {
+                        setEditRequest(null);
+                        setIsNewRequestModalOpen(true);
+                    }}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    title={getPageTitle()}
+                    onMenuClick={() => setIsMobileSidebarOpen(true)}
+                />
+
+                <main className="flex-1 p-4 lg:p-6">
+                    <Outlet />
+                </main>
+            </div>
+
+            {/* Modals */}
+            <NewRequestModal
+                isOpen={isNewRequestModalOpen}
+                onClose={() => {
+                    setIsNewRequestModalOpen(false);
+                    setEditRequest(null);
+                }}
+                onSubmit={editRequest ? handleEditRequest : handleNewRequest}
+                editRequest={editRequest}
+            />
+
+            <RequestDetailModal
+                request={selectedRequest}
+                isOpen={isDetailModalOpen}
+                onClose={() => {
+                    setIsDetailModalOpen(false);
+                    setSelectedRequest(null);
+                }}
+                onUpdateStatus={handleUpdateStatus}
+            />
+        </div>
+    );
+}
