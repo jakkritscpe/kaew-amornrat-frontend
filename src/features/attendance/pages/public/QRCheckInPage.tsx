@@ -30,7 +30,7 @@ export function QRCheckInPage() {
                 });
                 setLoading(false);
             },
-            (err) => {
+            () => {
                 setGeoError('ไม่สามารถเข้าถึงตำแหน่งได้ กรุณาเปิดการตั้งค่า GPS ให้เบราว์เซอร์');
                 setLoading(false);
             },
