@@ -54,7 +54,7 @@ export function Navbar() {
                                     isScrolled ? "border-[#C2410C] text-[#C2410C]" : "border-white text-[#C2410C] hover:border-transparent"
                                 )}
                             >
-                                เข้าสู่ระบบแจ้งซ่อม
+                                เข้าสู่ระบบพนักงาน
                             </Button>
                         </Link>
                         <Button className="bg-[#C2410C] hover:bg-[#C2410C]/90 text-white gap-2">
@@ -86,7 +86,7 @@ export function Navbar() {
                     <div className="flex flex-col gap-2 pt-4 border-t border-gray-100">
                         <Link to="/login" className="w-full">
                             <Button variant="outline" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
-                                เข้าสู่ระบบแจ้งซ่อม
+                                เข้าสู่ระบบพนักงาน
                             </Button>
                         </Link>
                         <Button className="w-full bg-[#C2410C] hover:bg-[#C2410C]/90">
