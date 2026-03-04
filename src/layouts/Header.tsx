@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { Search, Bell, Menu } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Bell, Menu } from 'lucide-react';
 
 interface HeaderProps {
   onNewRequest: () => void;
@@ -11,9 +10,8 @@ interface HeaderProps {
   onMenuClick: () => void;
 }
 
-export default function Header({ searchQuery, setSearchQuery, title, onMenuClick }: HeaderProps) {
+export default function Header({ title, onMenuClick }: HeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
