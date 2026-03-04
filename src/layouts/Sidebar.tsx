@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import {
@@ -15,7 +15,9 @@ import {
   Clock,
   MapPin,
   FileCheck2,
-  BarChart3
+  BarChart3,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '../features/auth/hooks/useAuth';
@@ -27,17 +29,31 @@ interface SidebarProps {
   onMobileClose: () => void;
 }
 
-const menuItems = [
+type MenuItem = {
+  id: string;
+  label: string;
+  icon: any;
+  subItems?: { id: string; label: string; icon: any }[];
+};
+
+const menuItems: MenuItem[] = [
   { id: 'dashboard', label: 'แดชบอร์ด', icon: LayoutDashboard },
   { id: 'requests', label: 'รายการแจ้งซ่อม', icon: ClipboardList },
   { id: 'jobs', label: 'ระบบใบงาน', icon: FileText },
   { id: 'technicians', label: 'ช่าง', icon: Users },
-  { id: 'attendance/dashboard', label: 'แดชบอร์ดลงเวลา', icon: Clock },
-  { id: 'attendance/logs', label: 'ประวัติลงเวลา', icon: ClipboardList },
-  { id: 'attendance/employees', label: 'พนักงาน (ลงเวลา)', icon: Users },
-  { id: 'attendance/locations', label: 'สถานที่ (GPS)', icon: MapPin },
-  { id: 'attendance/ot-approvals', label: 'อนุมัติ OT', icon: FileCheck2 },
-  { id: 'attendance/reports', label: 'รายงานเวลา', icon: BarChart3 },
+  {
+    id: 'attendance',
+    label: 'ระบบลงเวลา',
+    icon: Clock,
+    subItems: [
+      { id: 'attendance/dashboard', label: 'แดชบอร์ด', icon: LayoutDashboard },
+      { id: 'attendance/logs', label: 'ประวัติลงเวลา', icon: ClipboardList },
+      { id: 'attendance/employees', label: 'พนักงาน', icon: Users },
+      { id: 'attendance/locations', label: 'สถานที่', icon: MapPin },
+      { id: 'attendance/ot-approvals', label: 'อนุมัติ OT', icon: FileCheck2 },
+      { id: 'attendance/reports', label: 'รายงานเวลา', icon: BarChart3 },
+    ]
+  },
   { id: 'settings', label: 'ตั้งค่า', icon: Settings },
 ];
 
@@ -46,10 +62,28 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
   const { user, logout } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
+    'attendance': location.pathname.includes('/attendance')
+  });
+
+  const toggleSubmenu = (id: string) => {
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      setOpenSubmenus(prev => ({ ...prev, [id]: true }));
+      return;
+    }
+    setOpenSubmenus(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  useEffect(() => {
+    if (location.pathname.includes('/attendance')) {
+      setOpenSubmenus(prev => ({ ...prev, 'attendance': true }));
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo('.menu-item',
+      gsap.fromTo('.menu-item:not(.sub-item)',
         { y: 20, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.4, stagger: 0.08, delay: 0.1, ease: 'power3.out' }
       );
@@ -124,7 +158,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
 
         {/* Desktop collapse toggle */}
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={() => {
+            setIsCollapsed(!isCollapsed);
+            if (!isCollapsed) setOpenSubmenus({});
+          }}
           className="hidden lg:flex absolute -right-3 top-[72px] w-6 h-6 bg-white rounded-full shadow-md border border-gray-200 items-center justify-center hover:bg-gray-50 transition-colors z-10"
           aria-label={isCollapsed ? 'ขยายเมนู' : 'ย่อเมนู'}
         >
@@ -143,12 +180,78 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
               // Allow exact match or if the item id starts with an allowed base menu (e.g., 'attendance')
               return allowed.some(menu => item.id === menu || item.id.startsWith(menu + '/'));
             }
-            // For other roles (e.g. technician), filter accordingly if needed. For now assume no access to admin menus.
             return false;
           }).map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname.includes(item.id);
 
+            // Check if ANY sub-item is active
+            const isAnyChildActive = item.subItems?.some(sub => location.pathname.includes(sub.id));
+            const isActive = location.pathname.includes(item.id) || !!isAnyChildActive;
+
+            if (item.subItems) {
+              const isOpen = openSubmenus[item.id] && !isCollapsed;
+
+              return (
+                <div key={item.id} className="menu-item flex flex-col pt-1">
+                  <button
+                    onClick={() => toggleSubmenu(item.id)}
+                    title={isCollapsed ? item.label : undefined}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group w-full text-left relative',
+                      isCollapsed ? 'justify-center' : 'justify-between',
+                      isActive && !isOpen
+                        ? 'bg-[#f0f5ff] text-[#2075f8] font-medium'
+                        : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
+                    )}
+                  >
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <Icon className={cn('w-5 h-5 shrink-0 transition-transform duration-200', (!isActive || isOpen) && 'group-hover:scale-110')} aria-hidden="true" />
+                      {!isCollapsed && (
+                        <span className={cn('font-medium text-sm whitespace-nowrap truncate', isActive && 'text-[#2075f8]')}>{item.label}</span>
+                      )}
+                    </div>
+                    {!isCollapsed && (
+                      <div className={cn('shrink-0 transition-colors', isActive && !isOpen ? 'text-[#2075f8]' : 'text-gray-400 group-hover:text-[#2075f8]')}>
+                        {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Sub-items Container */}
+                  {!isCollapsed && (
+                    <div
+                      className={cn(
+                        'overflow-hidden transition-all duration-300 ease-in-out',
+                        isOpen ? 'max-h-96 opacity-100 mt-1' : 'max-h-0 opacity-0'
+                      )}
+                    >
+                      <div className="flex flex-col gap-1 pl-[44px] pr-2 py-1">
+                        {item.subItems.map(subItem => {
+                          const isSubActive = location.pathname.includes(subItem.id);
+                          return (
+                            <Link
+                              key={subItem.id}
+                              to={`/admin/${subItem.id}`}
+                              onClick={onMobileClose}
+                              className={cn(
+                                'sub-item relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-[13px] group',
+                                isSubActive
+                                  ? 'bg-[#2075f8] text-white shadow-sm shadow-blue-500/20 font-medium'
+                                  : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
+                              )}
+                            >
+                              <span className="whitespace-nowrap truncate">{subItem.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            // Normal standalone menu items
             return (
               <Link
                 key={item.id}
@@ -156,17 +259,17 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                 onClick={onMobileClose}
                 title={isCollapsed ? item.label : undefined}
                 className={cn(
-                  'menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
+                  'menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative pt-1',
                   isCollapsed && 'justify-center',
                   isActive
-                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20'
+                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium'
                     : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <Icon className={cn('w-5 h-5 shrink-0 transition-transform duration-200', !isActive && 'group-hover:scale-110')} aria-hidden="true" />
                 {!isCollapsed && (
-                  <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>
+                  <span className="text-sm whitespace-nowrap font-medium">{item.label}</span>
                 )}
                 {!isActive && !isCollapsed && (
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-[#2075f8] rounded-full transition-all duration-200 group-hover:h-5" />
