@@ -192,7 +192,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
               const isOpen = openSubmenus[item.id] && !isCollapsed;
 
               return (
-                <div key={item.id} className="menu-item flex flex-col pt-1">
+                <div key={item.id} className="menu-item flex flex-col">
                   <button
                     onClick={() => toggleSubmenu(item.id)}
                     title={isCollapsed ? item.label : undefined}
@@ -264,7 +264,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                 onClick={onMobileClose}
                 title={isCollapsed ? item.label : undefined}
                 className={cn(
-                  'menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative pt-1',
+                  'menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
                   isCollapsed && 'justify-center',
                   isActive
                     ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium'
