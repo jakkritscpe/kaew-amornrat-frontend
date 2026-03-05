@@ -47,19 +47,19 @@ function StatCard({ title, value, icon: Icon, color, delay }: { title: string, v
         const ctx = gsap.context(() => {
             gsap.fromTo(cardRef.current,
                 { rotateX: 90, opacity: 0, transformOrigin: 'center bottom' },
-                { rotateX: 0, opacity: 1, duration: 0.8, delay, ease: 'power3.out' }
+                { rotateX: 0, opacity: 1, duration: 0.5, delay, ease: 'power3.out' }
             );
             const counter = { val: 0 };
             gsap.to(counter, {
                 val: value,
-                duration: 1.5,
-                delay: delay + 0.3,
+                duration: 0.8,
+                delay: delay + 0.1,
                 ease: 'expo.out',
                 onUpdate: () => setDisplayValue(Math.round(counter.val))
             });
             gsap.fromTo(cardRef.current?.querySelector('.stat-icon'),
                 { rotate: -180, scale: 0 },
-                { rotate: 0, scale: 1, duration: 0.8, delay: delay + 0.4, ease: 'back.out(1.7)' }
+                { rotate: 0, scale: 1, duration: 0.4, delay: delay + 0.15, ease: 'back.out(1.7)' }
             );
         });
         return () => ctx.revert();
@@ -178,7 +178,7 @@ export function AdminEmployees() {
             // Header animation
             gsap.fromTo('.page-header',
                 { y: -20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }
+                { y: 0, opacity: 1, duration: 0.4, ease: 'power3.out' }
             );
 
             // Cards stagger
@@ -186,7 +186,7 @@ export function AdminEmployees() {
                 { y: 30, opacity: 0 },
                 {
                     y: 0, opacity: 1,
-                    duration: 0.6, stagger: 0.05, ease: 'power3.out',
+                    duration: 0.4, stagger: 0.03, ease: 'power3.out',
                     scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', toggleActions: 'play none none none' },
                 }
             );
