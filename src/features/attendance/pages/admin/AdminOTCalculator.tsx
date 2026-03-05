@@ -66,10 +66,12 @@ function StatCard({ title, value, suffix, icon: Icon, color, delay, format }: St
                 onUpdate: () => setDisplayValue(counter.val),
             });
             // Icon spin
-            gsap.fromTo(cardRef.current?.querySelector('.stat-icon'),
-                { rotate: -180, scale: 0 },
-                { rotate: 0, scale: 1, duration: 0.8, delay: delay + 0.4, ease: 'back.out(1.7)' }
-            );
+            if (cardRef.current) {
+                gsap.fromTo(cardRef.current.querySelector('.stat-icon') as Element,
+                    { rotate: -180, scale: 0 },
+                    { rotate: 0, scale: 1, duration: 0.8, delay: delay + 0.4, ease: 'back.out(1.7)' }
+                );
+            }
         });
         return () => ctx.revert();
     }, [value, delay]);
