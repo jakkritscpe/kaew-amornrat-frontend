@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+const BASE_URL = '';
 
 function getToken(): string | null {
   return localStorage.getItem('attendance_token');
@@ -12,10 +12,15 @@ export function clearToken() {
   localStorage.removeItem('attendance_token');
 }
 
-export class ApiError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-  }
+export interface ApiError {
+  status: number;
+  message: string;
+}
+
+export function createApiError(status: number, message: string): ApiError & Error {
+  const err = new Error(message) as ApiError & Error;
+  err.status = status;
+  return err;
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -31,7 +36,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
 
   if (!res.ok || !json.success) {
     if (res.status === 401) clearToken();
-    throw new ApiError(res.status, json.error ?? 'Request failed');
+    throw createApiError(res.status, json.error ?? 'Request failed');
   }
 
   return json.data as T;
