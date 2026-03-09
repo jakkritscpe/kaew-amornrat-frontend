@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useAttendance } from '../../contexts/AttendanceContext';
 import { QRCodeSVG } from 'qrcode.react';
+import { regenerateQRApi } from '../../../../lib/api/auth-api';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -112,7 +113,7 @@ function StatCard({ title, value, icon: Icon, color, delay }: { title: string, v
 }
 
 export function AdminEmployees() {
-    const { employees, logs, locations, addEmployee, updateEmployee, removeEmployee, companySettings } = useAttendance();
+    const { employees, logs, locations, addEmployee, updateEmployee, removeEmployee, companySettings, refreshAll } = useAttendance();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showQRModal, setShowQRModal] = useState<string | null>(null);
@@ -363,6 +364,16 @@ export function AdminEmployees() {
         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
     };
 
+    const handleRegenerateQR = async (employeeId: string) => {
+        try {
+            await regenerateQRApi(employeeId);
+            await refreshAll();
+            alert('QR code ใหม่ถูกสร้างแล้ว');
+        } catch {
+            alert('ไม่สามารถสร้าง QR code ใหม่ได้ กรุณาลองใหม่อีกครั้ง');
+        }
+    };
+
     const selectedEmp = employees.find(e => e.id === showQRModal);
 
     return (
@@ -547,14 +558,17 @@ export function AdminEmployees() {
                                     <p className="text-sm text-[#6f6f6f] mt-1 mb-6">ผู้สแกนสามารถใช้บันทึกเวลาเข้า-ออกงานได้</p>
 
                                     <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm mb-6 w-full flex justify-center aspect-square items-center group relative">
-                                        <QRCodeSVG value={`${window.location.origin}/qr-checkin/${showQRModal}`} size={200} level="H" includeMargin ref={qrRef} />
+                                        <QRCodeSVG value={selectedEmp?.qrToken ? `${window.location.origin}/employee/qr-login/${selectedEmp.qrToken}` : `${window.location.origin}/employee/qr-login/`} size={200} level="H" includeMargin ref={qrRef} />
                                     </div>
 
                                     <Button onClick={downloadQR} className="w-full bg-[#1d1d1d] hover:bg-gray-800 text-white rounded-xl h-12 text-sm font-semibold transition-all">
                                         <FileDown className="w-4 h-4 mr-2" /> บันทึกรูปภาพ QR
                                     </Button>
-                                    <Button variant="ghost" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/qr-checkin/${showQRModal}`); alert('คัดลอกลิงก์แล้ว!'); }} className="w-full mt-2 text-[#6f6f6f] hover:text-[#1d1d1d] rounded-xl h-10 text-sm font-medium transition-all">
+                                    <Button variant="ghost" onClick={() => { navigator.clipboard.writeText(selectedEmp?.qrToken ? `${window.location.origin}/employee/qr-login/${selectedEmp.qrToken}` : ''); alert('คัดลอกลิงก์แล้ว!'); }} className="w-full mt-2 text-[#6f6f6f] hover:text-[#1d1d1d] rounded-xl h-10 text-sm font-medium transition-all">
                                         คัดลอกลิงก์
+                                    </Button>
+                                    <Button variant="ghost" onClick={() => showQRModal && handleRegenerateQR(showQRModal)} className="w-full mt-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl h-10 text-sm font-medium transition-all">
+                                        สร้าง QR code ใหม่ (ยกเลิก QR เดิม)
                                     </Button>
                                 </div>
                             </div>

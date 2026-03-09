@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { EmployeeNoSessionPage } from '../pages/EmployeeNoSessionPage';
 
 export function ProtectedRoute() {
     const { user, isAuthenticated, isLoading } = useAuth();
@@ -11,6 +12,15 @@ export function ProtectedRoute() {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2075f8]"></div>
             </div>
         );
+    }
+
+    // For employee routes - check attendance_token directly (QR-based login)
+    if (location.pathname.startsWith('/employee')) {
+        const employeeToken = localStorage.getItem('attendance_token');
+        if (!employeeToken) {
+            return <EmployeeNoSessionPage />;
+        }
+        return <Outlet />;
     }
 
     if (!isAuthenticated || !user) {

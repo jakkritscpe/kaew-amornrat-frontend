@@ -28,6 +28,7 @@ import { EmployeeHistory } from './features/attendance/pages/employee/EmployeeHi
 import { EmployeeOTRequest } from './features/attendance/pages/employee/EmployeeOTRequest';
 import { QRCheckInPage } from './features/attendance/pages/public/QRCheckInPage';
 import { EmployeeLoginPage } from './features/auth/pages/EmployeeLoginPage';
+import { QRLoginPage } from './features/auth/pages/QRLoginPage';
 
 function App() {
   return (
@@ -73,6 +74,9 @@ function App() {
                   <Route path="attendance/ot-request" element={<EmployeeOTRequest />} />
                 </Route>
               </Route>
+
+              {/* QR Login - Public */}
+              <Route path="/employee/qr-login/:token" element={<QRLoginPage />} />
 
               {/* Public QR Check-in Route */}
               <Route path="/qr-checkin/:employeeId" element={<QRCheckInPage />} />
