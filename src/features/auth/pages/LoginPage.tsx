@@ -1,31 +1,31 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe, Lock, User, ArrowRight } from 'lucide-react';
+import { Globe, Lock, Mail, ArrowRight } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export function LoginPage() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { login, isLoading } = useAuth();
+    const { loginWithCredentials, isLoading } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
-        if (!username || !password) {
+        if (!email || !password) {
             setError('กรุณากรอกข้อมูลให้ครบถ้วน');
             return;
         }
 
         try {
-            await login(username);
+            await loginWithCredentials!(email, password);
             navigate('/admin/dashboard');
         } catch {
-            setError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง (ลอง admin)');
+            setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
         }
     };
 
@@ -52,14 +52,14 @@ export function LoginPage() {
                         )}
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-[#1d1d1d]">ชื่อผู้ใช้งาน</label>
+                            <label className="text-sm font-medium text-[#1d1d1d]">อีเมล</label>
                             <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <Input
-                                    type="text"
-                                    placeholder="admin"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    type="email"
+                                    placeholder="admin@repair-hub.local"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white"
                                 />
                             </div>
@@ -101,7 +101,7 @@ export function LoginPage() {
 
                 {/* Footer info */}
                 <p className="text-center text-[#6f6f6f] text-sm mt-8">
-                    ทดสอบระบบ: ใช้ชื่อผู้ใช้ <span className="font-bold text-[#1d1d1d]">admin</span>
+                    ทดสอบระบบ: <span className="font-bold text-[#1d1d1d]">admin@repair-hub.local</span> / <span className="font-bold text-[#1d1d1d]">admin1234</span>
                 </p>
             </div>
         </div>

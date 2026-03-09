@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: result.user.id,
                 username: result.user.email,
                 name: result.user.name,
-                role: result.user.role === 'admin' ? 'admin' : 'technician',
+                role: (result.user.role === 'admin' || result.user.role === 'manager') ? 'super_admin' : 'technician',
                 employeeId: result.user.id,
             };
             setUser(user);
