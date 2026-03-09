@@ -1,123 +1,187 @@
-import { createContext, useContext, useState, useCallback } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { Employee, AttendanceLog, WorkLocation, OTRequest } from '../types';
-import { mockEmployees, mockAttendanceLogs, mockLocations, mockOTRequests } from '../mockData';
+import { getEmployeesApi, createEmployeeApi, updateEmployeeApi, deleteEmployeeApi } from '../../../lib/api/employees-api';
+import { getLocationsApi, createLocationApi, updateLocationApi, deleteLocationApi } from '../../../lib/api/locations-api';
+import { getLogsApi, getTodayLogApi, checkInApi, checkOutApi } from '../../../lib/api/attendance-api';
+import { getOTRequestsApi, submitOTRequestApi, updateOTStatusApi } from '../../../lib/api/ot-api';
+import { getSettingsApi, updateSettingsApi } from '../../../lib/api/settings-api';
 
 export interface CompanySettings {
-    defaultOtRateType: 'multiplier' | 'fixed';
-    defaultOtRateValue: number;
+  defaultOtRateType: 'multiplier' | 'fixed';
+  defaultOtRateValue: number;
 }
 
 interface AttendanceContextType {
-    employees: Employee[];
-    logs: AttendanceLog[];
-    locations: WorkLocation[];
-    otRequests: OTRequest[];
-    companySettings: CompanySettings;
+  employees: Employee[];
+  logs: AttendanceLog[];
+  locations: WorkLocation[];
+  otRequests: OTRequest[];
+  companySettings: CompanySettings;
+  loading: boolean;
+  error: string | null;
 
-    // Actions
-    addLog: (log: Omit<AttendanceLog, 'id'>) => void;
-    updateLog: (id: string, updates: Partial<AttendanceLog>) => void;
-    addEmployee: (emp: Omit<Employee, 'id'>) => void;
-    updateEmployee: (id: string, updates: Partial<Employee>) => void;
-    removeEmployee: (id: string) => void;
-    addLocation: (loc: Omit<WorkLocation, 'id'>) => void;
-    updateOTStatus: (id: string, status: OTRequest['status']) => void;
-    submitOTRequest: (req: Omit<OTRequest, 'id' | 'status'>) => void;
-    updateCompanySettings: (settings: Partial<CompanySettings>) => void;
+  refreshAll: () => Promise<void>;
+
+  // Logs
+  addLog: (lat: number, lng: number) => Promise<AttendanceLog | null>;
+  checkOut: (lat: number, lng: number) => Promise<AttendanceLog | null>;
+  updateLog: (id: string, updates: Partial<AttendanceLog>) => void;
+
+  // Employees
+  addEmployee: (emp: Omit<Employee, 'id'> & { password: string }) => Promise<void>;
+  updateEmployee: (id: string, updates: Partial<Employee> & { password?: string }) => Promise<void>;
+  removeEmployee: (id: string) => Promise<void>;
+
+  // Locations
+  addLocation: (loc: Omit<WorkLocation, 'id'>) => Promise<void>;
+  updateLocation: (id: string, updates: Partial<WorkLocation>) => Promise<void>;
+  removeLocation: (id: string) => Promise<void>;
+
+  // OT
+  submitOTRequest: (req: Omit<OTRequest, 'id' | 'status'>) => Promise<void>;
+  updateOTStatus: (id: string, status: OTRequest['status']) => Promise<void>;
+
+  // Settings
+  updateCompanySettings: (settings: Partial<CompanySettings>) => Promise<void>;
 }
 
-const AttendanceContext = createContext<AttendanceContextType | undefined>(undefined);
+const AttendanceContext = createContext<AttendanceContextType | null>(null);
 
 export function AttendanceProvider({ children }: { children: ReactNode }) {
-    const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
-    const [logs, setLogs] = useState<AttendanceLog[]>(mockAttendanceLogs);
-    const [locations, setLocations] = useState<WorkLocation[]>(mockLocations);
-    const [otRequests, setOtRequests] = useState<OTRequest[]>(mockOTRequests);
-    const [companySettings, setCompanySettings] = useState<CompanySettings>({
-        defaultOtRateType: 'multiplier',
-        defaultOtRateValue: 1.5,
-    });
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [logs, setLogs] = useState<AttendanceLog[]>([]);
+  const [locations, setLocations] = useState<WorkLocation[]>([]);
+  const [otRequests, setOTRequests] = useState<OTRequest[]>([]);
+  const [companySettings, setCompanySettings] = useState<CompanySettings>({
+    defaultOtRateType: 'multiplier',
+    defaultOtRateValue: 1.5,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const addLog = useCallback((log: Omit<AttendanceLog, 'id'>) => {
-        const newLog: AttendanceLog = {
-            ...log,
-            id: `log-${Date.now()}`
-        };
-        setLogs(prev => [...prev, newLog]);
-    }, []);
+  const refreshAll = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('attendance_token');
+      if (!token) { setLoading(false); return; }
 
-    const updateLog = useCallback((id: string, updates: Partial<AttendanceLog>) => {
-        setLogs(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
-    }, []);
+      const [emps, locs, settings] = await Promise.all([
+        getEmployeesApi().catch(() => [] as Employee[]),
+        getLocationsApi().catch(() => [] as WorkLocation[]),
+        getSettingsApi().catch(() => ({ defaultOtRateType: 'multiplier' as const, defaultOtRateValue: 1.5 })),
+      ]);
 
-    const addEmployee = useCallback((emp: Omit<Employee, 'id'>) => {
-        const newEmp: Employee = {
-            ...emp,
-            id: `emp-${Date.now()}`
-        };
-        setEmployees(prev => [...prev, newEmp]);
-    }, []);
+      setEmployees(emps);
+      setLocations(locs);
+      setCompanySettings(settings);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'เกิดข้อผิดพลาด');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    const updateEmployee = useCallback((id: string, updates: Partial<Employee>) => {
-        setEmployees(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
-    }, []);
+  const refreshLogs = useCallback(async () => {
+    const token = localStorage.getItem('attendance_token');
+    if (!token) return;
+    const data = await getLogsApi().catch(() => [] as AttendanceLog[]);
+    setLogs(data);
+  }, []);
 
-    const removeEmployee = useCallback((id: string) => {
-        setEmployees(prev => prev.filter(e => e.id !== id));
-    }, []);
+  const refreshOT = useCallback(async () => {
+    const token = localStorage.getItem('attendance_token');
+    if (!token) return;
+    const data = await getOTRequestsApi().catch(() => [] as OTRequest[]);
+    setOTRequests(data);
+  }, []);
 
-    const addLocation = useCallback((loc: Omit<WorkLocation, 'id'>) => {
-        const newLoc: WorkLocation = {
-            ...loc,
-            id: `loc-${Date.now()}`
-        };
-        setLocations(prev => [...prev, newLoc]);
-    }, []);
+  useEffect(() => {
+    refreshAll();
+    refreshLogs();
+    refreshOT();
+  }, [refreshAll, refreshLogs, refreshOT]);
 
-    const updateOTStatus = useCallback((id: string, status: OTRequest['status']) => {
-        setOtRequests(prev => prev.map(ot => ot.id === id ? { ...ot, status } : ot));
-    }, []);
+  const addLog = useCallback(async (lat: number, lng: number) => {
+    const log = await checkInApi(lat, lng);
+    await refreshLogs();
+    return log;
+  }, [refreshLogs]);
 
-    const submitOTRequest = useCallback((req: Omit<OTRequest, 'id' | 'status'>) => {
-        const newReq: OTRequest = {
-            ...req,
-            id: `ot-${Date.now()}`,
-            status: 'pending'
-        };
-        setOtRequests(prev => [...prev, newReq]);
-    }, []);
+  const checkOutAction = useCallback(async (lat: number, lng: number) => {
+    const log = await checkOutApi(lat, lng);
+    await refreshLogs();
+    return log;
+  }, [refreshLogs]);
 
-    const updateCompanySettings = useCallback((updates: Partial<CompanySettings>) => {
-        setCompanySettings(prev => ({ ...prev, ...updates }));
-    }, []);
+  // Keep a local updateLog for backward compatibility with admin UI
+  const updateLog = useCallback((id: string, updates: Partial<AttendanceLog>) => {
+    setLogs(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+  }, []);
 
-    return (
-        <AttendanceContext.Provider value={{
-            employees,
-            logs,
-            locations,
-            otRequests,
-            companySettings,
-            addLog,
-            updateLog,
-            addEmployee,
-            updateEmployee,
-            removeEmployee,
-            addLocation,
-            updateOTStatus,
-            submitOTRequest,
-            updateCompanySettings
-        }}>
-            {children}
-        </AttendanceContext.Provider>
-    );
+  const addEmployee = useCallback(async (emp: Omit<Employee, 'id'> & { password: string }) => {
+    await createEmployeeApi(emp);
+    await refreshAll();
+  }, [refreshAll]);
+
+  const updateEmployee = useCallback(async (id: string, updates: Partial<Employee> & { password?: string }) => {
+    await updateEmployeeApi(id, updates);
+    await refreshAll();
+  }, [refreshAll]);
+
+  const removeEmployee = useCallback(async (id: string) => {
+    await deleteEmployeeApi(id);
+    await refreshAll();
+  }, [refreshAll]);
+
+  const addLocation = useCallback(async (loc: Omit<WorkLocation, 'id'>) => {
+    await createLocationApi(loc);
+    await refreshAll();
+  }, [refreshAll]);
+
+  const updateLocation = useCallback(async (id: string, updates: Partial<WorkLocation>) => {
+    await updateLocationApi(id, updates);
+    await refreshAll();
+  }, [refreshAll]);
+
+  const removeLocation = useCallback(async (id: string) => {
+    await deleteLocationApi(id);
+    await refreshAll();
+  }, [refreshAll]);
+
+  const submitOTRequest = useCallback(async (req: Omit<OTRequest, 'id' | 'status'>) => {
+    await submitOTRequestApi({ date: req.date, startTime: req.startTime, endTime: req.endTime, reason: req.reason });
+    await refreshOT();
+  }, [refreshOT]);
+
+  const updateOTStatus = useCallback(async (id: string, status: OTRequest['status']) => {
+    if (status === 'pending') return;
+    await updateOTStatusApi(id, status);
+    await refreshOT();
+  }, [refreshOT]);
+
+  const updateCompanySettingsAction = useCallback(async (settings: Partial<CompanySettings>) => {
+    const updated = await updateSettingsApi(settings);
+    setCompanySettings(updated);
+  }, []);
+
+  return (
+    <AttendanceContext.Provider value={{
+      employees, logs, locations, otRequests, companySettings, loading, error,
+      refreshAll,
+      addLog, checkOut: checkOutAction, updateLog,
+      addEmployee, updateEmployee, removeEmployee,
+      addLocation, updateLocation, removeLocation,
+      submitOTRequest, updateOTStatus,
+      updateCompanySettings: updateCompanySettingsAction,
+    }}>
+      {children}
+    </AttendanceContext.Provider>
+  );
 }
 
 export function useAttendance() {
-    const context = useContext(AttendanceContext);
-    if (context === undefined) {
-        throw new Error('useAttendance must be used within an AttendanceProvider');
-    }
-    return context;
+  const ctx = useContext(AttendanceContext);
+  if (!ctx) throw new Error('useAttendance must be used within AttendanceProvider');
+  return ctx;
 }

@@ -4,6 +4,7 @@ export interface User {
     name: string;
     role: 'super_admin' | 'admin' | 'technician';
     accessibleMenus?: string[];
+    employeeId?: string;
 }
 
 export interface AuthContextType {
@@ -11,6 +12,7 @@ export interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (username: string) => Promise<void>;
+    loginWithCredentials: (email: string, password: string) => Promise<void>;
     logout: () => void;
     updateUserPermissions?: (userId: string, menus: string[]) => void;
     getAllAdmins?: () => User[];

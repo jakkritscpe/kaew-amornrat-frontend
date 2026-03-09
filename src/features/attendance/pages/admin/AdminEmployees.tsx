@@ -120,7 +120,7 @@ export function AdminEmployees() {
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [form, setForm] = useState({
-        name: '', nickname: '', email: '', department: '', position: '',
+        name: '', nickname: '', email: '', password: '', department: '', position: '',
         shiftStartTime: '09:00', shiftEndTime: '18:00',
         locationId: '' as string,
         baseWage: '' as string | number,
@@ -224,7 +224,7 @@ export function AdminEmployees() {
         setIsEditing(false);
         setEditingId(null);
         setForm({
-            name: '', nickname: '', email: '', department: '', position: '',
+            name: '', nickname: '', email: '', password: '', department: '', position: '',
             shiftStartTime: '09:00', shiftEndTime: '18:00',
             locationId: '', baseWage: '',
             otUseDefault: true,
@@ -239,7 +239,7 @@ export function AdminEmployees() {
         const emp = employees.find(e => e.id === id);
         if (!emp) return;
         setForm({
-            name: emp.name, nickname: emp.nickname || '', email: emp.email || '',
+            name: emp.name, nickname: emp.nickname || '', email: emp.email || '', password: '',
             department: emp.department, position: emp.position,
             shiftStartTime: emp.shiftStartTime || '09:00', shiftEndTime: emp.shiftEndTime || '18:00',
             locationId: emp.locationId || '',
@@ -261,7 +261,7 @@ export function AdminEmployees() {
         setAvatarMode('idle');
         setCameraError(null);
         setForm({
-            name: '', nickname: '', email: '', department: '', position: '',
+            name: '', nickname: '', email: '', password: '', department: '', position: '',
             shiftStartTime: '09:00', shiftEndTime: '18:00',
             locationId: '', baseWage: '',
             otUseDefault: true,
@@ -335,16 +335,14 @@ export function AdminEmployees() {
             avatarUrl: avatarPreview ?? undefined,
             locationId: form.locationId || undefined,
             baseWage: form.baseWage ? Number(form.baseWage) : undefined,
-            otRateConfig: {
-                useDefault: form.otUseDefault,
-                type: form.otUseDefault ? companySettings.defaultOtRateType : form.otType,
-                value: form.otUseDefault ? companySettings.defaultOtRateValue : (Number(form.otValue) || 0),
-            },
+            otRateUseDefault: form.otUseDefault,
+            otRateType: form.otUseDefault ? companySettings.defaultOtRateType : form.otType,
+            otRateValue: form.otUseDefault ? companySettings.defaultOtRateValue : (Number(form.otValue) || 0),
         };
         if (isEditing && editingId) {
-            updateEmployee(editingId, payload);
+            updateEmployee(editingId, form.password ? { ...payload, password: form.password } : payload);
         } else {
-            addEmployee({ ...payload, role: 'employee' });
+            addEmployee({ ...payload, role: 'employee', password: form.password || 'password123' });
         }
         closeFormModal();
     };
@@ -737,6 +735,14 @@ export function AdminEmployees() {
                                                     อีเมล <span className="text-red-500">*</span>
                                                 </label>
                                                 <Input id="emp-email" name="email" type="email" inputMode="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" required autoComplete="email" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="emp-password" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                                    รหัสผ่าน {!isEditing && <span className="text-red-500">*</span>}
+                                                    {isEditing && <span className="text-xs text-gray-400 ml-1">(เว้นว่างหากไม่ต้องการเปลี่ยน)</span>}
+                                                </label>
+                                                <Input id="emp-password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="อย่างน้อย 6 ตัวอักษร" required={!isEditing} minLength={6} autoComplete="new-password" className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
                                             </div>
 
                                             {/* Department + Position */}

@@ -14,7 +14,12 @@ export interface Employee {
     shiftEndTime: string;   // e.g. "18:00"
     avatarUrl?: string; // Additional for UI
     locationId?: string; // Optional: linked work location zone
-    baseWage?: number;
+    baseWage?: number | string;
+    // Flat fields from backend API
+    otRateUseDefault?: boolean;
+    otRateType?: 'multiplier' | 'fixed';
+    otRateValue?: number;
+    // Legacy nested config for backward compatibility with admin UI
     otRateConfig?: {
         useDefault: boolean;
         type: 'multiplier' | 'fixed';

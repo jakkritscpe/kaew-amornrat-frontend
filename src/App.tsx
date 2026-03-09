@@ -27,6 +27,7 @@ import { EmployeeMap } from './features/attendance/pages/employee/EmployeeMap';
 import { EmployeeHistory } from './features/attendance/pages/employee/EmployeeHistory';
 import { EmployeeOTRequest } from './features/attendance/pages/employee/EmployeeOTRequest';
 import { QRCheckInPage } from './features/attendance/pages/public/QRCheckInPage';
+import { EmployeeLoginPage } from './features/auth/pages/EmployeeLoginPage';
 
 function App() {
   return (
@@ -58,6 +59,9 @@ function App() {
                   <Route path="attendance/reports" element={<AdminReports />} />
                 </Route>
               </Route>
+
+              {/* Employee Login */}
+              <Route path="/employee/login" element={<EmployeeLoginPage />} />
 
               {/* Employee App Routes */}
               <Route path="/employee" element={<ProtectedRoute />}>

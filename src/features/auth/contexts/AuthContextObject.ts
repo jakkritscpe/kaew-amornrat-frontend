@@ -6,6 +6,7 @@ export const defaultContext: AuthContextType = {
     isAuthenticated: false,
     isLoading: true,
     login: async () => { },
+    loginWithCredentials: async () => { },
     logout: () => { },
 };
 

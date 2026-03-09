@@ -1,8 +1,21 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Clock, Map, History, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function EmployeeLayout() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('attendance_token');
+        if (!token) {
+            navigate('/employee/login', { replace: true });
+        }
+    }, [navigate]);
+
+    const employeeRaw = localStorage.getItem('attendance_employee');
+    const employee = employeeRaw ? JSON.parse(employeeRaw) : null;
+
     const navItems = [
         { to: '/employee/attendance/today', icon: Clock, label: 'วันนี้' },
         { to: '/employee/attendance/map', icon: Map, label: 'แผนที่' },
@@ -15,7 +28,9 @@ export function EmployeeLayout() {
             {/* Header */}
             <header className="bg-blue-600 text-white px-4 py-4 shadow-md sticky top-0 z-20">
                 <h1 className="text-xl font-bold">ระบบลงเวลาทำงาน</h1>
-                <p className="text-blue-100 text-sm">ยินดีต้อนรับ, สมชาย พนักงาน</p>
+                <p className="text-blue-100 text-sm">
+                    {employee ? `ยินดีต้อนรับ, ${employee.name}` : 'ยินดีต้อนรับ'}
+                </p>
             </header>
 
             {/* Main Content Area */}

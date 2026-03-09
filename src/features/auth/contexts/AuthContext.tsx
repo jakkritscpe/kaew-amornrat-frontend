@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
 import { AuthContext } from './AuthContextObject';
+import { loginApi } from '../../../lib/api/auth-api';
+import { setToken, clearToken } from '../../../lib/api-client';
 
 // Mock database of users
 const INITIAL_USERS: User[] = [
@@ -82,9 +84,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const loginWithCredentials = async (email: string, password: string) => {
+        setIsLoading(true);
+        try {
+            const result = await loginApi(email, password);
+            setToken(result.token);
+            const user: User = {
+                id: result.user.id,
+                username: result.user.email,
+                name: result.user.name,
+                role: result.user.role === 'admin' ? 'admin' : 'technician',
+                employeeId: result.user.id,
+            };
+            setUser(user);
+            localStorage.setItem('repairhub_user', JSON.stringify(user));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const logout = () => {
         setUser(null);
+        clearToken();
         localStorage.removeItem('repairhub_user');
+        localStorage.removeItem('attendance_employee');
     };
 
     const updateUserPermissions = (userId: string, targetMenus: string[]) => {
@@ -114,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         login,
+        loginWithCredentials,
         logout,
         updateUserPermissions,
         getAllAdmins
