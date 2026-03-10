@@ -1,17 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { Bell, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
+import { NotificationBell } from '../features/attendance/components/NotificationBell';
+import { TOKEN_KEY } from '../lib/api-client';
 
 interface HeaderProps {
-  onNewRequest: () => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   title: string;
   onMenuClick: () => void;
 }
 
 export default function Header({ title, onMenuClick }: HeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
+  const token = localStorage.getItem(TOKEN_KEY);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -94,13 +94,7 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
         )} */}
 
         {/* Notification */}
-        <button
-          className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400"
-          aria-label="การแจ้งเตือน"
-        >
-          <Bell className="w-5 h-5 text-gray-600" aria-hidden="true" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" aria-hidden="true" />
-        </button>
+        <NotificationBell token={token} />
 
         {/* New Request Button */}
         {/* <button

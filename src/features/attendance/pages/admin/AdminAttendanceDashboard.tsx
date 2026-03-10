@@ -1,15 +1,122 @@
+import { useState, useRef, useEffect } from 'react';
 import { useAttendance } from '../../contexts/AttendanceContext';
-import { Users, Clock, AlertTriangle, FileCheck2 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Users, Clock, AlertTriangle, FileCheck2, CalendarX, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { cn, formatTime } from '@/lib/utils';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const STATUS_LABEL: Record<string, string> = {
     present: 'มาทำงาน',
-    late: 'สาย',
+    late: 'มาสาย',
     absent: 'ขาดงาน',
 };
 
+// ═══════════════════════════════════════════
+// ── STAT CARD (matches Dashboard StatsGrid)
+// ═══════════════════════════════════════════
+interface StatCardProps {
+    title: string;
+    value: number;
+    suffix?: string;
+    icon: React.ElementType;
+    color: string;
+    delay: number;
+    href?: string;
+}
+
+function StatCard({ title, value, suffix = 'คน', icon: Icon, color, delay, href }: StatCardProps) {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const [displayValue, setDisplayValue] = useState(0);
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            gsap.fromTo(cardRef.current,
+                { rotateX: 90, opacity: 0, transformOrigin: 'center bottom' },
+                { rotateX: 0, opacity: 1, duration: 0.35, delay, ease: 'power3.out' }
+            );
+            const counter = { val: 0 };
+            gsap.to(counter, {
+                val: value,
+                duration: 0.6,
+                delay: delay + 0.1,
+                ease: 'expo.out',
+                onUpdate: () => setDisplayValue(Math.round(counter.val))
+            });
+            gsap.fromTo(cardRef.current?.querySelector('.stat-icon'),
+                { rotate: -180, scale: 0 },
+                { rotate: 0, scale: 1, duration: 0.35, delay: delay + 0.15, ease: 'back.out(1.7)' }
+            );
+        });
+        return () => ctx.revert();
+    }, [value, delay]);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const card = e.currentTarget;
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        gsap.to(card, {
+            rotateX: (y - rect.height / 2) / 10,
+            rotateY: (rect.width / 2 - x) / 10,
+            transformPerspective: 1000,
+            duration: 0.3,
+            ease: 'power2.out'
+        });
+    };
+    const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+        gsap.to(e.currentTarget, { rotateX: 0, rotateY: 0, duration: 0.5, ease: 'power2.out' });
+    };
+
+    const CardContent = (
+        <div
+            ref={cardRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className={cn(
+                'relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-full',
+                'hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300',
+                'cursor-pointer overflow-hidden group',
+                href && 'hover:border-[#2075f8]'
+            )}
+            style={{ transformStyle: 'preserve-3d' }}
+        >
+            {/* Glossy sheen effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+            <div className="flex items-start justify-between relative z-10 h-full">
+                <div className="flex flex-col h-full justify-between">
+                    <div>
+                        <p className="text-sm text-[#6f6f6f] mb-1">{title}</p>
+                        <span className="text-3xl font-bold text-[#1d1d1d] tabular-nums leading-none">
+                            {displayValue.toLocaleString()}
+                        </span>
+                        <p className="text-sm text-gray-400 mt-2">{suffix}</p>
+                    </div>
+                    {href && (
+                        <div className="mt-4 flex items-center text-sm font-medium text-[#2075f8] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                            ตรวจสอบ <ArrowRight className="w-4 h-4 ml-1" />
+                        </div>
+                    )}
+                </div>
+                <div className={cn('stat-icon w-12 h-12 rounded-xl flex items-center justify-center shrink-0', color)}>
+                    <Icon className="w-6 h-6 text-white" />
+                </div>
+            </div>
+        </div>
+    );
+
+    if (href) {
+        return <Link to={href} className="block outline-none">{CardContent}</Link>;
+    }
+    return CardContent;
+}
+
 export function AdminAttendanceDashboard() {
     const { employees, logs, otRequests } = useAttendance();
+    const containerRef = useRef<HTMLDivElement>(null);
     const todayDate = new Date().toISOString().split('T')[0];
 
     const todayLogs = logs.filter(l => l.date === todayDate);
@@ -24,100 +131,135 @@ export function AdminAttendanceDashboard() {
     const [y, m, d] = todayDate.split('-');
     const displayDate = `${parseInt(d)} / ${parseInt(m)} / ${parseInt(y) + 543}`;
 
+    // GSAP section entrance (same as Dashboard)
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            gsap.fromTo('.dashboard-section',
+                { y: 20, opacity: 0 },
+                {
+                    y: 0, opacity: 1, duration: 0.3, stagger: 0.07, ease: 'power3.out',
+                    scrollTrigger: { trigger: containerRef.current, start: 'top 80%', toggleActions: 'play none none none' },
+                }
+            );
+
+            gsap.fromTo('.log-row',
+                { x: -20, opacity: 0 },
+                { x: 0, opacity: 1, duration: 0.2, stagger: 0.03, ease: 'power2.out', delay: 0.25 }
+            );
+        });
+        return () => ctx.revert();
+    }, [todayLogs.length]);
+
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-[calc(100vh-4rem)]">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">แดชบอร์ดการลงเวลา</h1>
-                <p className="text-sm text-slate-500 mt-1">สรุปภาพรวมวันนี้: {displayDate}</p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Card className="p-6 border-l-4 border-l-emerald-500 shadow-sm">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-xl bg-emerald-50">
-                            <Users className="w-6 h-6 text-emerald-600" />
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm font-medium text-slate-500">มาทำงาน</p>
-                            <h3 className="text-2xl font-bold text-slate-900">{presentCount}</h3>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card className="p-6 border-l-4 border-l-orange-500 shadow-sm">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-xl bg-orange-50">
-                            <Clock className="w-6 h-6 text-orange-600" />
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm font-medium text-slate-500">มาสาย</p>
-                            <h3 className="text-2xl font-bold text-slate-900">{lateCount}</h3>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card className="p-6 border-l-4 border-l-red-500 shadow-sm">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-xl bg-red-50">
-                            <AlertTriangle className="w-6 h-6 text-red-600" />
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm font-medium text-slate-500">ขาดงาน</p>
-                            <h3 className="text-2xl font-bold text-slate-900">{absentCount}</h3>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card className="p-6 border-l-4 border-l-blue-500 shadow-sm hover:bg-blue-50/50 transition-colors cursor-pointer">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-xl bg-blue-50">
-                            <FileCheck2 className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm font-medium text-slate-500">รออนุมัติ OT</p>
-                            <h3 className="text-2xl font-bold text-slate-900">{pendingOTs}</h3>
-                        </div>
-                    </div>
-                </Card>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                    <h2 className="font-semibold text-slate-800">การเช็คอินล่าสุดวันนี้</h2>
+        <div ref={containerRef} className="space-y-6">
+            {/* ── Page header ── */}
+            <div className="dashboard-section flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">แดชบอร์ดการลงเวลา</h1>
+                    <p className="text-sm text-[#6f6f6f] mt-1">สรุปภาพรวมการเข้างานประจำวัน</p>
                 </div>
-                <div className="p-0 overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50/80 text-slate-500 font-medium">
+                <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-2 w-max">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-sm font-semibold text-[#1d1d1d]">{displayDate}</span>
+                </div>
+            </div>
+
+            {/* ── Stats grid (Match Dashboard) ── */}
+            <div className="dashboard-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
+                <StatCard
+                    title="มาทำงาน" value={presentCount} icon={Users}
+                    color="bg-gradient-to-br from-emerald-500 to-teal-500" delay={0.05}
+                />
+                <StatCard
+                    title="มาสาย" value={lateCount} icon={Clock}
+                    color="bg-gradient-to-br from-amber-500 to-orange-500" delay={0.1}
+                />
+                <StatCard
+                    title="ขาดงาน" value={absentCount} icon={AlertTriangle}
+                    color="bg-gradient-to-br from-red-500 to-rose-500" delay={0.15}
+                />
+                <StatCard
+                    title="รออนุมัติ OT" value={pendingOTs} suffix="รายการ" icon={FileCheck2}
+                    color="bg-gradient-to-br from-[#2075f8] to-[#1a64d4]" delay={0.2}
+                    href="/admin/attendance/ot-approvals"
+                />
+            </div>
+
+            {/* ── Recent Check-ins Table (Matches RequestsTable) ── */}
+            <div className="dashboard-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
+                    <div>
+                        <h2 className="text-lg font-semibold text-[#1d1d1d]">การเช็คอินล่าสุดวันนี้</h2>
+                        <p className="text-sm text-[#6f6f6f] mt-0.5">รายการลงเวลาเข้า-ออกงานประจำวัน</p>
+                    </div>
+                    <Link to="/admin/attendance/logs" className="hidden sm:flex items-center text-sm font-medium text-[#2075f8] hover:text-[#1a64d4] transition-colors group">
+                        ดูประวัติทั้งหมด <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left whitespace-nowrap">
+                        <thead className="bg-gray-50/50 text-[#6f6f6f] text-xs uppercase tracking-wider font-semibold border-b border-gray-200">
                             <tr>
-                                <th className="px-6 py-3">พนักงาน</th>
-                                <th className="px-6 py-3">แผนก</th>
-                                <th className="px-6 py-3">เวลาเข้า</th>
-                                <th className="px-6 py-3">เวลาออก</th>
-                                <th className="px-6 py-3">สถานะ</th>
+                                <th className="px-6 py-4">พนักงาน</th>
+                                <th className="px-6 py-4 hidden sm:table-cell">แผนก</th>
+                                <th className="px-6 py-4">เวลาเข้า</th>
+                                <th className="px-6 py-4">เวลาออก</th>
+                                <th className="px-6 py-4">สถานะ</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 bg-white">
+                        <tbody className="divide-y divide-gray-100 bg-white">
                             {todayLogs.length === 0 ? (
-                                <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">ยังไม่มีข้อมูลการลงเวลาวันนี้</td></tr>
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-20 text-center">
+                                        <div className="flex flex-col items-center justify-center">
+                                            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
+                                                <CalendarX className="w-8 h-8 text-gray-300" />
+                                            </div>
+                                            <p className="text-[#1d1d1d] font-semibold text-lg mb-1">ยังไม่มีข้อมูลการลงเวลาวันนี้</p>
+                                            <p className="text-[#6f6f6f] text-sm">เมื่อพนักงานเช็คอิน ข้อมูลจะแสดงที่นี่โดยอัตโนมัติ</p>
+                                        </div>
+                                    </td>
+                                </tr>
                             ) : (
                                 todayLogs.map(log => {
                                     const emp = employees.find(e => e.id === log.employeeId);
                                     return (
-                                        <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-4 font-medium text-slate-900 flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs">
-                                                    {emp?.name.charAt(0) || '?'}
-                                                </div>
-                                                {emp?.name || 'ไม่ทราบชื่อ'}{emp?.nickname ? <span className="font-normal text-slate-500 ml-1">({emp.nickname})</span> : null}
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-600">{emp?.department}</td>
-                                            <td className="px-6 py-4 text-slate-600 font-medium">{log.checkInTime}</td>
-                                            <td className="px-6 py-4 text-slate-600 font-medium">{log.checkOutTime || '--:--'}</td>
+                                        <tr key={log.id} className="log-row hover:bg-[#e8f1fe]/30 transition-colors duration-300 group">
                                             <td className="px-6 py-4">
-                                                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${log.status === 'present' ? 'bg-emerald-100 text-emerald-700' :
-                                                    log.status === 'late' ? 'bg-orange-100 text-orange-700' :
-                                                        'bg-red-100 text-red-700'
-                                                    }`}>
+                                                <div className="flex items-center gap-4">
+                                                    {emp?.avatarUrl ? (
+                                                        <img
+                                                            src={emp.avatarUrl}
+                                                            alt={emp.name}
+                                                            className="w-10 h-10 rounded-full object-cover shrink-0 bg-blue-50 ring-2 ring-white shadow-sm"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0 ring-2 ring-white shadow-sm">
+                                                            {emp?.name.charAt(0) || '?'}
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <p className="font-semibold text-[#1d1d1d] group-hover:text-[#2075f8] transition-colors">{emp?.name || 'ไม่ทราบชื่อ'}</p>
+                                                        {emp?.nickname && <p className="text-xs text-[#6f6f6f]">({emp.nickname})</p>}
+                                                        <p className="text-xs text-[#6f6f6f] sm:hidden mt-0.5">{emp?.department}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-[#6f6f6f] hidden sm:table-cell">{emp?.department}</td>
+                                            <td className="px-6 py-4">
+                                                <span className="font-semibold text-[#1d1d1d] tabular-nums">{formatTime(log.checkInTime)}</span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="font-medium text-[#6f6f6f] tabular-nums">{formatTime(log.checkOutTime)}</span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={cn(
+                                                    'inline-flex px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase',
+                                                    log.status === 'present' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20' :
+                                                        log.status === 'late' ? 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20' :
+                                                            'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10'
+                                                )}>
                                                     {STATUS_LABEL[log.status] || log.status}
                                                 </span>
                                             </td>
@@ -128,6 +270,15 @@ export function AdminAttendanceDashboard() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Mobile view history button */}
+                {todayLogs.length > 0 && (
+                    <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 sm:hidden">
+                        <Link to="/admin/attendance/logs" className="flex justify-center items-center w-full text-sm font-medium text-[#2075f8] bg-white border border-blue-100 hover:border-blue-200 hover:bg-blue-50/50 rounded-xl py-3 shadow-sm transition-all">
+                            ดูประวัติทั้งหมด <ArrowRight className="w-4 h-4 ml-1" />
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );

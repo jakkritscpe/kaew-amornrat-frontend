@@ -38,6 +38,7 @@ export function MainLayout() {
         if (path.includes('/attendance/employees')) return 'จัดการพนักงาน';
         if (path.includes('/attendance/locations')) return 'สถานที่ตั้ง (GPS)';
         if (path.includes('/attendance/ot-approvals')) return 'อนุมัติ OT';
+        if (path.includes('/attendance/ot-calculator')) return 'คำนวณค่าล่วงเวลา';
         if (path.includes('/attendance/reports')) return 'รายงานการทำงาน';
         return 'แดชบอร์ด';
     };
@@ -60,12 +61,6 @@ export function MainLayout() {
                 isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[260px]'
             )}>
                 <Header
-                    onNewRequest={() => {
-                        setEditRequest(null);
-                        setIsNewRequestModalOpen(true);
-                    }}
-                    searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
                     title={getPageTitle()}
                     onMenuClick={() => setIsMobileSidebarOpen(true)}
                 />

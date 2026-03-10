@@ -1,19 +1,37 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAttendance } from '../../contexts/AttendanceContext';
-import { findMatchingLocation } from '../../utils/geo';
 import { MapPin, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+
+interface EmployeeInfo {
+  id: string;
+  name: string;
+  position: string;
+  avatarUrl?: string;
+}
+
 export function QRCheckInPage() {
     const { employeeId } = useParams<{ employeeId: string }>();
-    const { employees, locations, logs, addLog, updateLog } = useAttendance();
     const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState(false);
     const [geoError, setGeoError] = useState<string | null>(null);
     const [currentLoc, setCurrentLoc] = useState<{ lat: number; lng: number } | null>(null);
+    const [employee, setEmployee] = useState<EmployeeInfo | null>(null);
     const [result, setResult] = useState<{ success: boolean; type: 'in' | 'out'; msg: string } | null>(null);
+    const [fetchError, setFetchError] = useState<string | null>(null);
 
-    const employee = employees.find(e => e.id === employeeId);
+    useEffect(() => {
+        if (!employeeId) return;
+        fetch(`${API_URL}/api/qr-checkin/${employeeId}`)
+            .then(r => r.json())
+            .then(json => {
+                if (json.success) setEmployee(json.data);
+                else setFetchError('ไม่พบข้อมูลพนักงาน');
+            })
+            .catch(() => setFetchError('ไม่สามารถโหลดข้อมูลพนักงานได้'));
+    }, [employeeId]);
 
     useEffect(() => {
         if (!navigator.geolocation) {
@@ -24,87 +42,51 @@ export function QRCheckInPage() {
 
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                setCurrentLoc({
-                    lat: pos.coords.latitude,
-                    lng: pos.coords.longitude
-                });
+                setCurrentLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
                 setLoading(false);
             },
             () => {
                 setGeoError('ไม่สามารถเข้าถึงตำแหน่งได้ กรุณาเปิดการตั้งค่า GPS ให้เบราว์เซอร์');
                 setLoading(false);
             },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }, []);
 
-    if (!employee) {
+    if (fetchError) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center bg-gray-50">
                 <XCircle className="w-16 h-16 text-red-500 mb-4" />
                 <h2 className="text-xl font-bold text-gray-900">ไม่พบข้อมูลพนักงาน</h2>
-                <p className="text-gray-500 mt-2">QR Code อาจไม่ถูกต้อง หรือพนักงานถูกลบออกจากระบบแล้ว</p>
+                <p className="text-gray-500 mt-2">{fetchError}</p>
             </div>
         );
     }
 
-    const handleCheckIn = () => {
-        if (!currentLoc) return;
-
-        const matchedLocation = findMatchingLocation(currentLoc.lat, currentLoc.lng, locations);
-
-        if (!matchedLocation) {
-            setResult({
-                success: false,
-                type: 'in', // Doesn't matter
-                msg: 'คุณอยู่นอกพื้นที่ที่กำหนด (Geofence) ไม่สามารถลงเวลาได้'
+    const handleCheckIn = async () => {
+        if (!currentLoc || !employeeId) return;
+        setActionLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/api/qr-checkin/${employeeId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lat: currentLoc.lat, lng: currentLoc.lng }),
             });
-            return;
-        }
-
-        const todayDate = new Date().toISOString().split('T')[0];
-        const nowTime = new Date().toTimeString().slice(0, 5); // "HH:MM"
-
-        // Find today's log
-        const todayLog = logs.find(l => l.employeeId === employee.id && l.date === todayDate);
-
-        if (!todayLog) {
-            // Check IN
-            const shiftStart = parseInt(employee.shiftStartTime.split(':')[0], 10);
-            const nowHour = parseInt(nowTime.split(':')[0], 10);
-            const isLate = nowHour > shiftStart;
-
-            addLog({
-                employeeId: employee.id,
-                date: todayDate,
-                checkInTime: nowTime,
-                checkOutTime: null,
-                checkInLat: currentLoc.lat,
-                checkInLng: currentLoc.lng,
-                checkOutLat: null,
-                checkOutLng: null,
-                workHours: 0,
-                otHours: 0,
-                status: isLate ? 'late' : 'present',
-                locationId: matchedLocation.id
-            });
-            setResult({ success: true, type: 'in', msg: `บันทึกเวลาเข้างานเรียบร้อยเวลา ${nowTime}` });
-        } else if (todayLog && !todayLog.checkOutTime) {
-            // Check OUT
-            updateLog(todayLog.id, {
-                checkOutTime: nowTime,
-                checkOutLat: currentLoc.lat,
-                checkOutLng: currentLoc.lng,
-                // Calculate basic work hours mock
-                workHours: 8 // default
-            });
-            setResult({ success: true, type: 'out', msg: `บันทึกเวลาออกงานเรียบร้อยเวลา ${nowTime}` });
-        } else {
-            setResult({ success: false, type: 'out', msg: 'คุณลงเวลาออกงานแล้วสำหรับวันนี้' });
+            const json = await res.json();
+            if (json.success) {
+                const action = json.data?.action as 'check-in' | 'check-out';
+                setResult({
+                    success: true,
+                    type: action === 'check-in' ? 'in' : 'out',
+                    msg: json.message ?? 'บันทึกเวลาเรียบร้อย',
+                });
+            } else {
+                setResult({ success: false, type: 'in', msg: json.error ?? 'เกิดข้อผิดพลาด' });
+            }
+        } catch {
+            setResult({ success: false, type: 'in', msg: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้' });
+        } finally {
+            setActionLoading(false);
         }
     };
 
@@ -138,11 +120,25 @@ export function QRCheckInPage() {
                 ) : (
                     <div className="pt-2">
                         <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
-                            <span className="text-blue-600 font-bold text-2xl">{employee.name.charAt(0)}</span>
+                            {employee?.avatarUrl ? (
+                                <img src={employee.avatarUrl} alt={employee.name} className="w-20 h-20 rounded-full object-cover" />
+                            ) : (
+                                <span className="text-blue-600 font-bold text-2xl">
+                                    {employee ? employee.name.charAt(0) : '?'}
+                                </span>
+                            )}
                         </div>
 
-                        <h2 className="text-xl font-bold text-gray-900">{employee.name}</h2>
-                        <p className="text-gray-500 text-sm mb-6">{employee.department} • {employee.position}</p>
+                        {employee ? (
+                            <>
+                                <h2 className="text-xl font-bold text-gray-900">{employee.name}</h2>
+                                <p className="text-gray-500 text-sm mb-6">{employee.position}</p>
+                            </>
+                        ) : (
+                            <div className="mb-6">
+                                <Loader2 className="w-6 h-6 text-blue-500 animate-spin mx-auto" />
+                            </div>
+                        )}
 
                         {geoError ? (
                             <div className="bg-red-50 p-4 rounded-xl mb-6 border border-red-100">
@@ -163,12 +159,12 @@ export function QRCheckInPage() {
                         <Button
                             size="lg"
                             className="w-full text-lg py-6 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 rounded-full disabled:opacity-50"
-                            disabled={!!geoError}
+                            disabled={!!geoError || !employee || actionLoading}
                             onClick={handleCheckIn}
                         >
-                            {!logs.find(l => l.employeeId === employee.id && l.date === new Date().toISOString().split('T')[0])
-                                ? 'เช็คอิน เข้างาน'
-                                : 'เช็คเอาท์ เลิกงาน'}
+                            {actionLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : 'เช็คอิน / เช็คเอาท์'}
                         </Button>
 
                         <p className="text-xs text-gray-400 mt-6 font-medium tracking-wide">
