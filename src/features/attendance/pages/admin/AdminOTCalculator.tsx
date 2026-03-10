@@ -185,7 +185,8 @@ export function AdminOTCalculator() {
             const rVal = useDef ? companySettings.defaultOtRateValue : (emp.otRateConfig?.value || 0);
             let pay = 0;
             if (rType === 'multiplier') {
-                const h = (emp.baseWage || 0) > 0 ? (emp.baseWage || 0) / (wd * 8) : 0;
+                const wage = Number(emp.baseWage || 0);
+                const h = wage > 0 ? wage / (wd * 8) : 0;
                 pay = hrs * h * rVal;
             } else {
                 pay = hrs * rVal;

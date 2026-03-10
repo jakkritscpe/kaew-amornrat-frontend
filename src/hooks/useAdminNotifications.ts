@@ -33,7 +33,7 @@ export function useAdminNotifications(token: string | null) {
     ws.onmessage = (evt) => {
       if (evt.data === 'pong') return;
       try {
-        const event = JSON.parse(evt.data) as { type?: string } & NotificationEvent;
+        const event = JSON.parse(evt.data) as { type: string } & Partial<NotificationEvent>;
         if (event.type === 'auth_ok') {
           setConnected(true);
           retryRef.current = 0;

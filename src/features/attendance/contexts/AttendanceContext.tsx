@@ -3,7 +3,7 @@ import type { Employee, AttendanceLog, WorkLocation, OTRequest } from '../types'
 import { TOKEN_KEY } from '../../../lib/api-client';
 import { getEmployeesApi, createEmployeeApi, updateEmployeeApi, deleteEmployeeApi } from '../../../lib/api/employees-api';
 import { getLocationsApi, createLocationApi, updateLocationApi, deleteLocationApi } from '../../../lib/api/locations-api';
-import { getLogsApi, getTodayLogApi, checkInApi, checkOutApi } from '../../../lib/api/attendance-api';
+import { getLogsApi, checkInApi, checkOutApi } from '../../../lib/api/attendance-api';
 import { getOTRequestsApi, submitOTRequestApi, updateOTStatusApi } from '../../../lib/api/ot-api';
 import { getSettingsApi, updateSettingsApi } from '../../../lib/api/settings-api';
 
