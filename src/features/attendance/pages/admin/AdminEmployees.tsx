@@ -2,13 +2,15 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useAttendance } from '../../contexts/AttendanceContext';
 import { QRCodeSVG } from 'qrcode.react';
+import { regenerateQRApi } from '../../../../lib/api/auth-api';
+import { toast } from 'sonner';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
     Plus, QrCode, X, Search, FileDown, Clock,
     Building2, ImagePlus, Trash2, Camera, SwitchCamera,
     CheckCircle2, AlertCircle, XCircle, MinusCircle, Users, Pencil,
-    MapPin, DollarSign,
+    MapPin, DollarSign, Link2, Check, RefreshCw, AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -112,15 +114,18 @@ function StatCard({ title, value, icon: Icon, color, delay }: { title: string, v
 }
 
 export function AdminEmployees() {
-    const { employees, logs, locations, addEmployee, updateEmployee, removeEmployee, companySettings } = useAttendance();
+    const { employees, logs, locations, addEmployee, updateEmployee, removeEmployee, companySettings, refreshAll } = useAttendance();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showQRModal, setShowQRModal] = useState<string | null>(null);
+    const [confirmRegenerate, setConfirmRegenerate] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const selectedEmp = employees.find(e => e.id === showQRModal) ?? null;
     const [showFormModal, setShowFormModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [form, setForm] = useState({
-        name: '', nickname: '', email: '', department: '', position: '',
+        name: '', nickname: '', email: '', password: '', department: '', position: '',
         shiftStartTime: '09:00', shiftEndTime: '18:00',
         locationId: '' as string,
         baseWage: '' as string | number,
@@ -147,6 +152,7 @@ export function AdminEmployees() {
 
     const sectionRef = useRef<HTMLDivElement>(null);
     const qrRef = useRef<SVGSVGElement>(null);
+    const qrModalRef = useRef<HTMLDivElement>(null);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
@@ -224,7 +230,7 @@ export function AdminEmployees() {
         setIsEditing(false);
         setEditingId(null);
         setForm({
-            name: '', nickname: '', email: '', department: '', position: '',
+            name: '', nickname: '', email: '', password: '', department: '', position: '',
             shiftStartTime: '09:00', shiftEndTime: '18:00',
             locationId: '', baseWage: '',
             otUseDefault: true,
@@ -239,7 +245,7 @@ export function AdminEmployees() {
         const emp = employees.find(e => e.id === id);
         if (!emp) return;
         setForm({
-            name: emp.name, nickname: emp.nickname || '', email: emp.email || '',
+            name: emp.name, nickname: emp.nickname || '', email: emp.email || '', password: '',
             department: emp.department, position: emp.position,
             shiftStartTime: emp.shiftStartTime || '09:00', shiftEndTime: emp.shiftEndTime || '18:00',
             locationId: emp.locationId || '',
@@ -261,7 +267,7 @@ export function AdminEmployees() {
         setAvatarMode('idle');
         setCameraError(null);
         setForm({
-            name: '', nickname: '', email: '', department: '', position: '',
+            name: '', nickname: '', email: '', password: '', department: '', position: '',
             shiftStartTime: '09:00', shiftEndTime: '18:00',
             locationId: '', baseWage: '',
             otUseDefault: true,
@@ -335,18 +341,22 @@ export function AdminEmployees() {
             avatarUrl: avatarPreview ?? undefined,
             locationId: form.locationId || undefined,
             baseWage: form.baseWage ? Number(form.baseWage) : undefined,
-            otRateConfig: {
-                useDefault: form.otUseDefault,
-                type: form.otUseDefault ? companySettings.defaultOtRateType : form.otType,
-                value: form.otUseDefault ? companySettings.defaultOtRateValue : (Number(form.otValue) || 0),
-            },
+            otRateUseDefault: form.otUseDefault,
+            otRateType: form.otUseDefault ? companySettings.defaultOtRateType : form.otType,
+            otRateValue: form.otUseDefault ? companySettings.defaultOtRateValue : (Number(form.otValue) || 0),
         };
         if (isEditing && editingId) {
-            updateEmployee(editingId, payload);
+            updateEmployee(editingId, form.password ? { ...payload, password: form.password } : payload);
         } else {
-            addEmployee({ ...payload, role: 'employee' });
+            addEmployee({ ...payload, role: 'employee', password: form.password || 'password123' });
         }
         closeFormModal();
+    };
+
+    const closeQRModal = () => {
+        setShowQRModal(null);
+        setConfirmRegenerate(false);
+        setCopied(false);
     };
 
     const downloadQR = () => {
@@ -358,14 +368,65 @@ export function AdminEmployees() {
             canvas.width = img.width; canvas.height = img.height;
             canvas.getContext('2d')?.drawImage(img, 0, 0);
             const a = document.createElement('a');
-            a.download = `qr-${showQRModal}.png`;
+            a.download = `qr-${selectedEmp?.name ?? showQRModal}.png`;
             a.href = canvas.toDataURL('image/png');
             a.click();
         };
         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+        toast.success('บันทึก QR สำเร็จ');
     };
 
-    const selectedEmp = employees.find(e => e.id === showQRModal);
+    const copyQRLink = () => {
+        const url = selectedEmp?.qrToken
+            ? `${window.location.origin}/employee/qr-login/${selectedEmp.qrToken}`
+            : '';
+        if (!url) return;
+        navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleRegenerateQR = async (employeeId: string) => {
+        try {
+            await regenerateQRApi(employeeId);
+            await refreshAll();
+            setConfirmRegenerate(false);
+            toast.success('ออก QR ใหม่สำเร็จ — QR เดิมถูกยกเลิกแล้ว');
+        } catch {
+            toast.error('ไม่สามารถออก QR ใหม่ได้ กรุณาลองใหม่');
+        }
+    };
+
+    useEffect(() => {
+        if (!showQRModal) return;
+
+        // Lock body scroll (prevents background scroll on iOS)
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        // Enter animation
+        if (qrModalRef.current) {
+            const isMobile = window.innerWidth < 640;
+            if (isMobile) {
+                gsap.fromTo(qrModalRef.current,
+                    { y: 80, opacity: 0 },
+                    { y: 0, opacity: 1, duration: 0.32, ease: 'power3.out' }
+                );
+            } else {
+                gsap.fromTo(qrModalRef.current,
+                    { scale: 0.95, opacity: 0, y: 12 },
+                    { scale: 1, opacity: 1, y: 0, duration: 0.22, ease: 'power3.out' }
+                );
+            }
+        }
+
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeQRModal(); };
+        window.addEventListener('keydown', onKey);
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.overflow = prev;
+        };
+    }, [showQRModal]);
 
     return (
         <div className="space-y-6">
@@ -535,29 +596,152 @@ export function AdminEmployees() {
                 <>
                     {/* ════ QR Modal ════ */}
                     {showQRModal ? (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
-                            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden relative">
-                                <button onClick={() => setShowQRModal(null)} className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors z-10">
-                                    <X className="w-5 h-5" />
-                                </button>
-                                <div className="p-8 pb-6 flex flex-col items-center text-center">
-                                    <div className="w-14 h-14 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center mb-4">
-                                        <QrCode className="w-7 h-7 text-[#2075f8]" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-[#1d1d1d] mb-1">QR สำหรับลงเวลา</h3>
-                                    {selectedEmp ? <p className="text-sm text-[#2075f8] font-semibold">{selectedEmp.name}</p> : null}
-                                    <p className="text-sm text-[#6f6f6f] mt-1 mb-6">ผู้สแกนสามารถใช้บันทึกเวลาเข้า-ออกงานได้</p>
+                        <div
+                            role="dialog"
+                            aria-modal="true"
+                            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-gray-900/70 backdrop-blur-sm p-0 sm:p-4"
+                            onClick={closeQRModal}
+                        >
+                            <div
+                                ref={qrModalRef}
+                                className="bg-white w-full rounded-t-3xl max-h-[90svh] overflow-y-auto overscroll-contain will-change-transform shadow-2xl sm:w-auto sm:min-w-[360px] sm:max-w-sm sm:rounded-3xl sm:max-h-[calc(100svh-2rem)]"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                {/* Drag handle – mobile only */}
+                                <div className="flex justify-center pt-2.5 pb-1 sm:hidden">
+                                    <div className="w-9 h-1 rounded-full bg-gray-300" />
+                                </div>
+                                {/* ── Branded header with employee identity ── */}
+                                <div className="relative bg-gradient-to-br from-[#2075f8] to-[#1250c4] px-6 pt-5 pb-10">
+                                    <button
+                                        onClick={closeQRModal}
+                                        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 flex items-center justify-center text-white transition-colors"
+                                        aria-label="ปิด"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
 
-                                    <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm mb-6 w-full flex justify-center aspect-square items-center group relative">
-                                        <QRCodeSVG value={`${window.location.origin}/qr-checkin/${showQRModal}`} size={200} level="H" includeMargin ref={qrRef} />
+                                    <p className="text-[11px] font-semibold text-blue-200 uppercase tracking-widest mb-3">QR ลงเวลาของ</p>
+
+                                    <div className="flex items-center gap-4">
+                                        {selectedEmp?.avatarUrl ? (
+                                            <img
+                                                src={selectedEmp.avatarUrl}
+                                                alt={selectedEmp.name}
+                                                className="w-14 h-14 rounded-2xl object-cover ring-4 ring-white/25 shrink-0"
+                                            />
+                                        ) : (
+                                            <div className="w-14 h-14 rounded-2xl bg-white/20 ring-4 ring-white/20 flex items-center justify-center text-white text-2xl font-bold shrink-0 select-none">
+                                                {selectedEmp?.name.charAt(0) ?? '?'}
+                                            </div>
+                                        )}
+                                        <div className="min-w-0">
+                                            <h3 className="text-lg font-bold text-white leading-tight truncate">
+                                                {selectedEmp?.name}
+                                            </h3>
+                                            <p className="text-sm text-blue-200 truncate mt-0.5">
+                                                {selectedEmp?.position}
+                                                {selectedEmp?.department && (
+                                                    <span className="text-blue-300"> · {selectedEmp.department}</span>
+                                                )}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ── QR card — lifts over header ── */}
+                                <div className="px-5 -mt-6">
+                                    <div className="bg-white p-5 flex flex-col items-center gap-3">
+                                        {/* QR with corner-bracket frame */}
+                                        <div className="relative p-3">
+                                            <span className="absolute top-0 left-0 w-5 h-5 border-t-[3px] border-l-[3px] border-[#2075f8] rounded-tl-lg" />
+                                            <span className="absolute top-0 right-0 w-5 h-5 border-t-[3px] border-r-[3px] border-[#2075f8] rounded-tr-lg" />
+                                            <span className="absolute bottom-0 left-0 w-5 h-5 border-b-[3px] border-l-[3px] border-[#2075f8] rounded-bl-lg" />
+                                            <span className="absolute bottom-0 right-0 w-5 h-5 border-b-[3px] border-r-[3px] border-[#2075f8] rounded-br-lg" />
+                                            <QRCodeSVG
+                                                value={
+                                                    selectedEmp?.qrToken
+                                                        ? `${window.location.origin}/employee/qr-login/${selectedEmp.qrToken}`
+                                                        : `${window.location.origin}/employee/qr-login/`
+                                                }
+                                                size={192}
+                                                level="H"
+                                                includeMargin
+                                                ref={qrRef}
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-xs text-[#6f6f6f]">
+                                            <QrCode className="w-3.5 h-3.5 text-[#2075f8]" />
+                                            สแกนเพื่อเข้าสู่ระบบลงเวลา
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ── Actions ── */}
+                                <div className="px-5 pt-4 space-y-3" style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}>
+                                    {/* Primary: Download + Copy */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Button
+                                            onClick={downloadQR}
+                                            className="bg-[#1d1d1d] hover:bg-gray-800 active:bg-gray-900 text-white rounded-xl h-12 sm:h-11 text-sm font-semibold gap-2 touch-manipulation"
+                                        >
+                                            <FileDown className="w-4 h-4" />
+                                            บันทึก QR
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            onClick={copyQRLink}
+                                            className={cn(
+                                                'rounded-xl h-12 sm:h-11 text-sm font-medium gap-2 transition-all border-gray-200 touch-manipulation',
+                                                copied
+                                                    ? 'border-emerald-300 text-emerald-600 bg-emerald-50 hover:bg-emerald-50'
+                                                    : 'text-[#1d1d1d] hover:bg-gray-50'
+                                            )}
+                                        >
+                                            {copied
+                                                ? <><Check className="w-4 h-4" /> คัดลอกแล้ว</>
+                                                : <><Link2 className="w-4 h-4" /> คัดลอกลิงก์</>
+                                            }
+                                        </Button>
                                     </div>
 
-                                    <Button onClick={downloadQR} className="w-full bg-[#1d1d1d] hover:bg-gray-800 text-white rounded-xl h-12 text-sm font-semibold transition-all">
-                                        <FileDown className="w-4 h-4 mr-2" /> บันทึกรูปภาพ QR
-                                    </Button>
-                                    <Button variant="ghost" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/qr-checkin/${showQRModal}`); alert('คัดลอกลิงก์แล้ว!'); }} className="w-full mt-2 text-[#6f6f6f] hover:text-[#1d1d1d] rounded-xl h-10 text-sm font-medium transition-all">
-                                        คัดลอกลิงก์
-                                    </Button>
+                                    {/* Danger zone: Regenerate */}
+                                    <div className="border-t border-gray-100 pt-3">
+                                        {!confirmRegenerate ? (
+                                            <button
+                                                onClick={() => setConfirmRegenerate(true)}
+                                                className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors py-2.5 rounded-xl"
+                                            >
+                                                <RefreshCw className="w-3.5 h-3.5" />
+                                                ออก QR ใหม่ · ยกเลิก QR เดิม
+                                            </button>
+                                        ) : (
+                                            <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-3">
+                                                <div className="flex items-start gap-2.5">
+                                                    <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-red-700">ยืนยันออก QR ใหม่?</p>
+                                                        <p className="text-xs text-red-500 mt-0.5">QR เดิมทั้งหมดจะใช้ไม่ได้ทันที</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => setConfirmRegenerate(false)}
+                                                        className="h-9 text-sm rounded-lg border-gray-200"
+                                                    >
+                                                        ยกเลิก
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => showQRModal && handleRegenerateQR(showQRModal)}
+                                                        className="h-9 text-sm rounded-lg bg-red-500 hover:bg-red-600 text-white"
+                                                    >
+                                                        ออก QR ใหม่
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -737,6 +921,14 @@ export function AdminEmployees() {
                                                     อีเมล <span className="text-red-500">*</span>
                                                 </label>
                                                 <Input id="emp-email" name="email" type="email" inputMode="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" required autoComplete="email" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="emp-password" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                                    รหัสผ่าน {!isEditing && <span className="text-red-500">*</span>}
+                                                    {isEditing && <span className="text-xs text-gray-400 ml-1">(เว้นว่างหากไม่ต้องการเปลี่ยน)</span>}
+                                                </label>
+                                                <Input id="emp-password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="อย่างน้อย 6 ตัวอักษร" required={!isEditing} minLength={6} autoComplete="new-password" className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
                                             </div>
 
                                             {/* Department + Position */}

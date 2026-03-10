@@ -4,6 +4,7 @@ import { Search, Filter, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { AttendanceLog } from '../../types';
+import { formatTime, formatDate } from '@/lib/utils';
 
 const STATUS_LABEL: Record<string, string> = {
     present: 'มาทำงาน',
@@ -23,9 +24,11 @@ export function AdminAttendanceLogs() {
         const matchesDept = emp.department.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesDate = dateFilter ? log.date === dateFilter : true;
         return (matchesName || matchesDept) && matchesDate;
-    }).sort((a: AttendanceLog, b: AttendanceLog) =>
-        new Date(`${b.date}T${b.checkInTime || '00:00'}`).getTime() - new Date(`${a.date}T${a.checkInTime || '00:00'}`).getTime()
-    );
+    }).sort((a: AttendanceLog, b: AttendanceLog) => {
+        const ta = a.checkInTime ? new Date(a.checkInTime).getTime() : new Date(a.date).getTime();
+        const tb = b.checkInTime ? new Date(b.checkInTime).getTime() : new Date(b.date).getTime();
+        return tb - ta;
+    });
 
     return (
         <div className="p-6 bg-slate-50 min-h-[calc(100vh-4rem)]">
@@ -98,9 +101,9 @@ export function AdminAttendanceLogs() {
                                         <div>
                                             <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">เวลาเข้า-ออก</p>
                                             <div className="flex items-center gap-1.5 text-slate-600">
-                                                <span className="font-semibold text-emerald-600">{log.checkInTime || '--:--'}</span>
+                                                <span className="font-semibold text-emerald-600">{formatTime(log.checkInTime)}</span>
                                                 <span className="text-slate-300">-</span>
-                                                <span className="font-semibold text-slate-700">{log.checkOutTime || '--:--'}</span>
+                                                <span className="font-semibold text-slate-700">{formatTime(log.checkOutTime)}</span>
                                             </div>
                                         </div>
                                         <div>
@@ -158,12 +161,12 @@ export function AdminAttendanceLogs() {
                                                 </p>
                                                 <p className="text-xs text-slate-500 mt-0.5">{emp?.department}</p>
                                             </td>
-                                            <td className="px-6 py-4 text-slate-600 font-medium">{log.date}</td>
+                                            <td className="px-6 py-4 text-slate-600 font-medium">{formatDate(log.date)}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2 text-slate-600">
-                                                    <span className="font-semibold text-emerald-600">{log.checkInTime || '--:--'}</span>
+                                                    <span className="font-semibold text-emerald-600">{formatTime(log.checkInTime)}</span>
                                                     <span className="text-slate-300">-</span>
-                                                    <span className="font-semibold text-slate-700">{log.checkOutTime || '--:--'}</span>
+                                                    <span className="font-semibold text-slate-700">{formatTime(log.checkOutTime)}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">

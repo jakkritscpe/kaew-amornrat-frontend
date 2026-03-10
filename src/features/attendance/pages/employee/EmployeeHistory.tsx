@@ -1,76 +1,145 @@
 import { useState, useMemo } from 'react';
 import { useAttendance } from '../../contexts/AttendanceContext';
-import { Clock, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CheckCircle2, AlertCircle, XCircle, CalendarX, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatTime, formatDate, cn } from '@/lib/utils';
+
+function getMonthOptions() {
+    const opts: { value: string; label: string }[] = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const label = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+        opts.push({ value, label });
+    }
+    return opts;
+}
+
+const STATUS_CFG = {
+    present:  { label: 'ปกติ',    icon: CheckCircle2, dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    late:     { label: 'มาสาย',   icon: AlertCircle,  dot: 'bg-amber-500',   badge: 'bg-amber-50 text-amber-700 border-amber-200' },
+    absent:   { label: 'ขาดงาน',  icon: XCircle,      dot: 'bg-red-500',     badge: 'bg-red-50 text-red-700 border-red-200' },
+    on_leave: { label: 'ลางาน',   icon: CalendarX,    dot: 'bg-blue-500',    badge: 'bg-blue-50 text-blue-700 border-blue-200' },
+} as const;
+type StatusKey = keyof typeof STATUS_CFG;
 
 export function EmployeeHistory() {
     const { logs } = useAttendance();
-    const employeeId = 'emp-001'; // Mock user
+    const employeeId = 'emp-001';
 
-    const [selectedMonth, setSelectedMonth] = useState<string>(
-        new Date().toISOString().substring(0, 7) // 'YYYY-MM'
+    const monthOptions = useMemo(() => getMonthOptions(), []);
+    const [monthIdx, setMonthIdx] = useState(0);
+    const selectedMonth = monthOptions[monthIdx].value;
+
+    const historyLogs = useMemo(() =>
+        logs
+            .filter(l => l.employeeId === employeeId && l.date.startsWith(selectedMonth))
+            .sort((a, b) => b.date.localeCompare(a.date)),
+        [logs, employeeId, selectedMonth]
     );
 
-    const historyLogs = useMemo(() => {
-        return logs
-            .filter((l) => l.employeeId === employeeId && l.date.startsWith(selectedMonth))
-            .sort((a, b) => b.date.localeCompare(a.date)); // descending
-    }, [logs, employeeId, selectedMonth]);
-
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'present': return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 shadow-none"><CheckCircle2 className="w-3 h-3 mr-1" /> มาปกติ</Badge>;
-            case 'late': return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 shadow-none"><AlertCircle className="w-3 h-3 mr-1" /> สาย</Badge>;
-            case 'absent': return <Badge className="bg-red-100 text-red-700 hover:bg-red-200 shadow-none"><XCircle className="w-3 h-3 mr-1" /> ขาด</Badge>;
-            case 'on_leave': return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 shadow-none">ลา</Badge>;
-            default: return null;
-        }
-    };
+    const summary = useMemo(() => ({
+        present: historyLogs.filter(l => l.status === 'present').length,
+        late:    historyLogs.filter(l => l.status === 'late').length,
+        absent:  historyLogs.filter(l => l.status === 'absent').length,
+        otHours: historyLogs.reduce((s, l) => s + (l.otHours ?? 0), 0),
+    }), [historyLogs]);
 
     return (
-        <div className="p-4 flex flex-col h-full bg-gray-50">
-            <div className="flex justify-between items-center mb-6 mt-2">
-                <h2 className="text-xl font-bold text-gray-900">ประวัติการทำงาน</h2>
-                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                    <SelectTrigger className="w-[140px] bg-white">
-                        <SelectValue placeholder="เลือกเดือน" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {/* Mock recent months */}
-                        <SelectItem value="2026-03">มีนาคม 2026</SelectItem>
-                        <SelectItem value="2026-02">กุมภาพันธ์ 2026</SelectItem>
-                        <SelectItem value="2026-01">มกราคม 2026</SelectItem>
-                        <SelectItem value="2025-12">ธันวาคม 2025</SelectItem>
-                    </SelectContent>
-                </Select>
+        <div className="flex flex-col min-h-full bg-[#f1f5f9]">
+
+            {/* ── Blue hero ── */}
+            <div className="bg-[#2075f8] px-5 pt-3 pb-14">
+                {/* Month navigator */}
+                <div className="flex items-center justify-between mb-5">
+                    <div>
+                        <p className="text-blue-200 text-xs font-semibold uppercase tracking-widest">ประวัติการทำงาน</p>
+                        <h2 className="text-xl font-black text-white mt-0.5">{monthOptions[monthIdx].label}</h2>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <button
+                            onClick={() => setMonthIdx(i => Math.min(i + 1, monthOptions.length - 1))}
+                            disabled={monthIdx >= monthOptions.length - 1}
+                            className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white disabled:opacity-30 active:bg-white/30 touch-manipulation"
+                        ><ChevronLeft className="w-4 h-4" /></button>
+                        <button
+                            onClick={() => setMonthIdx(i => Math.max(i - 1, 0))}
+                            disabled={monthIdx <= 0}
+                            className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white disabled:opacity-30 active:bg-white/30 touch-manipulation"
+                        ><ChevronRight className="w-4 h-4" /></button>
+                    </div>
+                </div>
+
+                {/* Summary stats */}
+                <div className="grid grid-cols-4 gap-2">
+                    {[
+                        { label: 'มาปกติ',  value: summary.present,            color: 'text-emerald-300' },
+                        { label: 'มาสาย',   value: summary.late,               color: 'text-amber-300' },
+                        { label: 'ขาดงาน',  value: summary.absent,             color: 'text-red-300' },
+                        { label: 'OT ชม.',  value: summary.otHours.toFixed(1), color: 'text-white' },
+                    ].map(s => (
+                        <div key={s.label} className="bg-white/15 rounded-2xl p-2.5 text-center">
+                            <p className={cn('text-2xl font-black tabular-nums leading-none', s.color)}>{s.value}</p>
+                            <p className="text-[10px] text-blue-200 font-semibold mt-1">{s.label}</p>
+                        </div>
+                    ))}
+                </div>
             </div>
 
-            <div className="space-y-3 pb-8">
+            {/* ── White floating list ── */}
+            <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 pt-5 pb-6 relative z-10">
                 {historyLogs.length === 0 ? (
-                    <div className="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm border border-gray-100">
-                        ไม่มีประวัติในเดือนนี้
+                    <div className="flex flex-col items-center justify-center py-20 gap-3">
+                        <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center">
+                            <CalendarX className="w-7 h-7 text-gray-300" />
+                        </div>
+                        <p className="font-bold text-[#1d1d1d]">ไม่มีข้อมูลในเดือนนี้</p>
+                        <p className="text-sm text-[#6f6f6f]">ลองเดือนอื่น</p>
                     </div>
                 ) : (
-                    historyLogs.map(log => (
-                        <div key={log.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
-                            <div>
-                                <p className="font-semibold text-gray-900 mb-1">{log.date}</p>
-                                <div className="flex items-center text-xs text-gray-500 gap-3">
-                                    <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> เข้า: {log.checkInTime || '-'}</span>
-                                    <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> ออก: {log.checkOutTime || '-'}</span>
+                    <div className="space-y-2.5">
+                        {historyLogs.map(log => {
+                            const cfg = STATUS_CFG[log.status as StatusKey] ?? STATUS_CFG.absent;
+                            const Icon = cfg.icon;
+                            return (
+                                <div key={log.id} className="bg-[#f8fafc] rounded-2xl border border-gray-100 px-4 py-3.5 flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className={cn('w-2 h-2 rounded-full shrink-0', cfg.dot)} />
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-[#1d1d1d] text-sm leading-tight">
+                                                {formatDate(log.date)}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-1 text-xs text-[#6f6f6f]">
+                                                <span className="tabular-nums">{formatTime(log.checkInTime)}</span>
+                                                <span className="text-gray-300">→</span>
+                                                <span className="tabular-nums">{formatTime(log.checkOutTime)}</span>
+                                                {(log.workHours ?? 0) > 0 && (
+                                                    <span className="font-semibold text-[#1d1d1d]">
+                                                        · {log.workHours.toFixed(1)} ชม.
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                        <span className={cn(
+                                            'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border',
+                                            cfg.badge
+                                        )}>
+                                            <Icon className="w-3 h-3" />
+                                            {cfg.label}
+                                        </span>
+                                        {(log.otHours ?? 0) > 0 && (
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
+                                                <Zap className="w-3 h-3" />
+                                                +{log.otHours} OT
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                                {getStatusBadge(log.status)}
-                                {log.otHours > 0 && (
-                                    <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
-                                        OT +{log.otHours} ชม.
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    ))
+                            );
+                        })}
+                    </div>
                 )}
             </div>
         </div>

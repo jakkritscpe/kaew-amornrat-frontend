@@ -13,13 +13,20 @@ export interface Employee {
     shiftStartTime: string; // e.g. "09:00"
     shiftEndTime: string;   // e.g. "18:00"
     avatarUrl?: string; // Additional for UI
+    qrToken?: string; // QR login token
     locationId?: string; // Optional: linked work location zone
-    baseWage?: number;
+    baseWage?: number | string;
+    // Flat fields from backend API
+    otRateUseDefault?: boolean;
+    otRateType?: 'multiplier' | 'fixed';
+    otRateValue?: number;
+    // Legacy nested config for backward compatibility with admin UI
     otRateConfig?: {
         useDefault: boolean;
         type: 'multiplier' | 'fixed';
         value: number;
     };
+    accessibleMenus?: string[];
 }
 
 export interface AttendanceLog {

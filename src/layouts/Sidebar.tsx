@@ -178,12 +178,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
           {menuItems.filter(item => {
             if (user?.role === 'super_admin') return true;
             if (user?.role === 'admin') {
+              if (item.id === 'settings') return false; // super_admin only
               const allowed = user.accessibleMenus || [];
-              // The parent itself is allowed
               const isDirectlyAllowed = allowed.includes(item.id);
-              // Or any of its subItems are allowed
               const isAnySubAllowed = item.subItems?.some(sub => allowed.includes(sub.id));
-
               return isDirectlyAllowed || isAnySubAllowed;
             }
             return false;
