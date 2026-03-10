@@ -59,7 +59,7 @@ function StatCard({ title, value, icon: Icon, color, delay }: { title: string, v
                 ease: 'expo.out',
                 onUpdate: () => setDisplayValue(Math.round(counter.val))
             });
-            gsap.fromTo(cardRef.current?.querySelector('.stat-icon'),
+            gsap.fromTo(cardRef.current?.querySelector('.stat-icon') ?? null,
                 { rotate: -180, scale: 0 },
                 { rotate: 0, scale: 1, duration: 0.4, delay: delay + 0.15, ease: 'back.out(1.7)' }
             );
