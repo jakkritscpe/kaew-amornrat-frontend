@@ -1,15 +1,17 @@
 const BASE_URL = '';
 
+export const TOKEN_KEY = 'attendance_token';
+
 function getToken(): string | null {
-  return localStorage.getItem('attendance_token');
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 export function setToken(token: string) {
-  localStorage.setItem('attendance_token', token);
+  localStorage.setItem(TOKEN_KEY, token);
 }
 
 export function clearToken() {
-  localStorage.removeItem('attendance_token');
+  localStorage.removeItem(TOKEN_KEY);
 }
 
 export interface ApiError {

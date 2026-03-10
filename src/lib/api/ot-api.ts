@@ -1,9 +1,12 @@
 import { api } from '../api-client';
 import type { OTRequest } from '../../features/attendance/types';
 
+type PaginatedResponse<T> = { data: T[]; pagination: unknown };
+
 export async function getOTRequestsApi(filter?: { status?: string }): Promise<OTRequest[]> {
   const params = new URLSearchParams(filter as Record<string, string>).toString();
-  return api.get<OTRequest[]>(`/api/ot-requests${params ? `?${params}` : ''}`);
+  const res = await api.get<PaginatedResponse<OTRequest>>(`/api/ot-requests${params ? `?${params}` : ''}`);
+  return res.data;
 }
 
 export async function getMyOTRequestsApi(): Promise<OTRequest[]> {

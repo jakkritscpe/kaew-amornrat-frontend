@@ -7,6 +7,7 @@ export interface AuthUser {
   role: 'admin' | 'manager' | 'employee';
   department: string;
   position: string;
+  accessibleMenus?: string[];
 }
 
 export async function loginApi(email: string, password: string): Promise<{ token: string; user: AuthUser }> {

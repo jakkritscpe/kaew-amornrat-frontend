@@ -61,12 +61,6 @@ export function MainLayout() {
                 isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[260px]'
             )}>
                 <Header
-                    onNewRequest={() => {
-                        setEditRequest(null);
-                        setIsNewRequestModalOpen(true);
-                    }}
-                    searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
                     title={getPageTitle()}
                     onMenuClick={() => setIsMobileSidebarOpen(true)}
                 />

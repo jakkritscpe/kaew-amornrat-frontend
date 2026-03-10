@@ -3,7 +3,8 @@ import type { ReactNode } from 'react';
 import type { User } from '../types';
 import { AuthContext } from './AuthContextObject';
 import { loginApi } from '../../../lib/api/auth-api';
-import { setToken, clearToken } from '../../../lib/api-client';
+import { setToken, clearToken, TOKEN_KEY } from '../../../lib/api-client';
+import { decodeJwt } from '../../../lib/utils';
 
 // Mock database of users
 const INITIAL_USERS: User[] = [
@@ -52,16 +53,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Check local storage on mount
+        // Path 1: normal admin login → repairhub_user exists
         const storedUser = localStorage.getItem('repairhub_user');
         if (storedUser) {
             try {
                 setUser(JSON.parse(storedUser));
-            } catch (e) {
-                console.error('Failed to parse stored user', e);
+            } catch {
                 localStorage.removeItem('repairhub_user');
             }
+            setIsLoading(false);
+            return;
         }
+
+        // Path 2: QR login for admin/manager → decode JWT from attendance_token
+        const token = localStorage.getItem(TOKEN_KEY);
+        if (token) {
+            const payload = decodeJwt(token);
+            const isValid = payload
+                && typeof payload.exp === 'number'
+                && Date.now() / 1000 < payload.exp;
+
+            if (isValid) {
+                const backendRole = payload!.role as string;
+                if (backendRole === 'admin' || backendRole === 'manager') {
+                    const adminUser: User = {
+                        id: payload!.sub as string,
+                        username: payload!.email as string,
+                        name: payload!.name as string,
+                        role: backendRole === 'admin' ? 'super_admin' : 'admin',
+                        employeeId: payload!.sub as string,
+                    };
+                    setUser(adminUser);
+                }
+            }
+        }
+
         setIsLoading(false);
     }, []);
 
@@ -93,8 +119,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: result.user.id,
                 username: result.user.email,
                 name: result.user.name,
-                role: (result.user.role === 'admin' || result.user.role === 'manager') ? 'super_admin' : 'technician',
+                role: result.user.role === 'admin' ? 'super_admin' : result.user.role === 'manager' ? 'admin' : 'technician',
                 employeeId: result.user.id,
+                accessibleMenus: result.user.accessibleMenus || [],
             };
             setUser(user);
             localStorage.setItem('repairhub_user', JSON.stringify(user));

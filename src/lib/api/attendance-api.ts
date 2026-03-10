@@ -1,11 +1,14 @@
 import { api } from '../api-client';
 import type { AttendanceLog } from '../../features/attendance/types';
 
+type PaginatedResponse<T> = { data: T[]; pagination: { page: number; limit: number; total: number; totalPages: number } };
+
 export async function getLogsApi(filter?: {
   employeeId?: string; date?: string; status?: string;
 }): Promise<AttendanceLog[]> {
   const params = new URLSearchParams(filter as Record<string, string>).toString();
-  return api.get<AttendanceLog[]>(`/api/attendance/logs${params ? `?${params}` : ''}`);
+  const res = await api.get<PaginatedResponse<AttendanceLog>>(`/api/attendance/logs${params ? `?${params}` : ''}`);
+  return res.data;
 }
 
 export async function getTodayLogApi(): Promise<AttendanceLog | null> {
@@ -13,7 +16,8 @@ export async function getTodayLogApi(): Promise<AttendanceLog | null> {
 }
 
 export async function getEmployeeLogsApi(employeeId: string): Promise<AttendanceLog[]> {
-  return api.get<AttendanceLog[]>(`/api/attendance/logs/${employeeId}`);
+  const res = await api.get<PaginatedResponse<AttendanceLog>>(`/api/attendance/logs/${employeeId}`);
+  return res.data;
 }
 
 export async function checkInApi(lat: number, lng: number): Promise<AttendanceLog> {

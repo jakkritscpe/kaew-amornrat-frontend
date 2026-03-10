@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { qrLoginApi } from '../../../lib/api/auth-api';
+import type { User } from '../types';
 
 export function QRLoginPage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMsg, setErrorMsg] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -17,10 +19,28 @@ export function QRLoginPage() {
 
     qrLoginApi(token)
       .then((result) => {
-        // Store employee info
+        // Store employee profile for employee layout
         localStorage.setItem('attendance_employee', JSON.stringify(result.user));
-        setStatus('success');
-        setTimeout(() => navigate('/employee/attendance/today'), 1000);
+
+        const role = result.user.role;
+        if (role === 'admin' || role === 'manager') {
+          // Also set repairhub_user so AuthContext picks it up immediately
+          const adminUser: User = {
+            id: result.user.id,
+            username: result.user.email,
+            name: result.user.name,
+            role: role === 'admin' ? 'super_admin' : 'admin',
+            employeeId: result.user.id,
+            accessibleMenus: result.user.accessibleMenus || [],
+          };
+          localStorage.setItem('repairhub_user', JSON.stringify(adminUser));
+          setIsAdmin(true);
+          setStatus('success');
+          setTimeout(() => navigate('/admin/dashboard', { replace: true }), 1200);
+        } else {
+          setStatus('success');
+          setTimeout(() => navigate('/employee/attendance/today', { replace: true }), 1200);
+        }
       })
       .catch((err) => {
         setStatus('error');
@@ -48,7 +68,9 @@ export function QRLoginPage() {
             <span className="text-4xl">✓</span>
           </div>
           <h2 className="text-2xl font-bold">เข้าสู่ระบบสำเร็จ</h2>
-          <p className="text-green-200 mt-2">กำลังนำไปยังหน้าบันทึกเวลา...</p>
+          <p className="text-green-200 mt-2">
+            {isAdmin ? 'กำลังนำไปยังหน้าแดชบอร์ด...' : 'กำลังนำไปยังหน้าบันทึกเวลา...'}
+          </p>
         </div>
       </div>
     );

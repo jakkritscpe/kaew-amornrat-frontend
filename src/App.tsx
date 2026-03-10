@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { AuthProvider } from './features/auth/contexts/AuthContext';
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
+import { useAuth } from './features/auth/hooks/useAuth';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { RepairRequestProvider } from './features/repair-requests/contexts/RepairRequestContext';
 import { JobsProvider } from './features/jobs/contexts/JobsContext';
@@ -11,6 +12,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { RequestsPage } from './pages/RequestsPage';
 import { TechniciansPage } from './pages/TechniciansPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import JobsPage from './features/jobs/components/JobsPage';
 import DocumentPage from './features/jobs/pages/DocumentPage';
 import { AttendanceProvider } from './features/attendance/contexts/AttendanceContext';
@@ -30,6 +32,15 @@ import { QRCheckInPage } from './features/attendance/pages/public/QRCheckInPage'
 import { EmployeeLoginPage } from './features/auth/pages/EmployeeLoginPage';
 import { QRLoginPage } from './features/auth/pages/QRLoginPage';
 
+// Redirects to the correct landing page based on role
+function SmartAdminRedirect() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/admin/dashboard" replace />;
+  if (user.role === 'super_admin') return <Navigate to="/admin/dashboard" replace />;
+  const first = user.accessibleMenus?.[0];
+  return <Navigate to={first ? `/admin/${first}` : '/admin/dashboard'} replace />;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -42,7 +53,7 @@ function App() {
 
               <Route path="/admin" element={<ProtectedRoute />}>
                 <Route element={<MainLayout />}>
-                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route index element={<SmartAdminRedirect />} />
                   <Route path="dashboard" element={<DashboardPage />} />
                   <Route path="requests" element={<RequestsPage />} />
                   <Route path="jobs" element={<JobsPage />} />
@@ -81,7 +92,7 @@ function App() {
               {/* Public QR Check-in Route */}
               <Route path="/qr-checkin/:employeeId" element={<QRCheckInPage />} />
 
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </AttendanceProvider>
         </JobsProvider>

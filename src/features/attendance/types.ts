@@ -26,6 +26,7 @@ export interface Employee {
         type: 'multiplier' | 'fixed';
         value: number;
     };
+    accessibleMenus?: string[];
 }
 
 export interface AttendanceLog {

@@ -4,7 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Users, Clock, AlertTriangle, FileCheck2, CalendarX, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { cn, formatTime } from '@/lib/utils';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -35,19 +35,19 @@ function StatCard({ title, value, suffix = 'คน', icon: Icon, color, delay, h
         const ctx = gsap.context(() => {
             gsap.fromTo(cardRef.current,
                 { rotateX: 90, opacity: 0, transformOrigin: 'center bottom' },
-                { rotateX: 0, opacity: 1, duration: 0.8, delay, ease: 'power3.out' }
+                { rotateX: 0, opacity: 1, duration: 0.35, delay, ease: 'power3.out' }
             );
             const counter = { val: 0 };
             gsap.to(counter, {
                 val: value,
-                duration: 1.5,
-                delay: delay + 0.3,
+                duration: 0.6,
+                delay: delay + 0.1,
                 ease: 'expo.out',
                 onUpdate: () => setDisplayValue(Math.round(counter.val))
             });
             gsap.fromTo(cardRef.current?.querySelector('.stat-icon'),
                 { rotate: -180, scale: 0 },
-                { rotate: 0, scale: 1, duration: 0.8, delay: delay + 0.4, ease: 'back.out(1.7)' }
+                { rotate: 0, scale: 1, duration: 0.35, delay: delay + 0.15, ease: 'back.out(1.7)' }
             );
         });
         return () => ctx.revert();
@@ -135,16 +135,16 @@ export function AdminAttendanceDashboard() {
     useEffect(() => {
         const ctx = gsap.context(() => {
             gsap.fromTo('.dashboard-section',
-                { y: 30, opacity: 0 },
+                { y: 20, opacity: 0 },
                 {
-                    y: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: 'power3.out',
+                    y: 0, opacity: 1, duration: 0.3, stagger: 0.07, ease: 'power3.out',
                     scrollTrigger: { trigger: containerRef.current, start: 'top 80%', toggleActions: 'play none none none' },
                 }
             );
 
             gsap.fromTo('.log-row',
-                { x: -30, opacity: 0 },
-                { x: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'power2.out', delay: 0.6 }
+                { x: -20, opacity: 0 },
+                { x: 0, opacity: 1, duration: 0.2, stagger: 0.03, ease: 'power2.out', delay: 0.25 }
             );
         });
         return () => ctx.revert();
@@ -168,19 +168,19 @@ export function AdminAttendanceDashboard() {
             <div className="dashboard-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
                 <StatCard
                     title="มาทำงาน" value={presentCount} icon={Users}
-                    color="bg-gradient-to-br from-emerald-500 to-teal-500" delay={0.1}
+                    color="bg-gradient-to-br from-emerald-500 to-teal-500" delay={0.05}
                 />
                 <StatCard
                     title="มาสาย" value={lateCount} icon={Clock}
-                    color="bg-gradient-to-br from-amber-500 to-orange-500" delay={0.2}
+                    color="bg-gradient-to-br from-amber-500 to-orange-500" delay={0.1}
                 />
                 <StatCard
                     title="ขาดงาน" value={absentCount} icon={AlertTriangle}
-                    color="bg-gradient-to-br from-red-500 to-rose-500" delay={0.3}
+                    color="bg-gradient-to-br from-red-500 to-rose-500" delay={0.15}
                 />
                 <StatCard
                     title="รออนุมัติ OT" value={pendingOTs} suffix="รายการ" icon={FileCheck2}
-                    color="bg-gradient-to-br from-[#2075f8] to-[#1a64d4]" delay={0.4}
+                    color="bg-gradient-to-br from-[#2075f8] to-[#1a64d4]" delay={0.2}
                     href="/admin/attendance/ot-approvals"
                 />
             </div>
@@ -248,10 +248,10 @@ export function AdminAttendanceDashboard() {
                                             </td>
                                             <td className="px-6 py-4 text-[#6f6f6f] hidden sm:table-cell">{emp?.department}</td>
                                             <td className="px-6 py-4">
-                                                <span className="font-semibold text-[#1d1d1d] tabular-nums">{log.checkInTime}</span>
+                                                <span className="font-semibold text-[#1d1d1d] tabular-nums">{formatTime(log.checkInTime)}</span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="font-medium text-[#6f6f6f] tabular-nums">{log.checkOutTime || '--:--'}</span>
+                                                <span className="font-medium text-[#6f6f6f] tabular-nums">{formatTime(log.checkOutTime)}</span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={cn(

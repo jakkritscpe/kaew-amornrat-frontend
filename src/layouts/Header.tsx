@@ -2,18 +2,16 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { Menu } from 'lucide-react';
 import { NotificationBell } from '../features/attendance/components/NotificationBell';
+import { TOKEN_KEY } from '../lib/api-client';
 
 interface HeaderProps {
-  onNewRequest: () => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   title: string;
   onMenuClick: () => void;
 }
 
 export default function Header({ title, onMenuClick }: HeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
-  const token = localStorage.getItem('attendance_token');
+  const token = localStorage.getItem(TOKEN_KEY);
 
   useEffect(() => {
     const ctx = gsap.context(() => {

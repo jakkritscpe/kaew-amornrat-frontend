@@ -3,8 +3,8 @@ import { getTodayLogApi, checkInApi, checkOutApi } from '../../../../lib/api/att
 import type { AttendanceLog } from '../../types';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
-import { MapPin, LogIn, LogOut, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MapPin, LogIn, LogOut, Loader2, CheckCircle2, Clock4, Timer, Zap, AlertCircle } from 'lucide-react';
+import { formatTime, cn } from '@/lib/utils';
 
 export function EmployeeToday() {
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -12,52 +12,31 @@ export function EmployeeToday() {
     const [loadingLog, setLoadingLog] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [actionError, setActionError] = useState<string | null>(null);
-
     const [currentLoc, setCurrentLoc] = useState<{ lat: number; lng: number } | null>(null);
     const [geoError, setGeoError] = useState<string | null>(null);
     const [checkingLoc, setCheckingLoc] = useState(true);
 
     useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
+        const t = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(t);
     }, []);
 
     const fetchTodayLog = useCallback(async () => {
-        try {
-            const log = await getTodayLogApi();
-            setTodayLog(log);
-        } catch {
-            // Not logged in or no log yet — ignore
-        } finally {
-            setLoadingLog(false);
-        }
+        try { setTodayLog(await getTodayLogApi()); }
+        catch { /* no log yet */ }
+        finally { setLoadingLog(false); }
     }, []);
 
-    useEffect(() => {
-        fetchTodayLog();
-    }, [fetchTodayLog]);
+    useEffect(() => { fetchTodayLog(); }, [fetchTodayLog]);
 
     useEffect(() => {
-        if (!navigator.geolocation) {
-            setGeoError('GPS not supported');
-            setCheckingLoc(false);
-            return;
-        }
-
-        const watchId = navigator.geolocation.watchPosition(
-            (pos) => {
-                setCurrentLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-                setGeoError(null);
-                setCheckingLoc(false);
-            },
-            () => {
-                setGeoError('กรุณาเปิด GPS');
-                setCheckingLoc(false);
-            },
+        if (!navigator.geolocation) { setGeoError('ไม่รองรับ GPS'); setCheckingLoc(false); return; }
+        const id = navigator.geolocation.watchPosition(
+            (p) => { setCurrentLoc({ lat: p.coords.latitude, lng: p.coords.longitude }); setGeoError(null); setCheckingLoc(false); },
+            () => { setGeoError('กรุณาอนุญาตการเข้าถึงตำแหน่ง'); setCheckingLoc(false); },
             { enableHighAccuracy: true }
         );
-
-        return () => navigator.geolocation.clearWatch(watchId);
+        return () => navigator.geolocation.clearWatch(id);
     }, []);
 
     const handleAction = async () => {
@@ -65,128 +44,153 @@ export function EmployeeToday() {
         setActionLoading(true);
         setActionError(null);
         try {
-            if (!todayLog?.checkInTime) {
-                const log = await checkInApi(currentLoc.lat, currentLoc.lng);
-                setTodayLog(log);
-            } else if (!todayLog.checkOutTime) {
-                const log = await checkOutApi(currentLoc.lat, currentLoc.lng);
-                setTodayLog(log);
-            }
-        } catch (err) {
-            setActionError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
-        } finally {
-            setActionLoading(false);
-        }
+            if (!todayLog?.checkInTime) setTodayLog(await checkInApi(currentLoc.lat, currentLoc.lng));
+            else if (!todayLog.checkOutTime) setTodayLog(await checkOutApi(currentLoc.lat, currentLoc.lng));
+        } catch (e) {
+            setActionError(e instanceof Error ? e.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+        } finally { setActionLoading(false); }
     };
 
     const isCheckedIn = !!todayLog?.checkInTime;
     const isCheckedOut = !!todayLog?.checkOutTime;
 
-    const formatTime = (ts: string | Date | null | undefined) => {
-        if (!ts) return '--:--';
-        const d = typeof ts === 'string' ? new Date(ts) : ts;
-        return format(d, 'HH:mm');
-    };
-
     if (loadingLog) {
         return (
-            <div className="flex items-center justify-center h-full py-20">
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+            <div className="flex flex-col items-center justify-center h-full bg-[#2075f8] py-24">
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="p-4 flex flex-col items-center">
-            <div className="text-center my-6">
-                <p className="text-blue-600 font-semibold mb-1">
-                    {format(currentTime, 'EEEE dd MMMM yyyy', { locale: th })}
+        <div className="flex flex-col min-h-full bg-[#f1f5f9]">
+
+            {/* ── Blue hero with clock ── */}
+            <div className="bg-[#2075f8] px-5 pt-3 pb-14">
+                <p className="text-blue-200 text-sm">
+                    <span className="text-white font-semibold capitalize">
+                        {format(currentTime, 'EEEE', { locale: th })}
+                    </span>
+                    {'  '}
+                    {format(currentTime, 'd MMMM yyyy', { locale: th })}
                 </p>
-                <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-600 tracking-tight">
-                    {format(currentTime, 'HH:mm:ss')}
-                </h1>
-            </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 w-full mb-6">
-                <div className="flex items-start gap-3">
-                    <div className="bg-blue-50 p-2 rounded-full mt-1">
-                        {checkingLoc ? (
-                            <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
-                        ) : geoError ? (
-                            <MapPin className="w-5 h-5 text-red-500" />
-                        ) : (
-                            <MapPin className="w-5 h-5 text-emerald-500" />
-                        )}
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-900">สถานะตำแหน่งของคุณ</h3>
-                        {checkingLoc ? (
-                            <p className="text-sm text-gray-500">กำลังค้นหาตำแหน่ง...</p>
-                        ) : geoError ? (
-                            <p className="text-sm text-red-500">ไม่สามารถเข้าถึงตำแหน่งได้</p>
-                        ) : (
-                            <>
-                                <p className="text-sm text-emerald-600 font-medium tracking-tight">พร้อมบันทึกเวลา</p>
-                                <p className="text-[10px] text-gray-400 mt-1">Lat: {currentLoc?.lat.toFixed(4)}, Lng: {currentLoc?.lng.toFixed(4)}</p>
-                            </>
-                        )}
-                    </div>
+                {/* Giant clock */}
+                <div className="flex items-end gap-1 mt-2">
+                    <span className="text-[72px] font-black text-white leading-none tabular-nums tracking-tighter">
+                        {format(currentTime, 'HH:mm')}
+                    </span>
+                    <span className="text-2xl font-bold text-blue-200 tabular-nums mb-3 leading-none">
+                        :{format(currentTime, 'ss')}
+                    </span>
+                </div>
+
+                {/* GPS status pill */}
+                <div className={cn(
+                    'inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold',
+                    checkingLoc
+                        ? 'bg-white/20 text-blue-100'
+                        : geoError
+                            ? 'bg-red-400/25 text-red-100'
+                            : 'bg-emerald-400/25 text-emerald-100'
+                )}>
+                    {checkingLoc
+                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                        : geoError
+                            ? <AlertCircle className="w-3 h-3" />
+                            : <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />}
+                    {checkingLoc ? 'กำลังค้นหาตำแหน่ง...' : geoError ? geoError : 'GPS พร้อมแล้ว'}
                 </div>
             </div>
 
-            {actionError && (
-                <div className="w-full bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-4">
-                    {actionError}
-                </div>
-            )}
+            {/* ── White floating card ── */}
+            <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 pt-5 pb-6 space-y-4 relative z-10">
 
-            <div className="w-full">
+                {/* Error */}
+                {actionError && (
+                    <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        {actionError}
+                    </div>
+                )}
+
+                {/* Done state */}
                 {isCheckedOut ? (
-                    <div className="bg-gray-100 p-6 rounded-3xl text-center border border-gray-200">
-                        <h2 className="text-xl font-bold text-gray-700 mb-2">วันนี้คุณหมดกะงานแล้ว</h2>
-                        <p className="text-gray-500 text-sm">เลิกงานเวลา {formatTime(todayLog?.checkOutTime)}</p>
+                    <div className="flex flex-col items-center text-center py-6 gap-3">
+                        <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center">
+                            <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                        </div>
+                        <div>
+                            <p className="font-bold text-[#1d1d1d] text-xl">เสร็จสิ้นวันนี้แล้ว</p>
+                            <p className="text-[#6f6f6f] text-sm mt-1">
+                                เลิกงาน <span className="font-semibold text-[#1d1d1d]">{formatTime(todayLog?.checkOutTime)}</span> น.
+                            </p>
+                        </div>
                     </div>
                 ) : (
-                    <Button
-                        size="lg"
-                        disabled={checkingLoc || !!geoError || isCheckedOut || actionLoading}
+                    /* CTA button */
+                    <button
+                        disabled={checkingLoc || !!geoError || actionLoading}
                         onClick={handleAction}
-                        className={`w-full py-8 text-xl rounded-2xl shadow-lg transition-transform active:scale-95 ${!isCheckedIn
-                            ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25'
-                            : 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/25'
-                            }`}
-                    >
-                        {actionLoading ? (
-                            <Loader2 className="mr-3 w-6 h-6 animate-spin" />
-                        ) : !isCheckedIn ? (
-                            <><LogIn className="mr-3 w-6 h-6" /> เช็คอิน (เข้างาน)</>
-                        ) : (
-                            <><LogOut className="mr-3 w-6 h-6" /> เช็คเอาท์ (เลิกงาน)</>
+                        className={cn(
+                            'w-full py-5 rounded-2xl font-bold text-lg text-white',
+                            'flex items-center justify-center gap-3 shadow-lg',
+                            'transition-all duration-150 active:scale-[0.97] touch-manipulation',
+                            'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100',
+                            !isCheckedIn
+                                ? 'bg-[#2075f8] hover:bg-[#1a64d4] shadow-blue-200'
+                                : 'bg-orange-500 hover:bg-orange-600 shadow-orange-200'
                         )}
-                    </Button>
+                    >
+                        {actionLoading
+                            ? <Loader2 className="w-6 h-6 animate-spin" />
+                            : !isCheckedIn
+                                ? <><LogIn className="w-6 h-6" /> เช็คอิน · เข้างาน</>
+                                : <><LogOut className="w-6 h-6" /> เช็คเอาท์ · เลิกงาน</>
+                        }
+                    </button>
+                )}
+
+                {/* Location coords */}
+                {!checkingLoc && !geoError && currentLoc && (
+                    <div className="flex items-center gap-2 px-4 py-2.5 bg-[#f8fafc] rounded-xl border border-gray-100 text-xs">
+                        <MapPin className="w-3.5 h-3.5 text-[#2075f8] shrink-0" />
+                        <span className="text-[#6f6f6f]">ตำแหน่ง</span>
+                        <span className="font-mono text-[#1d1d1d] font-medium ml-auto">
+                            {currentLoc.lat.toFixed(5)}, {currentLoc.lng.toFixed(5)}
+                        </span>
+                    </div>
+                )}
+
+                {/* Stats grid */}
+                {todayLog && (
+                    <div className="pt-1">
+                        <p className="text-[11px] font-bold text-[#6f6f6f] uppercase tracking-widest mb-3 px-1">สรุปวันนี้</p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <StatCard label="เวลาเข้างาน"   value={formatTime(todayLog.checkInTime)}                  icon={Clock4}  iconBg="bg-blue-50"    iconColor="text-[#2075f8]" />
+                            <StatCard label="เวลาออกงาน"    value={formatTime(todayLog.checkOutTime)}                 icon={LogOut}  iconBg="bg-orange-50"  iconColor="text-orange-500" />
+                            <StatCard label="ชั่วโมงทำงาน"  value={`${(todayLog.workHours ?? 0).toFixed(1)} ชม.`}   icon={Timer}   iconBg="bg-emerald-50" iconColor="text-emerald-600" />
+                            <StatCard label="OT วันนี้"     value={`${(todayLog.otHours ?? 0).toFixed(1)} ชม.`}     icon={Zap}     iconBg="bg-purple-50"  iconColor="text-purple-600" />
+                        </div>
+                    </div>
                 )}
             </div>
+        </div>
+    );
+}
 
-            {todayLog && (
-                <div className="grid grid-cols-2 gap-4 w-full mt-8">
-                    <div className="bg-white p-4 rounded-xl border border-gray-100 text-center shadow-sm">
-                        <p className="text-xs text-gray-500 font-medium mb-1">เวลาเข้า</p>
-                        <p className="text-xl font-bold text-emerald-600">{formatTime(todayLog.checkInTime)}</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-xl border border-gray-100 text-center shadow-sm">
-                        <p className="text-xs text-gray-500 font-medium mb-1">เวลาออก</p>
-                        <p className="text-xl font-bold text-gray-900">{formatTime(todayLog.checkOutTime)}</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-xl border border-gray-100 text-center shadow-sm">
-                        <p className="text-xs text-gray-500 font-medium mb-1">ชม. ทำงาน</p>
-                        <p className="text-xl font-bold text-blue-600">{(todayLog.workHours ?? 0).toFixed(1)} <span className="text-sm font-normal">ชม.</span></p>
-                    </div>
-                    <div className="bg-white p-4 rounded-xl border border-gray-100 text-center shadow-sm">
-                        <p className="text-xs text-gray-500 font-medium mb-1">OT</p>
-                        <p className="text-xl font-bold text-purple-600">{(todayLog.otHours ?? 0).toFixed(1)} <span className="text-sm font-normal">ชม.</span></p>
-                    </div>
-                </div>
-            )}
+function StatCard({ label, value, icon: Icon, iconBg, iconColor }: {
+    label: string; value: string; icon: React.ElementType; iconBg: string; iconColor: string;
+}) {
+    return (
+        <div className="bg-[#f8fafc] rounded-2xl border border-gray-100 p-4 flex items-center gap-3">
+            <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', iconBg)}>
+                <Icon className={cn('w-4 h-4', iconColor)} />
+            </div>
+            <div className="min-w-0">
+                <p className="text-[10px] text-[#6f6f6f] font-semibold uppercase tracking-wide">{label}</p>
+                <p className="text-[15px] font-bold text-[#1d1d1d] tabular-nums mt-0.5 leading-none">{value}</p>
+            </div>
         </div>
     );
 }

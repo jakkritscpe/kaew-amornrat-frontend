@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { EmployeeNoSessionPage } from '../pages/EmployeeNoSessionPage';
+import { TOKEN_KEY } from '../../../lib/api-client';
 
 export function ProtectedRoute() {
     const { user, isAuthenticated, isLoading } = useAuth();
@@ -16,7 +17,7 @@ export function ProtectedRoute() {
 
     // For employee routes - check attendance_token directly (QR-based login)
     if (location.pathname.startsWith('/employee')) {
-        const employeeToken = localStorage.getItem('attendance_token');
+        const employeeToken = localStorage.getItem(TOKEN_KEY);
         if (!employeeToken) {
             return <EmployeeNoSessionPage />;
         }
@@ -30,22 +31,23 @@ export function ProtectedRoute() {
     // Role-Based Access Control (RBAC) Route Guards
     if (location.pathname.startsWith('/admin')) {
         if (user.role === 'admin') {
-            const allowed = user.accessibleMenus || [];
-
-            // Extract the base path after /admin/
             const pathParts = location.pathname.split('/').filter(Boolean);
             if (pathParts[0] === 'admin' && pathParts.length > 1) {
-                const featurePath = pathParts.slice(1).join('/'); // e.g. 'requests' or 'attendance/dashboard'
+                const featurePath = pathParts.slice(1).join('/');
+                const allowed = user.accessibleMenus || [];
+                const fallback = allowed.length > 0 ? `/admin/${allowed[0]}` : '/';
 
-                // Allow access if it's the dashboard by default, or if it matches allowed menus
-                const hasAccess = featurePath === 'dashboard' || allowed.some(menu => featurePath === menu || featurePath.startsWith(menu + '/'));
+                // settings is super_admin only — always block admin
+                if (featurePath === 'settings' || featurePath.startsWith('settings/')) {
+                    return <Navigate to={fallback} replace />;
+                }
 
+                const hasAccess = allowed.some(menu => featurePath === menu || featurePath.startsWith(menu + '/'));
                 if (!hasAccess) {
-                    return <Navigate to="/admin/dashboard" replace />;
+                    return <Navigate to={fallback} replace />;
                 }
             }
         } else if (user.role !== 'super_admin') {
-            // Block non-admins from /admin routes entirely
             return <Navigate to="/" replace />;
         }
     }

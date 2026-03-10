@@ -23,7 +23,7 @@ export function LoginPage() {
 
         try {
             await loginWithCredentials!(email, password);
-            navigate('/admin/dashboard');
+            navigate('/admin');
         } catch {
             setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
         }

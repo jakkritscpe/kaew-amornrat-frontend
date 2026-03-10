@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { Employee, AttendanceLog, WorkLocation, OTRequest } from '../types';
+import { TOKEN_KEY } from '../../../lib/api-client';
 import { getEmployeesApi, createEmployeeApi, updateEmployeeApi, deleteEmployeeApi } from '../../../lib/api/employees-api';
 import { getLocationsApi, createLocationApi, updateLocationApi, deleteLocationApi } from '../../../lib/api/locations-api';
 import { getLogsApi, getTodayLogApi, checkInApi, checkOutApi } from '../../../lib/api/attendance-api';
@@ -63,7 +64,7 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('attendance_token');
+      const token = localStorage.getItem(TOKEN_KEY);
       if (!token) { setLoading(false); return; }
 
       const [emps, locs, settings] = await Promise.all([
@@ -83,14 +84,14 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshLogs = useCallback(async () => {
-    const token = localStorage.getItem('attendance_token');
+    const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return;
     const data = await getLogsApi().catch(() => [] as AttendanceLog[]);
     setLogs(data);
   }, []);
 
   const refreshOT = useCallback(async () => {
-    const token = localStorage.getItem('attendance_token');
+    const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return;
     const data = await getOTRequestsApi().catch(() => [] as OTRequest[]);
     setOTRequests(data);
