@@ -9,8 +9,6 @@ import RequestDetailModal from '../features/repair-requests/components/RequestDe
 
 export function MainLayout() {
     const {
-        searchQuery,
-        setSearchQuery,
         setIsNewRequestModalOpen,
         setEditRequest,
         isNewRequestModalOpen,

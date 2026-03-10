@@ -33,14 +33,15 @@ export function useAdminNotifications(token: string | null) {
     ws.onmessage = (evt) => {
       if (evt.data === 'pong') return;
       try {
-        const event = JSON.parse(evt.data) as { type?: string } & NotificationEvent;
-        if (event.type === 'auth_ok') {
+        const msg = JSON.parse(evt.data) as { type: string };
+        if (msg.type === 'auth_ok') {
           setConnected(true);
           retryRef.current = 0;
           // keepalive ping every 30s
           pingRef.current = setInterval(() => ws.send('ping'), 30000);
           return;
         }
+        const event = msg as unknown as NotificationEvent;
         setNotifications((prev) => [event, ...prev].slice(0, MAX_NOTIFICATIONS));
         setUnreadCount((n) => n + 1);
       } catch { /* ignore malformed */ }
