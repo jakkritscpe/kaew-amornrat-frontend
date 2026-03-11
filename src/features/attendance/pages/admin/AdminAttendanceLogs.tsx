@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAttendance } from '../../contexts/AttendanceContext';
-import { Search, Filter, Download } from 'lucide-react';
+import { Search, Filter, Download, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { AttendanceLog } from '../../types';
@@ -119,6 +120,14 @@ export function AdminAttendanceLogs() {
                                             <p className="font-mono text-[9px] text-slate-400 mt-0.5">{log.checkInLat ? `${log.checkInLat.toFixed(4)}, ${log.checkInLng?.toFixed(4)}` : 'ไม่มีพิกัด GPS'}</p>
                                         </div>
                                     </div>
+                                    <div className="mt-3 flex justify-end">
+                                        <Link
+                                            to={`/admin/attendance/logs/${log.id}`}
+                                            className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-md border border-blue-200 transition-colors"
+                                        >
+                                            ดูรายละเอียด <ChevronRight className="w-3.5 h-3.5" />
+                                        </Link>
+                                    </div>
                                 </div>
                             );
                         })
@@ -136,6 +145,7 @@ export function AdminAttendanceLogs() {
                                 <th className="px-6 py-4 border-b border-slate-100">ชั่วโมง / OT</th>
                                 <th className="px-6 py-4 border-b border-slate-100">สถานะ</th>
                                 <th className="px-6 py-4 border-b border-slate-100">สถานที่</th>
+                                <th className="px-4 py-4 border-b border-slate-100 text-right"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -186,6 +196,14 @@ export function AdminAttendanceLogs() {
                                                 <div className="font-mono text-[10px] text-slate-400 mt-1">
                                                     {log.checkInLat ? `${log.checkInLat.toFixed(4)}, ${log.checkInLng?.toFixed(4)}` : 'ไม่มีพิกัด GPS'}
                                                 </div>
+                                            </td>
+                                            <td className="px-4 py-4 text-right">
+                                                <Link
+                                                    to={`/admin/attendance/logs/${log.id}`}
+                                                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2.5 py-1.5 rounded-md transition-colors whitespace-nowrap"
+                                                >
+                                                    รายละเอียด <ChevronRight className="w-3.5 h-3.5" />
+                                                </Link>
                                             </td>
                                         </tr>
                                     )
