@@ -26,7 +26,7 @@ export function EmployeeLayout() {
     return (
         <div className="flex flex-col h-[100svh] bg-[#f1f5f9]">
             {/* ── Identity bar (inside blue hero of each page, so layout bar is minimal) ── */}
-            <header className="shrink-0 bg-[#2075f8] px-4 pt-4 pb-0 max-w-lg mx-auto w-full flex items-center justify-between gap-3">
+            <header className="shrink-0 bg-[#2075f8] px-4 pt-4 pb-2 max-w-lg mx-auto w-full flex items-center justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[10px] font-semibold text-blue-200 uppercase tracking-widest">ระบบลงเวลา</p>
                     <p className="text-sm font-bold text-white leading-snug truncate mt-0.5">
