@@ -452,8 +452,13 @@ export function AdminEmployees() {
             locationId: form.locationId || undefined,
             baseWage: form.baseWage ? Number(form.baseWage) : undefined,
             otRateUseDefault: form.otUseDefault,
-            otRateType: form.otUseDefault ? companySettings.defaultOtRateType : form.otType,
-            otRateValue: form.otUseDefault ? companySettings.defaultOtRateValue : (Number(form.otValue) || 0),
+            // When using company default, omit type/value — backend reads company settings
+            // when calculating OT. Sending them risks schema rejection if company settings
+            // use a fixed rate > multiplier range (e.g. 50 ฿/hr).
+            ...(form.otUseDefault ? {} : {
+                otRateType: form.otType,
+                otRateValue: Number(form.otValue) || 0,
+            }),
         };
         try {
             setIsSubmitting(true);
