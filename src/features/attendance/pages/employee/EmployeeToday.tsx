@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { getTodayLogApi, checkInApi, checkOutApi } from '../../../../lib/api/attendance-api';
 import type { AttendanceLog } from '../../types';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
-import { MapPin, LogIn, LogOut, Loader2, CheckCircle2, Clock4, Timer, Zap, AlertCircle } from 'lucide-react';
+import { MapPin, LogIn, LogOut, Loader2, CheckCircle2, Clock4, Timer, Zap, AlertCircle, X } from 'lucide-react';
 import { formatTime, cn } from '@/lib/utils';
 
 export function EmployeeToday() {
@@ -12,6 +13,8 @@ export function EmployeeToday() {
     const [loadingLog, setLoadingLog] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [actionError, setActionError] = useState<string | null>(null);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [confirmTime, setConfirmTime] = useState<Date | null>(null);
     const [currentLoc, setCurrentLoc] = useState<{ lat: number; lng: number } | null>(null);
     const [geoError, setGeoError] = useState<string | null>(null);
     const [checkingLoc, setCheckingLoc] = useState(true);
@@ -46,8 +49,14 @@ export function EmployeeToday() {
         return () => navigator.geolocation.clearWatch(id);
     }, []);
 
+    const openConfirm = () => {
+        setConfirmTime(new Date());
+        setShowConfirm(true);
+    };
+
     const handleAction = async () => {
         if (!currentLoc) return;
+        setShowConfirm(false);
         setActionLoading(true);
         setActionError(null);
         try {
@@ -70,6 +79,7 @@ export function EmployeeToday() {
     }
 
     return (
+        <>
         <div className="flex flex-col min-h-full bg-[#f1f5f9]">
 
             {/* ── Blue hero with clock ── */}
@@ -138,7 +148,7 @@ export function EmployeeToday() {
                     /* CTA button */
                     <button
                         disabled={checkingLoc || !!geoError || actionLoading}
-                        onClick={handleAction}
+                        onClick={openConfirm}
                         className={cn(
                             'w-full py-5 rounded-2xl font-bold text-lg text-white',
                             'flex items-center justify-center gap-3 shadow-lg',
@@ -183,6 +193,119 @@ export function EmployeeToday() {
                 )}
             </div>
         </div>
+
+        {/* ── Confirm Modal ── */}
+        {showConfirm && currentLoc && confirmTime && createPortal(
+            <div className="fixed inset-0 z-50 flex items-end justify-center">
+                {/* Backdrop */}
+                <div
+                    className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+                    onClick={() => setShowConfirm(false)}
+                />
+
+                {/* Bottom sheet */}
+                <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
+
+                    {/* Handle bar */}
+                    <div className="flex justify-center pt-3 pb-1">
+                        <div className="w-10 h-1 rounded-full bg-gray-200" />
+                    </div>
+
+                    {/* Header */}
+                    <div className={cn(
+                        'flex items-center justify-between px-5 py-4',
+                        !isCheckedIn ? 'bg-blue-50' : 'bg-orange-50'
+                    )}>
+                        <div className="flex items-center gap-3">
+                            <div className={cn(
+                                'w-11 h-11 rounded-2xl flex items-center justify-center',
+                                !isCheckedIn ? 'bg-[#2075f8]' : 'bg-orange-500'
+                            )}>
+                                {!isCheckedIn
+                                    ? <LogIn className="w-5 h-5 text-white" />
+                                    : <LogOut className="w-5 h-5 text-white" />}
+                            </div>
+                            <div>
+                                <p className="font-bold text-[#1d1d1d] text-base leading-tight">
+                                    {!isCheckedIn ? 'ยืนยันการเช็คอิน' : 'ยืนยันการเช็คเอาท์'}
+                                </p>
+                                <p className="text-xs text-[#6f6f6f] mt-0.5">
+                                    {!isCheckedIn ? 'บันทึกเวลาเข้างาน' : 'บันทึกเวลาออกงาน'}
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setShowConfirm(false)}
+                            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    {/* Info rows */}
+                    <div className="px-5 py-4 space-y-3">
+                        {/* Time */}
+                        <div className="flex items-center justify-between bg-[#f8fafc] rounded-2xl px-4 py-3">
+                            <div className="flex items-center gap-2.5">
+                                <Clock4 className={cn('w-4 h-4', !isCheckedIn ? 'text-[#2075f8]' : 'text-orange-500')} />
+                                <span className="text-sm text-[#6f6f6f] font-medium">เวลา</span>
+                            </div>
+                            <div className="text-right">
+                                <p className="font-bold text-[#1d1d1d] text-base tabular-nums">
+                                    {format(confirmTime, 'HH:mm:ss')}
+                                </p>
+                                <p className="text-[11px] text-[#6f6f6f] tabular-nums">
+                                    {format(confirmTime, 'd MMM yyyy', { locale: th })}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* GPS */}
+                        <div className="flex items-center justify-between bg-[#f8fafc] rounded-2xl px-4 py-3">
+                            <div className="flex items-center gap-2.5">
+                                <MapPin className="w-4 h-4 text-emerald-600" />
+                                <span className="text-sm text-[#6f6f6f] font-medium">ตำแหน่ง GPS</span>
+                            </div>
+                            <div className="text-right">
+                                <p className="font-mono text-xs font-semibold text-[#1d1d1d]">
+                                    {currentLoc.lat.toFixed(5)}
+                                </p>
+                                <p className="font-mono text-xs font-semibold text-[#1d1d1d]">
+                                    {currentLoc.lng.toFixed(5)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="px-5 pb-8 pt-1 flex gap-3">
+                        <button
+                            onClick={() => setShowConfirm(false)}
+                            className="flex-1 py-4 rounded-2xl bg-gray-100 text-[#1d1d1d] font-bold text-base hover:bg-gray-200 transition-colors active:scale-[0.97]"
+                        >
+                            ยกเลิก
+                        </button>
+                        <button
+                            onClick={handleAction}
+                            className={cn(
+                                'flex-2 basis-[60%] py-4 rounded-2xl font-bold text-base text-white',
+                                'flex items-center justify-center gap-2 shadow-lg',
+                                'transition-all active:scale-[0.97]',
+                                !isCheckedIn
+                                    ? 'bg-[#2075f8] hover:bg-[#1a64d4] shadow-blue-200'
+                                    : 'bg-orange-500 hover:bg-orange-600 shadow-orange-200'
+                            )}
+                        >
+                            {!isCheckedIn
+                                ? <><LogIn className="w-5 h-5" /> เช็คอิน</>
+                                : <><LogOut className="w-5 h-5" /> เช็คเอาท์</>}
+                        </button>
+                    </div>
+                </div>
+            </div>,
+            document.body
+        )}
+        </>
     );
 }
 
