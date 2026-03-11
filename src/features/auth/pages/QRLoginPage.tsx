@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { qrLoginApi } from '../../../lib/api/auth-api';
+import { setToken, EMPLOYEE_KEY, USER_KEY } from '../../../lib/api-client';
 import type { User } from '../types';
 
 export function QRLoginPage() {
@@ -19,12 +20,11 @@ export function QRLoginPage() {
 
     qrLoginApi(token)
       .then((result) => {
-        // Store employee profile for employee layout
-        localStorage.setItem('attendance_employee', JSON.stringify(result.user));
+        setToken(result.token);
+        localStorage.setItem(EMPLOYEE_KEY, JSON.stringify(result.user));
 
         const role = result.user.role;
         if (role === 'admin' || role === 'manager') {
-          // Also set repairhub_user so AuthContext picks it up immediately
           const adminUser: User = {
             id: result.user.id,
             username: result.user.email,
@@ -33,7 +33,7 @@ export function QRLoginPage() {
             employeeId: result.user.id,
             accessibleMenus: result.user.accessibleMenus || [],
           };
-          localStorage.setItem('repairhub_user', JSON.stringify(adminUser));
+          localStorage.setItem(USER_KEY, JSON.stringify(adminUser));
           setIsAdmin(true);
           setStatus('success');
           setTimeout(() => navigate('/admin/dashboard', { replace: true }), 1200);

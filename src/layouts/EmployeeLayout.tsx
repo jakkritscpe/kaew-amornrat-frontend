@@ -2,9 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Clock, Map, History, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { TOKEN_KEY } from '@/lib/api-client';
-
-const EMPLOYEE_KEY = 'attendance_employee';
+import { TOKEN_KEY, EMPLOYEE_KEY } from '@/lib/api-client';
 
 const navItems = [
     { to: '/employee/attendance/today', icon: Clock, label: 'วันนี้' },

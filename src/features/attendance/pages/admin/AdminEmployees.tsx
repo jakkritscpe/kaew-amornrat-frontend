@@ -795,8 +795,8 @@ export function AdminEmployees() {
 
                                                 {/* PIN dots */}
                                                 <div className="flex justify-center gap-4 mb-6">
-                                                    {[0, 1, 2, 3].map(i => (
-                                                        <div key={i} className={cn(
+                                                    {['d0', 'd1', 'd2', 'd3'].map((id, i) => (
+                                                        <div key={id} className={cn(
                                                             'w-14 h-14 rounded-2xl border-2 flex items-center justify-center text-2xl font-bold transition-all duration-200',
                                                             i < pinInput.length ? (isDelete ? 'border-red-400 bg-red-50 text-red-500 scale-105' : 'border-blue-400 bg-blue-50 text-blue-500 scale-105') : 'border-gray-200 bg-gray-50',
                                                             locked && 'opacity-40',
@@ -810,16 +810,16 @@ export function AdminEmployees() {
 
                                                 {/* Numpad */}
                                                 <div className="grid grid-cols-3 gap-3 mb-6">
-                                                    {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map((k, i) =>
-                                                        k === '' ? <div key={i} /> :
+                                                    {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'empty', '0', '⌫'].map((k) =>
+                                                        k === 'empty' ? <div key="empty" /> :
                                                             k === '⌫' ? (
-                                                                <button key={i} type="button" disabled={locked}
+                                                                <button key="backspace" type="button" disabled={locked}
                                                                     onClick={handlePinBackspace}
                                                                     className="h-14 rounded-2xl bg-gray-100 hover:bg-gray-200 text-[#6f6f6f] font-bold text-xl transition-colors disabled:opacity-30 touch-manipulation">
                                                                     {k}
                                                                 </button>
                                                             ) : (
-                                                                <button key={i} type="button" disabled={locked || pinInput.length >= 4}
+                                                                <button key={k} type="button" disabled={locked || pinInput.length >= 4}
                                                                     onClick={() => handlePinDigit(k)}
                                                                     className="h-14 rounded-2xl bg-white border border-gray-200 shadow-sm hover:border-[#2075f8] hover:text-[#2075f8] text-[#1d1d1d] font-semibold text-xl transition-all disabled:opacity-30 touch-manipulation">
                                                                     {k}
