@@ -3,7 +3,8 @@ import { useParams } from 'react-router-dom';
 import { MapPin, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+// Uses Vite proxy (/api → backend) in dev; empty string means same-origin in production
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 interface EmployeeInfo {
   id: string;

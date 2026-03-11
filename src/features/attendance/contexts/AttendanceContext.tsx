@@ -68,8 +68,8 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
       if (!token) { setLoading(false); return; }
 
       const [emps, locs, settings] = await Promise.all([
-        getEmployeesApi().catch(() => [] as Employee[]),
-        getLocationsApi().catch(() => [] as WorkLocation[]),
+        getEmployeesApi(),
+        getLocationsApi(),
         getSettingsApi().catch(() => ({ defaultOtRateType: 'multiplier' as const, defaultOtRateValue: 1.5 })),
       ]);
 
@@ -86,15 +86,23 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
   const refreshLogs = useCallback(async () => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return;
-    const data = await getLogsApi().catch(() => [] as AttendanceLog[]);
-    setLogs(data);
+    try {
+      const data = await getLogsApi();
+      setLogs(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'เกิดข้อผิดพลาดในการโหลดประวัติลงเวลา');
+    }
   }, []);
 
   const refreshOT = useCallback(async () => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return;
-    const data = await getOTRequestsApi().catch(() => [] as OTRequest[]);
-    setOTRequests(data);
+    try {
+      const data = await getOTRequestsApi();
+      setOTRequests(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'เกิดข้อผิดพลาดในการโหลดคำขอ OT');
+    }
   }, []);
 
   useEffect(() => {

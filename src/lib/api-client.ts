@@ -1,6 +1,8 @@
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 export const TOKEN_KEY = 'attendance_token';
+export const EMPLOYEE_KEY = 'attendance_employee';
+export const USER_KEY = 'repairhub_user';
 
 function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);

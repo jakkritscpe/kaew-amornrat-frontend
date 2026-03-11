@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginApi } from '../../../lib/api/auth-api';
-import { setToken } from '../../../lib/api-client';
+import { setToken, EMPLOYEE_KEY } from '../../../lib/api-client';
 
 export function EmployeeLoginPage() {
   const [email, setEmail] = useState('');
@@ -17,7 +17,7 @@ export function EmployeeLoginPage() {
     try {
       const result = await loginApi(email, password);
       setToken(result.token);
-      localStorage.setItem('attendance_employee', JSON.stringify(result.user));
+      localStorage.setItem(EMPLOYEE_KEY, JSON.stringify(result.user));
       navigate('/employee/attendance/today');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'เข้าสู่ระบบไม่สำเร็จ');
