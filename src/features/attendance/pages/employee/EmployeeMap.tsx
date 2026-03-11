@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAttendance } from '../../contexts/AttendanceContext';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -6,6 +6,8 @@ import { Loader2, AlertCircle, Navigation2, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import L from 'leaflet';
 
+// Leaflet's default icon URL detection doesn't work with bundlers — this is the standard fix
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -74,7 +76,9 @@ export function EmployeeMap() {
         );
     }
 
-    const center = [currentLoc!.lat, currentLoc!.lng] as [number, number];
+    // TypeScript can't narrow through the two early returns above, so we assert here
+    if (!currentLoc) return null;
+    const center = [currentLoc.lat, currentLoc.lng] as [number, number];
 
     return (
         <div className="flex flex-col h-full bg-[#f1f5f9]">
@@ -106,7 +110,7 @@ export function EmployeeMap() {
                         <Popup className="text-sm font-semibold">ตำแหน่งของคุณ</Popup>
                     </Marker>
                     {locations.map(loc => (
-                        <div key={loc.id}>
+                        <React.Fragment key={loc.id}>
                             <Marker position={[loc.lat, loc.lng]}>
                                 <Popup>
                                     <p className="font-bold text-sm">{loc.name}</p>
@@ -118,7 +122,7 @@ export function EmployeeMap() {
                                 radius={loc.radiusMeters}
                                 pathOptions={{ color: '#2075f8', fillColor: '#2075f8', fillOpacity: 0.08, weight: 2, dashArray: '6 4' }}
                             />
-                        </div>
+                        </React.Fragment>
                     ))}
                 </MapContainer>
             </div>
@@ -139,7 +143,7 @@ export function EmployeeMap() {
                         </span>
                     </div>
                     <span className="text-[11px] font-mono text-[#6f6f6f]">
-                        {currentLoc!.lat.toFixed(4)}, {currentLoc!.lng.toFixed(4)}
+                        {currentLoc.lat.toFixed(4)}, {currentLoc.lng.toFixed(4)}
                     </span>
                 </div>
             </div>

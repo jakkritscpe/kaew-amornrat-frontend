@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import {
@@ -33,8 +34,8 @@ interface SidebarProps {
 type MenuItem = {
   id: string;
   label: string;
-  icon: any;
-  subItems?: { id: string; label: string; icon: any }[];
+  icon: React.ElementType;
+  subItems?: { id: string; label: string; icon: React.ElementType }[];
 };
 
 const menuItems: MenuItem[] = [

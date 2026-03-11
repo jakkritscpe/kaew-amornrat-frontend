@@ -22,9 +22,16 @@ export function EmployeeToday() {
     }, []);
 
     const fetchTodayLog = useCallback(async () => {
-        try { setTodayLog(await getTodayLogApi()); }
-        catch { /* no log yet */ }
-        finally { setLoadingLog(false); }
+        try {
+            setTodayLog(await getTodayLogApi());
+        } catch (e) {
+            // 404 = ยังไม่มีข้อมูลวันนี้ ถือเป็นเรื่องปกติ
+            // error อื่นๆ แสดงใน actionError
+            const status = e instanceof Error && 'status' in e ? (e as { status: number }).status : 0;
+            if (status !== 404) setActionError('ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่');
+        } finally {
+            setLoadingLog(false);
+        }
     }, []);
 
     useEffect(() => { fetchTodayLog(); }, [fetchTodayLog]);

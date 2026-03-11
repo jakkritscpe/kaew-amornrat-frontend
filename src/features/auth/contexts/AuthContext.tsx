@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { User } from '../types';
 import { AuthContext } from './AuthContextObject';
 import { loginApi } from '../../../lib/api/auth-api';
-import { setToken, clearToken, TOKEN_KEY } from '../../../lib/api-client';
+import { setToken, clearToken, TOKEN_KEY, USER_KEY } from '../../../lib/api-client';
 import { decodeJwt } from '../../../lib/utils';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -12,12 +12,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         // Path 1: normal admin login → repairhub_user exists
-        const storedUser = localStorage.getItem('repairhub_user');
+        const storedUser = localStorage.getItem(USER_KEY);
         if (storedUser) {
             try {
                 setUser(JSON.parse(storedUser));
             } catch {
-                localStorage.removeItem('repairhub_user');
+                localStorage.removeItem(USER_KEY);
             }
             setIsLoading(false);
             return;
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 accessibleMenus: result.user.accessibleMenus || [],
             };
             setUser(loggedInUser);
-            localStorage.setItem('repairhub_user', JSON.stringify(loggedInUser));
+            localStorage.setItem(USER_KEY, JSON.stringify(loggedInUser));
         } finally {
             setIsLoading(false);
         }
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = () => {
         setUser(null);
         clearToken();
-        localStorage.removeItem('repairhub_user');
+        localStorage.removeItem(USER_KEY);
         localStorage.removeItem('attendance_employee');
     };
 
@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (user?.id !== userId) return;
         const updated = { ...user, accessibleMenus: targetMenus };
         setUser(updated);
-        localStorage.setItem('repairhub_user', JSON.stringify(updated));
+        localStorage.setItem(USER_KEY, JSON.stringify(updated));
     };
 
     const value = {
