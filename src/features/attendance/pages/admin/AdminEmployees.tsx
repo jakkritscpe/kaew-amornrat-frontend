@@ -10,13 +10,60 @@ import {
     Plus, QrCode, X, Search, FileDown, Clock,
     Building2, ImagePlus, Trash2, Camera, SwitchCamera,
     CheckCircle2, AlertCircle, XCircle, MinusCircle, Users, Pencil,
-    MapPin, DollarSign, Link2, Check, RefreshCw, AlertTriangle,
+    MapPin, DollarSign, Link2, Check, RefreshCw, AlertTriangle, Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn, formatTime } from '@/lib/utils';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// ── Image helpers ───────────────────────────────────────────────────────────
+
+/**
+ * Resize + center-crop image to a square, output as JPEG.
+ * White background is applied so transparent PNGs render correctly.
+ * @param dataUrl  source data URL (any image format)
+ * @param size     output side length in px (default 256)
+ * @param quality  JPEG quality 0–1 (default 0.82)
+ */
+async function resizeImage(dataUrl: string, size = 256, quality = 0.82): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const side = Math.min(img.width, img.height);
+            const sx = (img.width - side) / 2;
+            const sy = (img.height - side) / 2;
+            const canvas = document.createElement('canvas');
+            const out = Math.min(size, side);
+            canvas.width = out;
+            canvas.height = out;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { reject(new Error('Canvas not supported')); return; }
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, out, out);
+            ctx.drawImage(img, sx, sy, side, side, 0, 0, out, out);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => reject(new Error('ไม่สามารถโหลดรูปภาพได้'));
+        img.src = dataUrl;
+    });
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('ไม่สามารถอ่านไฟล์ได้'));
+        reader.readAsDataURL(file);
+    });
+}
+
+/** Estimate encoded image size in KB from a data URL */
+function estimateSizeKB(dataUrl: string): number {
+    const base64 = dataUrl.split(',')[1] ?? '';
+    return Math.round((base64.length * 3) / 4 / 1024);
+}
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
     present: { label: 'มาทำงาน', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
@@ -137,6 +184,10 @@ export function AdminEmployees() {
     const [avatarMode, setAvatarMode] = useState<AvatarMode>('idle');
     const [cameraError, setCameraError] = useState<string | null>(null);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isProcessingImage, setIsProcessingImage] = useState(false);
+
     // Secure Action (Edit/Delete) + PIN
     const [secureActionId, setSecureActionId] = useState<string | null>(null);
     const [secureActionType, setSecureActionType] = useState<'delete' | 'edit' | null>(null);
@@ -202,12 +253,24 @@ export function AdminEmployees() {
 
     const startCamera = useCallback(async () => {
         setCameraError(null);
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setCameraError('เบราว์เซอร์ไม่รองรับกล้อง หรือต้องใช้งานผ่าน HTTPS');
+            return;
+        }
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+            });
             streamRef.current = stream;
             setAvatarMode('camera');
-            setTimeout(() => { if (videoRef.current) videoRef.current.srcObject = stream; }, 50);
-        } catch { setCameraError('ไม่สามารถเข้าถึงกล้องได้'); }
+            // srcObject is assigned in useEffect below, after the <video> element mounts
+        } catch (err) {
+            if (err instanceof DOMException && err.name === 'NotAllowedError') {
+                setCameraError('กรุณาอนุญาตการเข้าถึงกล้องในเบราว์เซอร์');
+            } else {
+                setCameraError('ไม่สามารถเข้าถึงกล้องได้');
+            }
+        }
     }, []);
 
     const stopCamera = useCallback(() => {
@@ -216,14 +279,32 @@ export function AdminEmployees() {
         setAvatarMode('idle');
     }, []);
 
-    const capturePhoto = useCallback(() => {
+    // Assign MediaStream to <video> after it mounts (when avatarMode switches to 'camera')
+    useEffect(() => {
+        if (avatarMode === 'camera' && videoRef.current && streamRef.current) {
+            videoRef.current.srcObject = streamRef.current;
+        }
+    }, [avatarMode]);
+
+    const capturePhoto = useCallback(async () => {
         if (!videoRef.current) return;
-        const canvas = document.createElement('canvas');
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
-        canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0);
-        setAvatarPreview(canvas.toDataURL('image/jpeg', 0.85));
-        stopCamera();
+        setIsProcessingImage(true);
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Canvas not supported');
+            ctx.drawImage(videoRef.current, 0, 0);
+            const raw = canvas.toDataURL('image/jpeg');
+            const resized = await resizeImage(raw);
+            setAvatarPreview(resized);
+            stopCamera();
+        } catch {
+            toast.error('ไม่สามารถถ่ายรูปได้ กรุณาลองใหม่');
+        } finally {
+            setIsProcessingImage(false);
+        }
     }, [stopCamera]);
 
     const openAddForm = useCallback(() => {
@@ -287,9 +368,9 @@ export function AdminEmployees() {
         setPinAttempts(0);
     }, []);
 
-    const handlePinDigit = (digit: string) => {
+    const handlePinDigit = async (digit: string) => {
         const locked = pinAttempts >= 3;
-        if (locked) return;
+        if (locked || isDeleting) return;
         const next = (pinInput + digit).slice(0, 4);
         setPinInput(next);
         setPinError('');
@@ -297,11 +378,23 @@ export function AdminEmployees() {
         if (next.length === 4) {
             if (next === ADMIN_PIN) {
                 if (secureActionType === 'delete') {
-                    removeEmployee(secureActionId!);
+                    setIsDeleting(true);
+                    try {
+                        const target = employees.find(e => e.id === secureActionId);
+                        await removeEmployee(secureActionId!);
+                        toast.success(`ลบ ${target?.name ?? 'พนักงาน'} ออกจากระบบสำเร็จ`);
+                        closeSecureAction();
+                    } catch (err) {
+                        toast.error(err instanceof Error ? err.message : 'ไม่สามารถลบพนักงานได้ กรุณาลองใหม่');
+                        setPinInput('');
+                        PIN_REFS[0]?.current?.focus();
+                    } finally {
+                        setIsDeleting(false);
+                    }
                 } else if (secureActionType === 'edit') {
                     openEditForm(secureActionId!);
+                    closeSecureAction();
                 }
-                closeSecureAction();
             } else {
                 const newAttempts = pinAttempts + 1;
                 setPinAttempts(newAttempts);
@@ -319,17 +412,34 @@ export function AdminEmployees() {
         PIN_REFS[Math.max(0, next.length)]?.current?.focus();
     };
 
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        if (file.size > 2 * 1024 * 1024) { alert('รูปภาพต้องมีขนาดไม่เกิน 2 MB'); return; }
-        const reader = new FileReader();
-        reader.onload = () => setAvatarPreview(reader.result as string);
-        reader.readAsDataURL(file);
+        // Reset input so the same file can be re-selected later
+        e.target.value = '';
+        if (!file.type.startsWith('image/')) {
+            toast.error('กรุณาเลือกไฟล์รูปภาพเท่านั้น (JPG, PNG, WebP)');
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            toast.error('ไฟล์ต้องมีขนาดไม่เกิน 10 MB');
+            return;
+        }
+        setIsProcessingImage(true);
+        try {
+            const raw = await readFileAsDataUrl(file);
+            const resized = await resizeImage(raw);
+            setAvatarPreview(resized);
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการโหลดรูป');
+        } finally {
+            setIsProcessingImage(false);
+        }
     };
 
-    const handleFormSubmit = (e: React.FormEvent) => {
+    const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return;
         const payload = {
             name: form.name,
             nickname: form.nickname,
@@ -345,12 +455,21 @@ export function AdminEmployees() {
             otRateType: form.otUseDefault ? companySettings.defaultOtRateType : form.otType,
             otRateValue: form.otUseDefault ? companySettings.defaultOtRateValue : (Number(form.otValue) || 0),
         };
-        if (isEditing && editingId) {
-            updateEmployee(editingId, form.password ? { ...payload, password: form.password } : payload);
-        } else {
-            addEmployee({ ...payload, role: 'employee', password: form.password || 'password123' });
+        try {
+            setIsSubmitting(true);
+            if (isEditing && editingId) {
+                await updateEmployee(editingId, form.password ? { ...payload, password: form.password } : payload);
+                toast.success(`อัปเดตข้อมูล ${form.name} สำเร็จ`);
+            } else {
+                await addEmployee({ ...payload, role: 'employee', password: form.password || 'password123' });
+                toast.success(`เพิ่ม ${form.name} เข้าสู่ระบบสำเร็จ`);
+            }
+            closeFormModal();
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+        } finally {
+            setIsSubmitting(false);
         }
-        closeFormModal();
     };
 
     const closeQRModal = () => {
@@ -561,7 +680,7 @@ export function AdminEmployees() {
                                 )}>
                                     <p className="text-xs font-medium text-[#6f6f6f]">เช็คอินวันนี้</p>
                                     {todayLog?.checkInTime
-                                        ? <p className="text-xs font-bold text-emerald-600 tabular-nums">{todayLog.checkInTime} น.</p>
+                                        ? <p className="text-xs font-bold text-emerald-600 tabular-nums">{formatTime(todayLog.checkInTime)} น.</p>
                                         : <p className="text-xs text-gray-400">ยังไม่มีข้อมูล</p>
                                     }
                                 </div>
@@ -809,25 +928,32 @@ export function AdminEmployees() {
                                                 {pinError && <p className={cn('text-sm mb-4 font-medium', locked ? 'text-[#6f6f6f]' : 'text-red-500')}>{pinError}</p>}
 
                                                 {/* Numpad */}
-                                                <div className="grid grid-cols-3 gap-3 mb-6">
-                                                    {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'empty', '0', '⌫'].map((k) =>
-                                                        k === 'empty' ? <div key="empty" /> :
-                                                            k === '⌫' ? (
-                                                                <button key="backspace" type="button" disabled={locked}
-                                                                    onClick={handlePinBackspace}
-                                                                    className="h-14 rounded-2xl bg-gray-100 hover:bg-gray-200 text-[#6f6f6f] font-bold text-xl transition-colors disabled:opacity-30 touch-manipulation">
-                                                                    {k}
-                                                                </button>
-                                                            ) : (
-                                                                <button key={k} type="button" disabled={locked || pinInput.length >= 4}
-                                                                    onClick={() => handlePinDigit(k)}
-                                                                    className="h-14 rounded-2xl bg-white border border-gray-200 shadow-sm hover:border-[#2075f8] hover:text-[#2075f8] text-[#1d1d1d] font-semibold text-xl transition-all disabled:opacity-30 touch-manipulation">
-                                                                    {k}
-                                                                </button>
-                                                            )
-                                                    )}
-                                                </div>
-                                                <Button variant="ghost" className="w-full text-[#6f6f6f] font-medium" onClick={closeSecureAction}>ยกเลิก</Button>
+                                                {isDeleting ? (
+                                                    <div className="flex flex-col items-center gap-3 mb-6 py-4">
+                                                        <Loader2 className="w-8 h-8 text-red-400 animate-spin" />
+                                                        <p className="text-sm text-[#6f6f6f]">กำลังลบพนักงาน...</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="grid grid-cols-3 gap-3 mb-6">
+                                                        {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'empty', '0', '⌫'].map((k) =>
+                                                            k === 'empty' ? <div key="empty" /> :
+                                                                k === '⌫' ? (
+                                                                    <button key="backspace" type="button" disabled={locked}
+                                                                        onClick={handlePinBackspace}
+                                                                        className="h-14 rounded-2xl bg-gray-100 hover:bg-gray-200 text-[#6f6f6f] font-bold text-xl transition-colors disabled:opacity-30 touch-manipulation">
+                                                                        {k}
+                                                                    </button>
+                                                                ) : (
+                                                                    <button key={k} type="button" disabled={locked || pinInput.length >= 4}
+                                                                        onClick={() => handlePinDigit(k)}
+                                                                        className="h-14 rounded-2xl bg-white border border-gray-200 shadow-sm hover:border-[#2075f8] hover:text-[#2075f8] text-[#1d1d1d] font-semibold text-xl transition-all disabled:opacity-30 touch-manipulation">
+                                                                        {k}
+                                                                    </button>
+                                                                )
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <Button variant="ghost" className="w-full text-[#6f6f6f] font-medium" disabled={isDeleting} onClick={closeSecureAction}>ยกเลิก</Button>
                                             </>
                                         )}
                                     </div>
@@ -860,43 +986,107 @@ export function AdminEmployees() {
                                             <p className="text-sm font-semibold text-[#1d1d1d] self-start">
                                                 รูปโปรไฟล์ <span className="text-gray-400 font-normal text-xs">(ไม่บังคับ)</span>
                                             </p>
-                                            <div className="w-48 h-48 rounded-full overflow-hidden border-2 border-dashed border-gray-200 bg-white hover:border-blue-300 transition-colors flex items-center justify-center shadow-sm">
-                                                {avatarMode === 'camera'
-                                                    ? <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                                                    : avatarPreview
-                                                        ? <img src={avatarPreview} alt="รูปโปรไฟล์" width={192} height={192} className="w-full h-full object-cover" />
-                                                        : <div className="flex flex-col items-center gap-3 text-gray-300">
+
+                                            {/* Avatar circle — camera / preview / placeholder */}
+                                            <div className="relative w-48 h-48">
+                                                <div className={cn(
+                                                    'w-48 h-48 rounded-full overflow-hidden border-2 border-dashed bg-white flex items-center justify-center shadow-sm transition-colors',
+                                                    isProcessingImage ? 'border-blue-300' : 'border-gray-200 hover:border-blue-300',
+                                                )}>
+                                                    {avatarMode === 'camera' ? (
+                                                        <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                                                    ) : avatarPreview ? (
+                                                        <img src={avatarPreview} alt="รูปโปรไฟล์" width={192} height={192} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="flex flex-col items-center gap-3 text-gray-300">
                                                             <ImagePlus className="w-12 h-12" />
                                                             <span className="text-sm font-medium">ไม่มีรูปภาพ</span>
                                                         </div>
-                                                }
+                                                    )}
+                                                </div>
+
+                                                {/* Processing overlay */}
+                                                {isProcessingImage && (
+                                                    <div className="absolute inset-0 rounded-full bg-white/75 flex flex-col items-center justify-center gap-2">
+                                                        <Loader2 className="w-8 h-8 text-[#2075f8] animate-spin" />
+                                                        <span className="text-xs font-medium text-[#2075f8]">กำลังประมวลผล</span>
+                                                    </div>
+                                                )}
                                             </div>
+
+                                            {/* Image size badge */}
+                                            {avatarPreview && !isProcessingImage && (
+                                                <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full font-medium">
+                                                    <CheckCircle2 className="w-3 h-3 shrink-0" />
+                                                    {estimateSizeKB(avatarPreview)} KB · 256×256 px
+                                                </div>
+                                            )}
+
                                             {cameraError && <p className="text-xs text-red-500 font-medium text-center">{cameraError}</p>}
 
+                                            {/* Action buttons */}
                                             {avatarMode === 'camera' ? (
                                                 <div className="flex flex-col gap-2 w-full mt-2">
-                                                    <Button type="button" onClick={capturePhoto} className="w-full bg-[#2075f8] hover:bg-[#1a64d4] text-white rounded-xl h-10">
-                                                        <Camera className="w-4 h-4 mr-2" /> ถ่ายรูป
+                                                    <Button
+                                                        type="button"
+                                                        onClick={capturePhoto}
+                                                        disabled={isProcessingImage}
+                                                        className="w-full bg-[#2075f8] hover:bg-[#1a64d4] text-white rounded-xl h-10 disabled:opacity-60"
+                                                    >
+                                                        {isProcessingImage
+                                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> กำลังประมวลผล...</>
+                                                            : <><Camera className="w-4 h-4 mr-2" /> ถ่ายรูป</>
+                                                        }
                                                     </Button>
-                                                    <Button type="button" variant="ghost" onClick={stopCamera} className="w-full text-[#6f6f6f] rounded-xl h-10">ยกเลิกกล้อง</Button>
+                                                    <Button type="button" variant="ghost" onClick={stopCamera} disabled={isProcessingImage} className="w-full text-[#6f6f6f] rounded-xl h-10">
+                                                        ยกเลิกกล้อง
+                                                    </Button>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col gap-2 w-full mt-2">
-                                                    <Button type="button" onClick={startCamera} variant="outline" className="w-full text-[#1d1d1d] border-gray-200 hover:bg-gray-50 rounded-xl h-10">
+                                                    <Button
+                                                        type="button"
+                                                        onClick={startCamera}
+                                                        disabled={isProcessingImage}
+                                                        variant="outline"
+                                                        className="w-full text-[#1d1d1d] border-gray-200 hover:bg-gray-50 rounded-xl h-10 disabled:opacity-60"
+                                                    >
                                                         <SwitchCamera className="w-4 h-4 mr-2 text-[#2075f8]" /> ถ่ายจากกล้อง
                                                     </Button>
-                                                    <Button type="button" onClick={() => avatarInputRef.current?.click()} variant="outline" className="w-full text-[#1d1d1d] border-gray-200 hover:bg-gray-50 rounded-xl h-10">
-                                                        <ImagePlus className="w-4 h-4 mr-2 text-indigo-500" /> อัปโหลดรูปภาพ
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => avatarInputRef.current?.click()}
+                                                        disabled={isProcessingImage}
+                                                        variant="outline"
+                                                        className="w-full text-[#1d1d1d] border-gray-200 hover:bg-gray-50 rounded-xl h-10 disabled:opacity-60"
+                                                    >
+                                                        {isProcessingImage
+                                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> กำลังประมวลผล...</>
+                                                            : <><ImagePlus className="w-4 h-4 mr-2 text-indigo-500" /> อัปโหลดรูปภาพ</>
+                                                        }
                                                     </Button>
                                                     {avatarPreview && (
-                                                        <Button type="button" variant="ghost" onClick={() => { setAvatarPreview(null); if (avatarInputRef.current) avatarInputRef.current.value = ''; }}
-                                                            className="w-full text-red-500 hover:bg-red-50 rounded-xl h-10 mt-1">
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            disabled={isProcessingImage}
+                                                            onClick={() => { setAvatarPreview(null); if (avatarInputRef.current) avatarInputRef.current.value = ''; }}
+                                                            className="w-full text-red-500 hover:bg-red-50 rounded-xl h-10 mt-1"
+                                                        >
                                                             <Trash2 className="w-4 h-4 mr-2" /> ลบรูปปัจจุบัน
                                                         </Button>
                                                     )}
                                                 </div>
                                             )}
-                                            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+
+                                            {/* Hidden file input — explicit MIME types for better mobile picker */}
+                                            <input
+                                                ref={avatarInputRef}
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                                className="hidden"
+                                                onChange={handleAvatarChange}
+                                            />
                                         </div>
 
                                         {/* RIGHT: Fields */}
@@ -1059,8 +1249,13 @@ export function AdminEmployees() {
                                     <div className="px-8 py-5 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
                                         <p className="text-sm font-medium text-gray-400"><span className="text-red-500 mr-1">*</span>ข้อมูลภาคบังคับ</p>
                                         <div className="flex gap-3">
-                                            <Button type="button" variant="outline" onClick={closeFormModal} className="rounded-xl h-11 px-5 border-gray-200 text-[#1d1d1d] hover:bg-gray-50 font-semibold text-sm">ยกเลิก</Button>
-                                            <Button type="submit" className="rounded-xl h-11 px-8 bg-gradient-to-r from-[#2075f8] to-[#1a64d4] hover:from-[#1a64d4] hover:to-[#1655b5] text-white shadow-sm font-semibold text-sm">{isEditing ? 'บันทึกการปรับปรุง' : 'เพิ่มพนักงานเข้าสู่ระบบ'}</Button>
+                                            <Button type="button" variant="outline" onClick={closeFormModal} disabled={isSubmitting} className="rounded-xl h-11 px-5 border-gray-200 text-[#1d1d1d] hover:bg-gray-50 font-semibold text-sm disabled:opacity-50">ยกเลิก</Button>
+                                            <Button type="submit" disabled={isSubmitting} className="rounded-xl h-11 px-8 bg-gradient-to-r from-[#2075f8] to-[#1a64d4] hover:from-[#1a64d4] hover:to-[#1655b5] text-white shadow-sm font-semibold text-sm disabled:opacity-70 min-w-[160px]">
+                                                {isSubmitting
+                                                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />กำลังบันทึก...</>
+                                                    : (isEditing ? 'บันทึกการปรับปรุง' : 'เพิ่มพนักงานเข้าสู่ระบบ')
+                                                }
+                                            </Button>
                                         </div>
                                     </div>
                                 </form>
