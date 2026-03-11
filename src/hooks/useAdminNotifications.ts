@@ -5,6 +5,10 @@ const MAX_NOTIFICATIONS = 50;
 const RECONNECT_DELAY_MS = [1000, 2000, 5000, 10000]; // exponential backoff
 
 function getWsUrl(): string {
+  const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
+  if (apiUrl) {
+    return apiUrl.replace(/^https/, 'wss').replace(/^http/, 'ws') + '/ws';
+  }
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
   return `${proto}://${window.location.host}/ws`;
 }
