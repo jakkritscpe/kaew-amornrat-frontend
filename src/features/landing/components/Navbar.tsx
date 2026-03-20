@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Globe, Menu, X, PhoneCall } from 'lucide-react';
+import { Menu, X, PhoneCall } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -29,12 +29,17 @@ export function Navbar() {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex items-center justify-between">
                     {/* Logo */}
-                    <div className="flex items-center gap-2">
-                        <div className={cn("p-2 rounded-lg", isScrolled ? "bg-[#044F88]/10" : "bg-white/10")}>
-                            <Globe className={cn("w-6 h-6", isScrolled ? "text-[#044F88]" : "text-white")} />
-                        </div>
+                    <div className="flex items-center gap-2.5">
+                        <img
+                            src="/logo.svg"
+                            alt="หจก.แก้วอมรรัตน์"
+                            className={cn(
+                                "h-9 w-auto object-contain transition-all",
+                                !isScrolled && "brightness-0 invert"
+                            )}
+                        />
                         <span className={cn(
-                            "font-bold text-xl",
+                            "font-bold text-lg transition-colors",
                             isScrolled ? "text-[#00223A]" : "text-white"
                         )}>
                             หจก.แก้วอมรรัตน์
@@ -57,10 +62,12 @@ export function Navbar() {
                                 เข้าสู่ระบบพนักงาน
                             </Button>
                         </Link>
-                        <Button className="bg-[#C2410C] hover:bg-[#C2410C]/90 text-white gap-2">
-                            <PhoneCall className="w-4 h-4" />
-                            โทรเลย
-                        </Button>
+                        <a href="tel:0854288897">
+                            <Button className="bg-[#C2410C] hover:bg-[#C2410C]/90 text-white gap-2">
+                                <PhoneCall className="w-4 h-4" />
+                                โทรเลย
+                            </Button>
+                        </a>
                     </div>
 
                     {/* Mobile Menu Toggle */}
@@ -89,10 +96,12 @@ export function Navbar() {
                                 เข้าสู่ระบบพนักงาน
                             </Button>
                         </Link>
-                        <Button className="w-full bg-[#C2410C] hover:bg-[#C2410C]/90">
-                            <PhoneCall className="w-4 h-4 mr-2" />
-                            โทรเลย
-                        </Button>
+                        <a href="tel:0854288897" className="w-full">
+                            <Button className="w-full bg-[#C2410C] hover:bg-[#C2410C]/90">
+                                <PhoneCall className="w-4 h-4 mr-2" />
+                                โทรเลย
+                            </Button>
+                        </a>
                     </div>
                 </div>
             )}

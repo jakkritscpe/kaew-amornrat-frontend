@@ -1,7 +1,26 @@
 import { useState, useMemo } from 'react';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { CheckCircle2, AlertCircle, XCircle, CalendarX, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
-import { formatTime, formatDate, cn } from '@/lib/utils';
+import { formatTime, formatDate, cn, decodeJwt } from '@/lib/utils';
+import { EMPLOYEE_KEY, TOKEN_KEY } from '@/lib/api-client';
+
+function getEmployeeId(): string {
+    try {
+        const emp = localStorage.getItem(EMPLOYEE_KEY);
+        if (emp) {
+            const parsed = JSON.parse(emp);
+            if (parsed?.id) return parsed.id;
+        }
+    } catch { /* ignore */ }
+    try {
+        const token = localStorage.getItem(TOKEN_KEY);
+        if (token) {
+            const payload = decodeJwt(token);
+            if (payload?.sub) return payload.sub as string;
+        }
+    } catch { /* ignore */ }
+    return '';
+}
 
 function getMonthOptions() {
     const opts: { value: string; label: string }[] = [];
@@ -19,13 +38,13 @@ const STATUS_CFG = {
     present:  { label: 'ปกติ',    icon: CheckCircle2, dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
     late:     { label: 'มาสาย',   icon: AlertCircle,  dot: 'bg-amber-500',   badge: 'bg-amber-50 text-amber-700 border-amber-200' },
     absent:   { label: 'ขาดงาน',  icon: XCircle,      dot: 'bg-red-500',     badge: 'bg-red-50 text-red-700 border-red-200' },
-    on_leave: { label: 'ลางาน',   icon: CalendarX,    dot: 'bg-blue-500',    badge: 'bg-blue-50 text-blue-700 border-blue-200' },
+    on_leave: { label: 'ลางาน',   icon: CalendarX,    dot: 'bg-[#044F88]',    badge: 'bg-[#044F88]/5 text-[#00223A] border-[#044F88]/20' },
 } as const;
 type StatusKey = keyof typeof STATUS_CFG;
 
 export function EmployeeHistory() {
     const { logs } = useAttendance();
-    const employeeId = 'emp-001';
+    const employeeId = getEmployeeId();
 
     const monthOptions = useMemo(() => getMonthOptions(), []);
     const [monthIdx, setMonthIdx] = useState(0);
@@ -49,11 +68,11 @@ export function EmployeeHistory() {
         <div className="flex flex-col min-h-full bg-[#f1f5f9]">
 
             {/* ── Blue hero ── */}
-            <div className="bg-[#2075f8] px-5 pt-3 pb-14">
+            <div className="bg-[#044F88] px-5 pt-3 pb-14">
                 {/* Month navigator */}
                 <div className="flex items-center justify-between mb-5">
                     <div>
-                        <p className="text-blue-200 text-xs font-semibold uppercase tracking-widest">ประวัติการทำงาน</p>
+                        <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">ประวัติการทำงาน</p>
                         <h2 className="text-xl font-black text-white mt-0.5">{monthOptions[monthIdx].label}</h2>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -80,7 +99,7 @@ export function EmployeeHistory() {
                     ].map(s => (
                         <div key={s.label} className="bg-white/15 rounded-2xl p-2.5 text-center">
                             <p className={cn('text-2xl font-black tabular-nums leading-none', s.color)}>{s.value}</p>
-                            <p className="text-[10px] text-blue-200 font-semibold mt-1">{s.label}</p>
+                            <p className="text-[10px] text-[#044F88]/80 font-semibold mt-1">{s.label}</p>
                         </div>
                     ))}
                 </div>

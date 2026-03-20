@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { QRCodeSVG } from 'qrcode.react';
 import { regenerateQRApi } from '../../../../lib/api/auth-api';
 import { toast } from 'sonner';
@@ -561,18 +561,18 @@ export function AdminEmployees() {
                     <p className="text-sm text-[#6f6f6f] mt-1">ทั้งหมด {employees.length} คน · สืบค้นและจัดการรายชื่อพนักงาน</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                    <div className="relative w-full sm:w-auto group focus-within:ring-4 focus-within:ring-[#2075f8]/20 rounded-lg transition-all">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-focus-within:text-[#2075f8] transition-colors" />
+                    <div className="relative w-full sm:w-auto group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-lg transition-all">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-focus-within:text-[#044F88] transition-colors" />
                         <Input
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                             placeholder="ค้นหาชื่อ ชื่อเล่น หรือแผนก…"
-                            className="pl-9 w-full sm:w-64 bg-white border-gray-200 focus:border-[#2075f8] focus-visible:ring-0 transition-all rounded-lg h-10"
+                            className="pl-9 w-full sm:w-64 bg-white border-gray-200 focus:border-[#044F88] focus-visible:ring-0 transition-all rounded-lg h-10"
                             autoComplete="off"
                             spellCheck={false}
                         />
                     </div>
-                    <Button onClick={openAddForm} className="bg-gradient-to-r from-[#2075f8] to-[#1a64d4] hover:from-[#1a64d4] hover:to-[#1655b5] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0">
+                    <Button onClick={openAddForm} className="bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0">
                         <Plus className="w-4 h-4 mr-2" /> เพิ่มพนักงาน
                     </Button>
                 </div>
@@ -596,7 +596,7 @@ export function AdminEmployees() {
                     return (
                         <div key={emp.id} className={cn(
                             'emp-card relative group bg-white rounded-2xl border border-gray-100 shadow-sm',
-                            'hover:shadow-xl hover:shadow-gray-200/50 hover:border-blue-200',
+                            'hover:shadow-xl hover:shadow-gray-200/50 hover:border-[#044F88]/20',
                             'transition-all duration-300 flex flex-col',
                         )}>
                             {/* ── Action icons (top-right) ── */}
@@ -604,7 +604,7 @@ export function AdminEmployees() {
                                 <button
                                     onClick={() => { setSecureActionId(emp.id); setSecureActionType('edit'); setSecureStep('pin'); setTimeout(() => PIN_REFS[0]?.current?.focus(), 50); }}
                                     aria-label="แก้ไขพนักงาน"
-                                    className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#2075f8] transition-colors"
+                                    className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#044F88] transition-colors"
                                 >
                                     <Pencil className="w-4 h-4" />
                                 </button>
@@ -626,16 +626,16 @@ export function AdminEmployees() {
                                             src={emp.avatarUrl}
                                             alt={emp.name}
                                             width={56} height={56}
-                                            className="w-14 h-14 rounded-full object-cover shrink-0 bg-blue-50 ring-2 ring-white shadow-sm"
+                                            className="w-14 h-14 rounded-full object-cover shrink-0 bg-[#044F88]/5 ring-2 ring-white shadow-sm"
                                             loading="lazy"
                                         />
                                     ) : (
-                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-lg font-bold shrink-0 ring-2 ring-white shadow-sm">
+                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center text-white text-lg font-bold shrink-0 ring-2 ring-white shadow-sm">
                                             {emp.name.charAt(0)}
                                         </div>
                                     )}
                                     <div className="min-w-0 flex-1 pt-1">
-                                        <h4 className="font-semibold text-[#1d1d1d] truncate group-hover:text-[#2075f8] transition-colors">
+                                        <h4 className="font-semibold text-[#1d1d1d] truncate group-hover:text-[#044F88] transition-colors">
                                             {emp.name}
                                             {emp.nickname && (
                                                 <span className="ml-1.5 font-normal text-[#6f6f6f] text-sm">({emp.nickname})</span>
@@ -659,8 +659,8 @@ export function AdminEmployees() {
                                 {/* Info row */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                                            <Clock className="w-4 h-4 text-[#2075f8]" />
+                                        <div className="w-8 h-8 rounded-xl bg-[#044F88]/5 flex items-center justify-center shrink-0">
+                                            <Clock className="w-4 h-4 text-[#044F88]" />
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-0.5">กะงาน</p>
@@ -696,7 +696,7 @@ export function AdminEmployees() {
                                 <Button
                                     variant="outline"
                                     onClick={() => setShowQRModal(emp.id)}
-                                    className="w-full text-[#6f6f6f] border-gray-200 hover:text-[#2075f8] hover:bg-blue-50 hover:border-blue-200 transition-colors rounded-xl h-10"
+                                    className="w-full text-[#6f6f6f] border-gray-200 hover:text-[#044F88] hover:bg-[#044F88]/5 hover:border-[#044F88]/20 transition-colors rounded-xl h-10"
                                 >
                                     <QrCode className="w-4 h-4 mr-2" /> สแกนลงเวลา
                                 </Button>
@@ -736,7 +736,7 @@ export function AdminEmployees() {
                                     <div className="w-9 h-1 rounded-full bg-gray-300" />
                                 </div>
                                 {/* ── Branded header with employee identity ── */}
-                                <div className="relative bg-gradient-to-br from-[#2075f8] to-[#1250c4] px-6 pt-5 pb-10">
+                                <div className="relative bg-gradient-to-br from-[#044F88] to-[#00223A] px-6 pt-5 pb-10">
                                     <button
                                         onClick={closeQRModal}
                                         className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 flex items-center justify-center text-white transition-colors"
@@ -745,7 +745,7 @@ export function AdminEmployees() {
                                         <X className="w-4 h-4" />
                                     </button>
 
-                                    <p className="text-[11px] font-semibold text-blue-200 uppercase tracking-widest mb-3">QR ลงเวลาของ</p>
+                                    <p className="text-[11px] font-semibold text-[#044F88]/20 uppercase tracking-widest mb-3">QR ลงเวลาของ</p>
 
                                     <div className="flex items-center gap-4">
                                         {selectedEmp?.avatarUrl ? (
@@ -763,10 +763,10 @@ export function AdminEmployees() {
                                             <h3 className="text-lg font-bold text-white leading-tight truncate">
                                                 {selectedEmp?.name}
                                             </h3>
-                                            <p className="text-sm text-blue-200 truncate mt-0.5">
+                                            <p className="text-sm text-[#044F88]/20 truncate mt-0.5">
                                                 {selectedEmp?.position}
                                                 {selectedEmp?.department && (
-                                                    <span className="text-blue-300"> · {selectedEmp.department}</span>
+                                                    <span className="text-[#044F88]/30"> · {selectedEmp.department}</span>
                                                 )}
                                             </p>
                                         </div>
@@ -778,10 +778,10 @@ export function AdminEmployees() {
                                     <div className="bg-white p-5 flex flex-col items-center gap-3">
                                         {/* QR with corner-bracket frame */}
                                         <div className="relative p-3">
-                                            <span className="absolute top-0 left-0 w-5 h-5 border-t-[3px] border-l-[3px] border-[#2075f8] rounded-tl-lg" />
-                                            <span className="absolute top-0 right-0 w-5 h-5 border-t-[3px] border-r-[3px] border-[#2075f8] rounded-tr-lg" />
-                                            <span className="absolute bottom-0 left-0 w-5 h-5 border-b-[3px] border-l-[3px] border-[#2075f8] rounded-bl-lg" />
-                                            <span className="absolute bottom-0 right-0 w-5 h-5 border-b-[3px] border-r-[3px] border-[#2075f8] rounded-br-lg" />
+                                            <span className="absolute top-0 left-0 w-5 h-5 border-t-[3px] border-l-[3px] border-[#044F88] rounded-tl-lg" />
+                                            <span className="absolute top-0 right-0 w-5 h-5 border-t-[3px] border-r-[3px] border-[#044F88] rounded-tr-lg" />
+                                            <span className="absolute bottom-0 left-0 w-5 h-5 border-b-[3px] border-l-[3px] border-[#044F88] rounded-bl-lg" />
+                                            <span className="absolute bottom-0 right-0 w-5 h-5 border-b-[3px] border-r-[3px] border-[#044F88] rounded-br-lg" />
                                             <QRCodeSVG
                                                 value={
                                                     selectedEmp?.qrToken
@@ -795,7 +795,7 @@ export function AdminEmployees() {
                                             />
                                         </div>
                                         <div className="flex items-center gap-1.5 text-xs text-[#6f6f6f]">
-                                            <QrCode className="w-3.5 h-3.5 text-[#2075f8]" />
+                                            <QrCode className="w-3.5 h-3.5 text-[#044F88]" />
                                             สแกนเพื่อเข้าสู่ระบบลงเวลา
                                         </div>
                                     </div>
@@ -911,8 +911,8 @@ export function AdminEmployees() {
                                             </>
                                         ) : (
                                             <>
-                                                <div className={cn('w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5', locked ? 'bg-gray-100' : (isDelete ? 'bg-red-50' : 'bg-[#e8f1fe]'))}>
-                                                    <CheckCircle2 className={cn('w-8 h-8', locked ? 'text-gray-400' : (isDelete ? 'text-red-500' : 'text-[#2075f8]'))} />
+                                                <div className={cn('w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5', locked ? 'bg-gray-100' : (isDelete ? 'bg-red-50' : 'bg-[#044F88/10]'))}>
+                                                    <CheckCircle2 className={cn('w-8 h-8', locked ? 'text-gray-400' : (isDelete ? 'text-red-500' : 'text-[#044F88]'))} />
                                                 </div>
                                                 <h3 className="text-xl font-bold text-[#1d1d1d] mb-2">ยืนยันรหัส PIN</h3>
                                                 <p className="text-sm text-[#6f6f6f] mb-6">กรุณากรอกรหัส PIN 4 หลักเพื่อยืนยันสิทธิ์ของคุณ</p>
@@ -922,7 +922,7 @@ export function AdminEmployees() {
                                                     {['d0', 'd1', 'd2', 'd3'].map((id, i) => (
                                                         <div key={id} className={cn(
                                                             'w-14 h-14 rounded-2xl border-2 flex items-center justify-center text-2xl font-bold transition-all duration-200',
-                                                            i < pinInput.length ? (isDelete ? 'border-red-400 bg-red-50 text-red-500 scale-105' : 'border-blue-400 bg-blue-50 text-blue-500 scale-105') : 'border-gray-200 bg-gray-50',
+                                                            i < pinInput.length ? (isDelete ? 'border-red-400 bg-red-50 text-red-500 scale-105' : 'border-[#044F88]/80 bg-[#044F88]/5 text-[#044F88] scale-105') : 'border-gray-200 bg-gray-50',
                                                             locked && 'opacity-40',
                                                         )}>
                                                             {i < pinInput.length ? '●' : ''}
@@ -951,7 +951,7 @@ export function AdminEmployees() {
                                                                 ) : (
                                                                     <button key={k} type="button" disabled={locked || pinInput.length >= 4}
                                                                         onClick={() => handlePinDigit(k)}
-                                                                        className="h-14 rounded-2xl bg-white border border-gray-200 shadow-sm hover:border-[#2075f8] hover:text-[#2075f8] text-[#1d1d1d] font-semibold text-xl transition-all disabled:opacity-30 touch-manipulation">
+                                                                        className="h-14 rounded-2xl bg-white border border-gray-200 shadow-sm hover:border-[#044F88] hover:text-[#044F88] text-[#1d1d1d] font-semibold text-xl transition-all disabled:opacity-30 touch-manipulation">
                                                                         {k}
                                                                     </button>
                                                                 )
@@ -996,7 +996,7 @@ export function AdminEmployees() {
                                             <div className="relative w-48 h-48">
                                                 <div className={cn(
                                                     'w-48 h-48 rounded-full overflow-hidden border-2 border-dashed bg-white flex items-center justify-center shadow-sm transition-colors',
-                                                    isProcessingImage ? 'border-blue-300' : 'border-gray-200 hover:border-blue-300',
+                                                    isProcessingImage ? 'border-[#044F88]/30' : 'border-gray-200 hover:border-[#044F88]/30',
                                                 )}>
                                                     {avatarMode === 'camera' ? (
                                                         <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
@@ -1013,8 +1013,8 @@ export function AdminEmployees() {
                                                 {/* Processing overlay */}
                                                 {isProcessingImage && (
                                                     <div className="absolute inset-0 rounded-full bg-white/75 flex flex-col items-center justify-center gap-2">
-                                                        <Loader2 className="w-8 h-8 text-[#2075f8] animate-spin" />
-                                                        <span className="text-xs font-medium text-[#2075f8]">กำลังประมวลผล</span>
+                                                        <Loader2 className="w-8 h-8 text-[#044F88] animate-spin" />
+                                                        <span className="text-xs font-medium text-[#044F88]">กำลังประมวลผล</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -1036,7 +1036,7 @@ export function AdminEmployees() {
                                                         type="button"
                                                         onClick={capturePhoto}
                                                         disabled={isProcessingImage}
-                                                        className="w-full bg-[#2075f8] hover:bg-[#1a64d4] text-white rounded-xl h-10 disabled:opacity-60"
+                                                        className="w-full bg-[#044F88] hover:bg-[#00223A] text-white rounded-xl h-10 disabled:opacity-60"
                                                     >
                                                         {isProcessingImage
                                                             ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> กำลังประมวลผล...</>
@@ -1056,7 +1056,7 @@ export function AdminEmployees() {
                                                         variant="outline"
                                                         className="w-full text-[#1d1d1d] border-gray-200 hover:bg-gray-50 rounded-xl h-10 disabled:opacity-60"
                                                     >
-                                                        <SwitchCamera className="w-4 h-4 mr-2 text-[#2075f8]" /> ถ่ายจากกล้อง
+                                                        <SwitchCamera className="w-4 h-4 mr-2 text-[#044F88]" /> ถ่ายจากกล้อง
                                                     </Button>
                                                     <Button
                                                         type="button"
@@ -1102,11 +1102,11 @@ export function AdminEmployees() {
                                                     <label htmlFor="emp-name" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
                                                         ชื่อ-นามสกุล <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input id="emp-name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="เช่น สมชาย ใจดี" required autoComplete="name" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="เช่น สมชาย ใจดี" required autoComplete="name" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                                 </div>
                                                 <div>
                                                     <label htmlFor="emp-nickname" className="text-sm font-semibold text-[#1d1d1d] block mb-2">ชื่อเล่น</label>
-                                                    <Input id="emp-nickname" name="nickname" value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} placeholder="เช่น ชาย" autoComplete="nickname" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-nickname" name="nickname" value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} placeholder="เช่น ชาย" autoComplete="nickname" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                                 </div>
                                             </div>
 
@@ -1115,7 +1115,7 @@ export function AdminEmployees() {
                                                 <label htmlFor="emp-email" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
                                                     อีเมล <span className="text-red-500">*</span>
                                                 </label>
-                                                <Input id="emp-email" name="email" type="email" inputMode="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" required autoComplete="email" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
+                                                <Input id="emp-email" name="email" type="email" inputMode="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" required autoComplete="email" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                             </div>
 
                                             <div>
@@ -1123,7 +1123,7 @@ export function AdminEmployees() {
                                                     รหัสผ่าน {!isEditing && <span className="text-red-500">*</span>}
                                                     {isEditing && <span className="text-xs text-gray-400 ml-1">(เว้นว่างหากไม่ต้องการเปลี่ยน)</span>}
                                                 </label>
-                                                <Input id="emp-password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="อย่างน้อย 6 ตัวอักษร" required={!isEditing} minLength={6} autoComplete="new-password" className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
+                                                <Input id="emp-password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="อย่างน้อย 6 ตัวอักษร" required={!isEditing} minLength={6} autoComplete="new-password" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                             </div>
 
                                             {/* Department + Position */}
@@ -1132,13 +1132,13 @@ export function AdminEmployees() {
                                                     <label htmlFor="emp-department" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
                                                         แผนก <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input id="emp-department" name="department" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="เช่น Engineering" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-department" name="department" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="เช่น Engineering" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                                 </div>
                                                 <div>
                                                     <label htmlFor="emp-position" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
                                                         ตำแหน่ง <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input id="emp-position" name="position" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="เช่น Developer" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-position" name="position" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="เช่น Developer" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                                 </div>
                                             </div>
 
@@ -1148,9 +1148,9 @@ export function AdminEmployees() {
                                                     เวลาทำงาน <span className="text-red-500">*</span>
                                                 </label>
                                                 <div className="flex items-center gap-3">
-                                                    <Input id="shift-start" name="shiftStartTime" type="time" value={form.shiftStartTime} onChange={e => setForm({ ...form, shiftStartTime: e.target.value })} required className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white tabular-nums text-[#1d1d1d] text-center" />
+                                                    <Input id="shift-start" name="shiftStartTime" type="time" value={form.shiftStartTime} onChange={e => setForm({ ...form, shiftStartTime: e.target.value })} required className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-[#1d1d1d] text-center" />
                                                     <span className="text-gray-400 font-medium">ถึง</span>
-                                                    <Input id="shift-end" name="shiftEndTime" type="time" value={form.shiftEndTime} onChange={e => setForm({ ...form, shiftEndTime: e.target.value })} required className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white tabular-nums text-[#1d1d1d] text-center" />
+                                                    <Input id="shift-end" name="shiftEndTime" type="time" value={form.shiftEndTime} onChange={e => setForm({ ...form, shiftEndTime: e.target.value })} required className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-[#1d1d1d] text-center" />
                                                 </div>
                                             </div>
 
@@ -1162,7 +1162,7 @@ export function AdminEmployees() {
                                                 </label>
                                                 <select
                                                     id="emp-location"
-                                                    className="w-full h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#2075f8]/20 focus:border-[#2075f8] transition-shadow"
+                                                    className="w-full h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#044F88]/20 focus:border-[#044F88] transition-shadow"
                                                     value={form.locationId}
                                                     onChange={e => setForm({ ...form, locationId: e.target.value })}
                                                 >
@@ -1201,25 +1201,25 @@ export function AdminEmployees() {
                                                     <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 transition-colors">
                                                         <input
                                                             type="checkbox"
-                                                            className="w-5 h-5 rounded border-gray-300 text-[#2075f8] focus:ring-[#2075f8] cursor-pointer"
+                                                            className="w-5 h-5 rounded border-gray-300 text-[#044F88] focus:ring-[#044F88] cursor-pointer"
                                                             checked={form.otUseDefault}
                                                             onChange={e => setForm({ ...form, otUseDefault: e.target.checked })}
                                                         />
                                                         <span className="text-sm font-medium text-[#1d1d1d]">
                                                             ใช้อัตราหลักของบริษัท
-                                                            <span className="ml-2 text-xs font-bold text-[#2075f8] bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full">
+                                                            <span className="ml-2 text-xs font-bold text-[#044F88] bg-[#044F88]/5 border border-[#044F88]/10 px-2 py-0.5 rounded-full">
                                                                 {companySettings.defaultOtRateValue} {companySettings.defaultOtRateType === 'multiplier' ? 'เท่า' : 'บาท/ชม.'}
                                                             </span>
                                                         </span>
                                                     </label>
 
                                                     {!form.otUseDefault && (
-                                                        <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/50 space-y-4 animate-in slide-in-from-top-2">
+                                                        <div className="p-4 rounded-xl border border-[#044F88]/10 bg-[#044F88]/5/50 space-y-4 animate-in slide-in-from-top-2">
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                 <div>
                                                                     <label className="text-xs font-semibold text-[#6f6f6f] block mb-1.5">คำนวณแบบ</label>
                                                                     <select
-                                                                        className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm text-[#1d1d1d] font-medium focus:outline-none focus:ring-2 focus:ring-[#2075f8]/20 focus:border-[#2075f8] transition-shadow"
+                                                                        className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm text-[#1d1d1d] font-medium focus:outline-none focus:ring-2 focus:ring-[#044F88]/20 focus:border-[#044F88] transition-shadow"
                                                                         value={form.otType}
                                                                         onChange={e => setForm({ ...form, otType: e.target.value as 'multiplier' | 'fixed' })}
                                                                     >
@@ -1235,7 +1235,7 @@ export function AdminEmployees() {
                                                                             value={form.otValue}
                                                                             onChange={e => setForm({ ...form, otValue: e.target.value })}
                                                                             placeholder={form.otType === 'multiplier' ? 'ตัวอย่าง: 1.5' : 'ตัวอย่าง: 50'}
-                                                                            className="h-11 rounded-lg border-gray-200 focus:border-[#2075f8] pr-12 font-medium"
+                                                                            className="h-11 rounded-lg border-gray-200 focus:border-[#044F88] pr-12 font-medium"
                                                                         />
                                                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#6f6f6f] pointer-events-none">
                                                                             {form.otType === 'multiplier' ? 'เท่า' : 'บาท'}
@@ -1255,7 +1255,7 @@ export function AdminEmployees() {
                                         <p className="text-sm font-medium text-gray-400"><span className="text-red-500 mr-1">*</span>ข้อมูลภาคบังคับ</p>
                                         <div className="flex gap-3">
                                             <Button type="button" variant="outline" onClick={closeFormModal} disabled={isSubmitting} className="rounded-xl h-11 px-5 border-gray-200 text-[#1d1d1d] hover:bg-gray-50 font-semibold text-sm disabled:opacity-50">ยกเลิก</Button>
-                                            <Button type="submit" disabled={isSubmitting} className="rounded-xl h-11 px-8 bg-gradient-to-r from-[#2075f8] to-[#1a64d4] hover:from-[#1a64d4] hover:to-[#1655b5] text-white shadow-sm font-semibold text-sm disabled:opacity-70 min-w-[160px]">
+                                            <Button type="submit" disabled={isSubmitting} className="rounded-xl h-11 px-8 bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm font-semibold text-sm disabled:opacity-70 min-w-[160px]">
                                                 {isSubmitting
                                                     ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />กำลังบันทึก...</>
                                                     : (isEditing ? 'บันทึกการปรับปรุง' : 'เพิ่มพนักงานเข้าสู่ระบบ')
