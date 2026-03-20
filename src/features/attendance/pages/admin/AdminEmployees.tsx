@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn, formatTime } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -65,11 +66,11 @@ function estimateSizeKB(dataUrl: string): number {
     return Math.round((base64.length * 3) / 4 / 1024);
 }
 
-const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
-    present: { label: 'มาทำงาน', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
-    late: { label: 'มาสาย', dot: 'bg-amber-500', badge: 'bg-amber-50 text-amber-700 ring-amber-200' },
-    absent: { label: 'ขาดงาน', dot: 'bg-red-500', badge: 'bg-red-50 text-red-700 ring-red-200' },
-    none: { label: 'ยังไม่เช็คอิน', dot: 'bg-gray-400', badge: 'bg-gray-50 text-gray-500 ring-gray-200' },
+const STATUS_STYLE: Record<string, { labelKey: string; dot: string; badge: string }> = {
+    present: { labelKey: 'status.present', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
+    late: { labelKey: 'status.late', dot: 'bg-amber-500', badge: 'bg-amber-50 text-amber-700 ring-amber-200' },
+    absent: { labelKey: 'status.absent', dot: 'bg-red-500', badge: 'bg-red-50 text-red-700 ring-red-200' },
+    none: { labelKey: 'status.notCheckedIn', dot: 'bg-gray-400', badge: 'bg-gray-50 text-gray-500 ring-gray-200' },
 };
 
 const STAT_ICONS: Record<string, React.ElementType> = {
@@ -89,6 +90,7 @@ const STAT_COLORS: Record<string, string> = {
 type AvatarMode = 'idle' | 'camera';
 
 function StatCard({ title, value, icon: Icon, color, delay }: { title: string, value: number, icon: React.ElementType, color: string, delay: number }) {
+    const { t } = useTranslation();
     const cardRef = useRef<HTMLDivElement>(null);
     const [displayValue, setDisplayValue] = useState(0);
 
@@ -150,7 +152,7 @@ function StatCard({ title, value, icon: Icon, color, delay }: { title: string, v
                     <span className="text-3xl font-bold text-[#1d1d1d] tabular-nums">
                         {displayValue.toLocaleString()}
                     </span>
-                    <p className="text-sm text-gray-400 mt-1">คน</p>
+                    <p className="text-sm text-gray-400 mt-1">{t('common.person')}</p>
                 </div>
                 <div className={cn('stat-icon w-12 h-12 rounded-xl flex items-center justify-center shrink-0', color)}>
                     <Icon className="w-6 h-6 text-white" />
@@ -161,7 +163,8 @@ function StatCard({ title, value, icon: Icon, color, delay }: { title: string, v
 }
 
 export function AdminEmployees() {
-    const { employees, logs, locations, addEmployee, updateEmployee, removeEmployee, companySettings, refreshAll } = useAttendance();
+    const { t } = useTranslation();
+    const { employees, logs, locations, addEmployee, updateEmployee, removeEmployee, companySettings, refreshAll, loading, error } = useAttendance();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showQRModal, setShowQRModal] = useState<string | null>(null);
@@ -254,7 +257,7 @@ export function AdminEmployees() {
     const startCamera = useCallback(async () => {
         setCameraError(null);
         if (!navigator.mediaDevices?.getUserMedia) {
-            setCameraError('เบราว์เซอร์ไม่รองรับกล้อง หรือต้องใช้งานผ่าน HTTPS');
+            setCameraError(t('admin.employees.cameraNotSupported'));
             return;
         }
         try {
@@ -266,9 +269,9 @@ export function AdminEmployees() {
             // srcObject is assigned in useEffect below, after the <video> element mounts
         } catch (err) {
             if (err instanceof DOMException && err.name === 'NotAllowedError') {
-                setCameraError('กรุณาอนุญาตการเข้าถึงกล้องในเบราว์เซอร์');
+                setCameraError(t('admin.employees.cameraPermission'));
             } else {
-                setCameraError('ไม่สามารถเข้าถึงกล้องได้');
+                setCameraError(t('admin.employees.cameraError'));
             }
         }
     }, []);
@@ -301,7 +304,7 @@ export function AdminEmployees() {
             setAvatarPreview(resized);
             stopCamera();
         } catch {
-            toast.error('ไม่สามารถถ่ายรูปได้ กรุณาลองใหม่');
+            toast.error(t('admin.employees.photoError'));
         } finally {
             setIsProcessingImage(false);
         }
@@ -382,10 +385,10 @@ export function AdminEmployees() {
                     try {
                         const target = employees.find(e => e.id === secureActionId);
                         await removeEmployee(secureActionId!);
-                        toast.success(`ลบ ${target?.name ?? 'พนักงาน'} ออกจากระบบสำเร็จ`);
+                        toast.success(t('admin.employees.deleteSuccess', { name: target?.name ?? '' }));
                         closeSecureAction();
                     } catch (err) {
-                        toast.error(err instanceof Error ? err.message : 'ไม่สามารถลบพนักงานได้ กรุณาลองใหม่');
+                        toast.error(err instanceof Error ? err.message : t('admin.employees.deleteFail'));
                         setPinInput('');
                         PIN_REFS[0]?.current?.focus();
                     } finally {
@@ -400,7 +403,7 @@ export function AdminEmployees() {
                 setPinAttempts(newAttempts);
                 setPinInput('');
                 PIN_REFS[0]?.current?.focus();
-                setPinError(newAttempts >= 3 ? 'ถูกล็อค – ลองใหม่ภายหลัง' : `PIN ไม่ถูกต้อง (${3 - newAttempts} ครั้งที่เหลือ)`);
+                setPinError(newAttempts >= 3 ? t('admin.employees.pinLocked') : t('admin.employees.pinWrong', { n: String(3 - newAttempts) }));
             }
         }
     };
@@ -418,11 +421,11 @@ export function AdminEmployees() {
         // Reset input so the same file can be re-selected later
         e.target.value = '';
         if (!file.type.startsWith('image/')) {
-            toast.error('กรุณาเลือกไฟล์รูปภาพเท่านั้น (JPG, PNG, WebP)');
+            toast.error(t('admin.employees.imageTypeError'));
             return;
         }
         if (file.size > 10 * 1024 * 1024) {
-            toast.error('ไฟล์ต้องมีขนาดไม่เกิน 10 MB');
+            toast.error(t('admin.employees.imageSizeError'));
             return;
         }
         setIsProcessingImage(true);
@@ -431,7 +434,7 @@ export function AdminEmployees() {
             const resized = await resizeImage(raw);
             setAvatarPreview(resized);
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการโหลดรูป');
+            toast.error(err instanceof Error ? err.message : t('admin.employees.imageLoadError'));
         } finally {
             setIsProcessingImage(false);
         }
@@ -464,14 +467,14 @@ export function AdminEmployees() {
             setIsSubmitting(true);
             if (isEditing && editingId) {
                 await updateEmployee(editingId, form.password ? { ...payload, password: form.password } : payload);
-                toast.success(`อัปเดตข้อมูล ${form.name} สำเร็จ`);
+                toast.success(t('admin.employees.updateSuccess', { name: form.name }));
             } else {
                 await addEmployee({ ...payload, role: 'employee', password: form.password || 'password123' });
-                toast.success(`เพิ่ม ${form.name} เข้าสู่ระบบสำเร็จ`);
+                toast.success(t('admin.employees.addSuccess', { name: form.name }));
             }
             closeFormModal();
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+            toast.error(err instanceof Error ? err.message : t('common.genericError'));
         } finally {
             setIsSubmitting(false);
         }
@@ -497,7 +500,7 @@ export function AdminEmployees() {
             a.click();
         };
         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-        toast.success('บันทึก QR สำเร็จ');
+        toast.success(t('admin.employees.saveQrSuccess'));
     };
 
     const copyQRLink = () => {
@@ -515,9 +518,9 @@ export function AdminEmployees() {
             await regenerateQRApi(employeeId);
             await refreshAll();
             setConfirmRegenerate(false);
-            toast.success('ออก QR ใหม่สำเร็จ — QR เดิมถูกยกเลิกแล้ว');
+            toast.success(t('admin.employees.regenerateSuccess'));
         } catch {
-            toast.error('ไม่สามารถออก QR ใหม่ได้ กรุณาลองใหม่');
+            toast.error(t('admin.employees.regenerateFail'));
         }
     };
 
@@ -552,13 +555,39 @@ export function AdminEmployees() {
         };
     }, [showQRModal]);
 
+    if (loading && employees.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-32 gap-4">
+                <Loader2 className="w-8 h-8 animate-spin text-[#044F88]" />
+                <p className="text-sm text-[#6f6f6f]">{t('admin.employees.loading')}</p>
+            </div>
+        );
+    }
+
+    if (error && employees.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-32 gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center">
+                    <AlertTriangle className="w-7 h-7 text-red-400" />
+                </div>
+                <div className="text-center">
+                    <p className="text-sm font-semibold text-[#1d1d1d]">{t('admin.employees.loadFailed')}</p>
+                    <p className="text-xs text-[#6f6f6f] mt-1">{error}</p>
+                </div>
+                <Button onClick={() => refreshAll()} variant="outline" className="gap-2 mt-2">
+                    <RefreshCw className="w-4 h-4" /> {t('common.retry')}
+                </Button>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             {/* ── Page header ── */}
             <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">จัดการพนักงาน</h1>
-                    <p className="text-sm text-[#6f6f6f] mt-1">ทั้งหมด {employees.length} คน · สืบค้นและจัดการรายชื่อพนักงาน</p>
+                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">{t('admin.employees.title')}</h1>
+                    <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.employees.totalDesc', { n: String(employees.length) })}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                     <div className="relative w-full sm:w-auto group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-lg transition-all">
@@ -566,24 +595,24 @@ export function AdminEmployees() {
                         <Input
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            placeholder="ค้นหาชื่อ ชื่อเล่น หรือแผนก…"
+                            placeholder={t('admin.employees.searchPlaceholder')}
                             className="pl-9 w-full sm:w-64 bg-white border-gray-200 focus:border-[#044F88] focus-visible:ring-0 transition-all rounded-lg h-10"
                             autoComplete="off"
                             spellCheck={false}
                         />
                     </div>
                     <Button onClick={openAddForm} className="bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0">
-                        <Plus className="w-4 h-4 mr-2" /> เพิ่มพนักงาน
+                        <Plus className="w-4 h-4 mr-2" /> {t('admin.employees.addEmployee')}
                     </Button>
                 </div>
             </div>
 
             {/* ── Stats grid (Match Dashboard) ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
-                <StatCard title="มาทำงาน" value={stats.present} icon={STAT_ICONS.present} color={STAT_COLORS.present} delay={0.1} />
-                <StatCard title="มาสาย" value={stats.late} icon={STAT_ICONS.late} color={STAT_COLORS.late} delay={0.2} />
-                <StatCard title="ขาดงาน" value={stats.absent} icon={STAT_ICONS.absent} color={STAT_COLORS.absent} delay={0.3} />
-                <StatCard title="ยังไม่เช็คอิน" value={stats.none} icon={STAT_ICONS.none} color={STAT_COLORS.none} delay={0.4} />
+                <StatCard title={t('status.present')} value={stats.present} icon={STAT_ICONS.present} color={STAT_COLORS.present} delay={0.1} />
+                <StatCard title={t('status.late')} value={stats.late} icon={STAT_ICONS.late} color={STAT_COLORS.late} delay={0.2} />
+                <StatCard title={t('status.absent')} value={stats.absent} icon={STAT_ICONS.absent} color={STAT_COLORS.absent} delay={0.3} />
+                <StatCard title={t('status.notCheckedIn')} value={stats.none} icon={STAT_ICONS.none} color={STAT_COLORS.none} delay={0.4} />
             </div>
 
             {/* ── Employee cards ── */}
@@ -591,7 +620,7 @@ export function AdminEmployees() {
                 {filteredEmployees.map(emp => {
                     const todayLog = logs.find(l => l.employeeId === emp.id && l.date === todayDate);
                     const status = getStatus(emp.id);
-                    const statusConfig = STATUS_CONFIG[status];
+                    const statusConfig = STATUS_STYLE[status];
 
                     return (
                         <div key={emp.id} className={cn(
@@ -603,14 +632,14 @@ export function AdminEmployees() {
                             <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                     onClick={() => { setSecureActionId(emp.id); setSecureActionType('edit'); setSecureStep('pin'); setTimeout(() => PIN_REFS[0]?.current?.focus(), 50); }}
-                                    aria-label="แก้ไขพนักงาน"
+                                    aria-label={t('admin.employees.editLabel')}
                                     className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#044F88] transition-colors"
                                 >
                                     <Pencil className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => { setSecureActionId(emp.id); setSecureActionType('delete'); setSecureStep('confirm'); }}
-                                    aria-label="ลบพนักงาน"
+                                    aria-label={t('admin.employees.deleteLabel')}
                                     className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-red-500 transition-colors"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -648,7 +677,7 @@ export function AdminEmployees() {
                                             statusConfig.badge,
                                         )}>
                                             <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', statusConfig.dot)} />
-                                            {statusConfig.label}
+                                            {t(statusConfig.labelKey)}
                                         </span>
                                     </div>
                                 </div>
@@ -663,7 +692,7 @@ export function AdminEmployees() {
                                             <Clock className="w-4 h-4 text-[#044F88]" />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-0.5">กะงาน</p>
+                                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-0.5">{t('admin.employees.shift')}</p>
                                             <p className="text-xs font-semibold text-[#1d1d1d] tabular-nums truncate">{emp.shiftStartTime}–{emp.shiftEndTime}</p>
                                         </div>
                                     </div>
@@ -672,7 +701,7 @@ export function AdminEmployees() {
                                             <Building2 className="w-4 h-4 text-indigo-500" />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-0.5">แผนก</p>
+                                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-0.5">{t('admin.employees.department')}</p>
                                             <p className="text-xs font-semibold text-[#1d1d1d] truncate">{emp.department}</p>
                                         </div>
                                     </div>
@@ -683,10 +712,10 @@ export function AdminEmployees() {
                                     'flex items-center justify-between rounded-xl px-4 py-3 border',
                                     todayLog?.checkInTime ? 'bg-emerald-50/50 border-emerald-100/50' : 'bg-gray-50/50 border-gray-100/50',
                                 )}>
-                                    <p className="text-xs font-medium text-[#6f6f6f]">เช็คอินวันนี้</p>
+                                    <p className="text-xs font-medium text-[#6f6f6f]">{t('admin.employees.checkedInToday')}</p>
                                     {todayLog?.checkInTime
-                                        ? <p className="text-xs font-bold text-emerald-600 tabular-nums">{formatTime(todayLog.checkInTime)} น.</p>
-                                        : <p className="text-xs text-gray-400">ยังไม่มีข้อมูล</p>
+                                        ? <p className="text-xs font-bold text-emerald-600 tabular-nums">{formatTime(todayLog.checkInTime)}</p>
+                                        : <p className="text-xs text-gray-400">{t('admin.employees.noData')}</p>
                                     }
                                 </div>
                             </div>
@@ -698,7 +727,7 @@ export function AdminEmployees() {
                                     onClick={() => setShowQRModal(emp.id)}
                                     className="w-full text-[#6f6f6f] border-gray-200 hover:text-[#044F88] hover:bg-[#044F88]/5 hover:border-[#044F88]/20 transition-colors rounded-xl h-10"
                                 >
-                                    <QrCode className="w-4 h-4 mr-2" /> สแกนลงเวลา
+                                    <QrCode className="w-4 h-4 mr-2" /> {t('admin.employees.scanAttendance')}
                                 </Button>
                             </div>
                         </div>
@@ -709,8 +738,8 @@ export function AdminEmployees() {
                 {filteredEmployees.length === 0 ? (
                     <div className="col-span-1 md:col-span-2 lg:col-span-3 py-24 text-center bg-white rounded-2xl border border-gray-100 shadow-sm">
                         <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p className="text-[#1d1d1d] font-semibold text-lg">ไม่พบพนักงานที่ตรงกับการค้นหา</p>
-                        <p className="text-sm text-[#6f6f6f] mt-1">ลองใช้คำค้นหาอื่น หรือกดปุ่มเพิ่มพนักงานใหม่</p>
+                        <p className="text-[#1d1d1d] font-semibold text-lg">{t('admin.employees.noResults')}</p>
+                        <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.employees.noResultsHint')}</p>
                     </div>
                 ) : null}
             </div>
@@ -740,12 +769,12 @@ export function AdminEmployees() {
                                     <button
                                         onClick={closeQRModal}
                                         className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 flex items-center justify-center text-white transition-colors"
-                                        aria-label="ปิด"
+                                        aria-label={t('common.close')}
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
 
-                                    <p className="text-[11px] font-semibold text-[#044F88]/20 uppercase tracking-widest mb-3">QR ลงเวลาของ</p>
+                                    <p className="text-[11px] font-semibold text-[#044F88]/20 uppercase tracking-widest mb-3">{t('admin.employees.qrTitle')}</p>
 
                                     <div className="flex items-center gap-4">
                                         {selectedEmp?.avatarUrl ? (
@@ -763,10 +792,10 @@ export function AdminEmployees() {
                                             <h3 className="text-lg font-bold text-white leading-tight truncate">
                                                 {selectedEmp?.name}
                                             </h3>
-                                            <p className="text-sm text-[#044F88]/20 truncate mt-0.5">
+                                            <p className="text-sm text-white/70 truncate mt-0.5">
                                                 {selectedEmp?.position}
                                                 {selectedEmp?.department && (
-                                                    <span className="text-[#044F88]/30"> · {selectedEmp.department}</span>
+                                                    <span className="text-white/50"> · {selectedEmp.department}</span>
                                                 )}
                                             </p>
                                         </div>
@@ -796,7 +825,7 @@ export function AdminEmployees() {
                                         </div>
                                         <div className="flex items-center gap-1.5 text-xs text-[#6f6f6f]">
                                             <QrCode className="w-3.5 h-3.5 text-[#044F88]" />
-                                            สแกนเพื่อเข้าสู่ระบบลงเวลา
+                                            {t('admin.employees.scanToLogin')}
                                         </div>
                                     </div>
                                 </div>
@@ -810,7 +839,7 @@ export function AdminEmployees() {
                                             className="bg-[#1d1d1d] hover:bg-gray-800 active:bg-gray-900 text-white rounded-xl h-12 sm:h-11 text-sm font-semibold gap-2 touch-manipulation"
                                         >
                                             <FileDown className="w-4 h-4" />
-                                            บันทึก QR
+                                            {t('admin.employees.saveQr')}
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -823,8 +852,8 @@ export function AdminEmployees() {
                                             )}
                                         >
                                             {copied
-                                                ? <><Check className="w-4 h-4" /> คัดลอกแล้ว</>
-                                                : <><Link2 className="w-4 h-4" /> คัดลอกลิงก์</>
+                                                ? <><Check className="w-4 h-4" /> {t('admin.employees.copied')}</>
+                                                : <><Link2 className="w-4 h-4" /> {t('admin.employees.copyLink')}</>
                                             }
                                         </Button>
                                     </div>
@@ -837,15 +866,15 @@ export function AdminEmployees() {
                                                 className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors py-2.5 rounded-xl"
                                             >
                                                 <RefreshCw className="w-3.5 h-3.5" />
-                                                ออก QR ใหม่ · ยกเลิก QR เดิม
+                                                {t('admin.employees.regenerateQr')}
                                             </button>
                                         ) : (
                                             <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-3">
                                                 <div className="flex items-start gap-2.5">
                                                     <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                                                     <div>
-                                                        <p className="text-sm font-semibold text-red-700">ยืนยันออก QR ใหม่?</p>
-                                                        <p className="text-xs text-red-500 mt-0.5">QR เดิมทั้งหมดจะใช้ไม่ได้ทันที</p>
+                                                        <p className="text-sm font-semibold text-red-700">{t('admin.employees.regenerateConfirm')}</p>
+                                                        <p className="text-xs text-red-500 mt-0.5">{t('admin.employees.regenerateWarning')}</p>
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2">
@@ -854,13 +883,13 @@ export function AdminEmployees() {
                                                         onClick={() => setConfirmRegenerate(false)}
                                                         className="h-9 text-sm rounded-lg border-gray-200"
                                                     >
-                                                        ยกเลิก
+                                                        {t('common.cancel')}
                                                     </Button>
                                                     <Button
                                                         onClick={() => showQRModal && handleRegenerateQR(showQRModal)}
                                                         className="h-9 text-sm rounded-lg bg-red-500 hover:bg-red-600 text-white"
                                                     >
-                                                        ออก QR ใหม่
+                                                        {t('admin.employees.regenerateBtn')}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -892,20 +921,16 @@ export function AdminEmployees() {
                                                 <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
                                                     <Trash2 className="w-8 h-8 text-red-500" />
                                                 </div>
-                                                <h3 className="text-xl font-bold text-[#1d1d1d] mb-2">ลบพนักงาน</h3>
+                                                <h3 className="text-xl font-bold text-[#1d1d1d] mb-2">{t('admin.employees.deleteConfirmTitle')}</h3>
                                                 <p className="text-[15px] text-[#6f6f6f] mb-8 leading-relaxed">
-                                                    คุณต้องการลบ{' '}
-                                                    <span className="font-semibold text-[#1d1d1d]">
-                                                        {target?.name}{target?.nickname ? ` (${target.nickname})` : ''}
-                                                    </span>{' '}
-                                                    <br />ออกจากระบบใช่ไหม?
-                                                    <span className="text-red-500 font-medium text-sm mt-2 block">ระวัง! การกระทำนี้ไม่สามารถย้อนกลับได้</span>
+                                                    {t('admin.employees.deleteConfirmMsg', { name: `${target?.name ?? ''}${target?.nickname ? ` (${target.nickname})` : ''}` })}
+                                                    <span className="text-red-500 font-medium text-sm mt-2 block">{t('admin.employees.deleteWarning')}</span>
                                                 </p>
                                                 <div className="flex gap-3">
-                                                    <Button variant="outline" className="flex-1 rounded-xl h-12 font-medium" onClick={closeSecureAction}>ยกเลิก</Button>
+                                                    <Button variant="outline" className="flex-1 rounded-xl h-12 font-medium" onClick={closeSecureAction}>{t('common.cancel')}</Button>
                                                     <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-xl h-12 font-medium"
                                                         onClick={() => { setSecureStep('pin'); setTimeout(() => PIN_REFS[0]?.current?.focus(), 50); }}>
-                                                        ใช่, ลบเลย
+                                                        {t('admin.employees.deleteConfirmBtn')}
                                                     </Button>
                                                 </div>
                                             </>
@@ -914,8 +939,8 @@ export function AdminEmployees() {
                                                 <div className={cn('w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5', locked ? 'bg-gray-100' : (isDelete ? 'bg-red-50' : 'bg-[#044F88/10]'))}>
                                                     <CheckCircle2 className={cn('w-8 h-8', locked ? 'text-gray-400' : (isDelete ? 'text-red-500' : 'text-[#044F88]'))} />
                                                 </div>
-                                                <h3 className="text-xl font-bold text-[#1d1d1d] mb-2">ยืนยันรหัส PIN</h3>
-                                                <p className="text-sm text-[#6f6f6f] mb-6">กรุณากรอกรหัส PIN 4 หลักเพื่อยืนยันสิทธิ์ของคุณ</p>
+                                                <h3 className="text-xl font-bold text-[#1d1d1d] mb-2">{t('admin.employees.pinTitle')}</h3>
+                                                <p className="text-sm text-[#6f6f6f] mb-6">{t('admin.employees.pinDesc')}</p>
 
                                                 {/* PIN dots */}
                                                 <div className="flex justify-center gap-4 mb-6">
@@ -936,7 +961,7 @@ export function AdminEmployees() {
                                                 {isDeleting ? (
                                                     <div className="flex flex-col items-center gap-3 mb-6 py-4">
                                                         <Loader2 className="w-8 h-8 text-red-400 animate-spin" />
-                                                        <p className="text-sm text-[#6f6f6f]">กำลังลบพนักงาน...</p>
+                                                        <p className="text-sm text-[#6f6f6f]">{t('admin.employees.deletingEmployee')}</p>
                                                     </div>
                                                 ) : (
                                                     <div className="grid grid-cols-3 gap-3 mb-6">
@@ -958,7 +983,7 @@ export function AdminEmployees() {
                                                         )}
                                                     </div>
                                                 )}
-                                                <Button variant="ghost" className="w-full text-[#6f6f6f] font-medium" disabled={isDeleting} onClick={closeSecureAction}>ยกเลิก</Button>
+                                                <Button variant="ghost" className="w-full text-[#6f6f6f] font-medium" disabled={isDeleting} onClick={closeSecureAction}>{t('common.cancel')}</Button>
                                             </>
                                         )}
                                     </div>
@@ -975,8 +1000,8 @@ export function AdminEmployees() {
                                 {/* Header */}
                                 <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 shrink-0 bg-white">
                                     <div>
-                                        <h2 className="text-xl font-bold text-[#1d1d1d]">{isEditing ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}</h2>
-                                        <p className="text-sm text-[#6f6f6f] mt-1">{isEditing ? 'ปรับปรุงข้อมูลพนักงานในระบบให้เป็นปัจจุบัน' : 'กรอกข้อมูลรายละเอียดของพนักงานให้ครบถ้วน'}</p>
+                                        <h2 className="text-xl font-bold text-[#1d1d1d]">{isEditing ? t('admin.employees.formTitleEdit') : t('admin.employees.formTitleAdd')}</h2>
+                                        <p className="text-sm text-[#6f6f6f] mt-1">{isEditing ? t('admin.employees.formDescEdit') : t('admin.employees.formDescAdd')}</p>
                                     </div>
                                     <button type="button" onClick={closeFormModal} className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-[#1d1d1d] transition-colors">
                                         <X className="w-5 h-5" />
@@ -989,7 +1014,7 @@ export function AdminEmployees() {
                                         {/* LEFT: Avatar */}
                                         <div className="w-full md:w-56 shrink-0 flex flex-col items-center gap-4">
                                             <p className="text-sm font-semibold text-[#1d1d1d] self-start">
-                                                รูปโปรไฟล์ <span className="text-gray-400 font-normal text-xs">(ไม่บังคับ)</span>
+                                                {t('admin.employees.avatar')} <span className="text-gray-400 font-normal text-xs">{t('admin.employees.avatarOptional')}</span>
                                             </p>
 
                                             {/* Avatar circle — camera / preview / placeholder */}
@@ -1001,11 +1026,11 @@ export function AdminEmployees() {
                                                     {avatarMode === 'camera' ? (
                                                         <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
                                                     ) : avatarPreview ? (
-                                                        <img src={avatarPreview} alt="รูปโปรไฟล์" width={192} height={192} className="w-full h-full object-cover" />
+                                                        <img src={avatarPreview} alt={t('admin.employees.avatar')} width={192} height={192} className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="flex flex-col items-center gap-3 text-gray-300">
                                                             <ImagePlus className="w-12 h-12" />
-                                                            <span className="text-sm font-medium">ไม่มีรูปภาพ</span>
+                                                            <span className="text-sm font-medium">{t('admin.employees.noImage')}</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -1014,7 +1039,7 @@ export function AdminEmployees() {
                                                 {isProcessingImage && (
                                                     <div className="absolute inset-0 rounded-full bg-white/75 flex flex-col items-center justify-center gap-2">
                                                         <Loader2 className="w-8 h-8 text-[#044F88] animate-spin" />
-                                                        <span className="text-xs font-medium text-[#044F88]">กำลังประมวลผล</span>
+                                                        <span className="text-xs font-medium text-[#044F88]">{t('admin.employees.processing')}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -1039,12 +1064,12 @@ export function AdminEmployees() {
                                                         className="w-full bg-[#044F88] hover:bg-[#00223A] text-white rounded-xl h-10 disabled:opacity-60"
                                                     >
                                                         {isProcessingImage
-                                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> กำลังประมวลผล...</>
-                                                            : <><Camera className="w-4 h-4 mr-2" /> ถ่ายรูป</>
+                                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('admin.employees.processingDots')}</>
+                                                            : <><Camera className="w-4 h-4 mr-2" /> {t('admin.employees.takePhoto')}</>
                                                         }
                                                     </Button>
                                                     <Button type="button" variant="ghost" onClick={stopCamera} disabled={isProcessingImage} className="w-full text-[#6f6f6f] rounded-xl h-10">
-                                                        ยกเลิกกล้อง
+                                                        {t('admin.employees.cancelCamera')}
                                                     </Button>
                                                 </div>
                                             ) : (
@@ -1056,7 +1081,7 @@ export function AdminEmployees() {
                                                         variant="outline"
                                                         className="w-full text-[#1d1d1d] border-gray-200 hover:bg-gray-50 rounded-xl h-10 disabled:opacity-60"
                                                     >
-                                                        <SwitchCamera className="w-4 h-4 mr-2 text-[#044F88]" /> ถ่ายจากกล้อง
+                                                        <SwitchCamera className="w-4 h-4 mr-2 text-[#044F88]" /> {t('admin.employees.fromCamera')}
                                                     </Button>
                                                     <Button
                                                         type="button"
@@ -1066,8 +1091,8 @@ export function AdminEmployees() {
                                                         className="w-full text-[#1d1d1d] border-gray-200 hover:bg-gray-50 rounded-xl h-10 disabled:opacity-60"
                                                     >
                                                         {isProcessingImage
-                                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> กำลังประมวลผล...</>
-                                                            : <><ImagePlus className="w-4 h-4 mr-2 text-indigo-500" /> อัปโหลดรูปภาพ</>
+                                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('admin.employees.processingDots')}</>
+                                                            : <><ImagePlus className="w-4 h-4 mr-2 text-indigo-500" /> {t('admin.employees.uploadImage')}</>
                                                         }
                                                     </Button>
                                                     {avatarPreview && (
@@ -1078,7 +1103,7 @@ export function AdminEmployees() {
                                                             onClick={() => { setAvatarPreview(null); if (avatarInputRef.current) avatarInputRef.current.value = ''; }}
                                                             className="w-full text-red-500 hover:bg-red-50 rounded-xl h-10 mt-1"
                                                         >
-                                                            <Trash2 className="w-4 h-4 mr-2" /> ลบรูปปัจจุบัน
+                                                            <Trash2 className="w-4 h-4 mr-2" /> {t('common.delete')}
                                                         </Button>
                                                     )}
                                                 </div>
@@ -1100,56 +1125,56 @@ export function AdminEmployees() {
                                             <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
                                                 <div>
                                                     <label htmlFor="emp-name" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                                        ชื่อ-นามสกุล <span className="text-red-500">*</span>
+                                                        {t('admin.employees.nameLabel')} <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input id="emp-name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="เช่น สมชาย ใจดี" required autoComplete="name" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="John Doe" required autoComplete="name" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                                 </div>
                                                 <div>
-                                                    <label htmlFor="emp-nickname" className="text-sm font-semibold text-[#1d1d1d] block mb-2">ชื่อเล่น</label>
-                                                    <Input id="emp-nickname" name="nickname" value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} placeholder="เช่น ชาย" autoComplete="nickname" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                    <label htmlFor="emp-nickname" className="text-sm font-semibold text-[#1d1d1d] block mb-2">{t('admin.employees.nicknameLabel')}</label>
+                                                    <Input id="emp-nickname" name="nickname" value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} placeholder="Jay" autoComplete="nickname" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                                 </div>
                                             </div>
 
                                             {/* Email */}
                                             <div>
                                                 <label htmlFor="emp-email" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                                    อีเมล <span className="text-red-500">*</span>
+                                                    {t('admin.employees.emailLabel')} <span className="text-red-500">*</span>
                                                 </label>
                                                 <Input id="emp-email" name="email" type="email" inputMode="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" required autoComplete="email" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                             </div>
 
                                             <div>
                                                 <label htmlFor="emp-password" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                                    รหัสผ่าน {!isEditing && <span className="text-red-500">*</span>}
-                                                    {isEditing && <span className="text-xs text-gray-400 ml-1">(เว้นว่างหากไม่ต้องการเปลี่ยน)</span>}
+                                                    {isEditing ? t('admin.employees.passwordNewLabel') : t('admin.employees.passwordLabel')} {!isEditing && <span className="text-red-500">*</span>}
+                                                    {isEditing && <span className="text-xs text-gray-400 ml-1">{t('admin.employees.passwordHint')}</span>}
                                                 </label>
-                                                <Input id="emp-password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="อย่างน้อย 6 ตัวอักษร" required={!isEditing} minLength={6} autoComplete="new-password" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                <Input id="emp-password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="******" required={!isEditing} minLength={6} autoComplete="new-password" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                             </div>
 
                                             {/* Department + Position */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
                                                     <label htmlFor="emp-department" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                                        แผนก <span className="text-red-500">*</span>
+                                                        {t('admin.employees.departmentLabel')} <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input id="emp-department" name="department" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="เช่น Engineering" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-department" name="department" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="Engineering" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                                 </div>
                                                 <div>
                                                     <label htmlFor="emp-position" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                                        ตำแหน่ง <span className="text-red-500">*</span>
+                                                        {t('admin.employees.positionLabel')} <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input id="emp-position" name="position" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="เช่น Developer" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-position" name="position" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="Developer" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
                                                 </div>
                                             </div>
 
                                             {/* Shift */}
                                             <div>
                                                 <label className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                                    เวลาทำงาน <span className="text-red-500">*</span>
+                                                    {t('admin.employees.shiftLabel')} <span className="text-red-500">*</span>
                                                 </label>
                                                 <div className="flex items-center gap-3">
                                                     <Input id="shift-start" name="shiftStartTime" type="time" value={form.shiftStartTime} onChange={e => setForm({ ...form, shiftStartTime: e.target.value })} required className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-[#1d1d1d] text-center" />
-                                                    <span className="text-gray-400 font-medium">ถึง</span>
+                                                    <span className="text-gray-400 font-medium">-</span>
                                                     <Input id="shift-end" name="shiftEndTime" type="time" value={form.shiftEndTime} onChange={e => setForm({ ...form, shiftEndTime: e.target.value })} required className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-[#1d1d1d] text-center" />
                                                 </div>
                                             </div>
@@ -1158,7 +1183,7 @@ export function AdminEmployees() {
                                             <div>
                                                 <label htmlFor="emp-location" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
                                                     <MapPin className="w-4 h-4 inline-block mr-1 text-[#6f6f6f]" />
-                                                    โซนสถานที่ทำงาน <span className="text-gray-400 font-normal text-xs">(ไม่บังคับ)</span>
+                                                    {t('admin.employees.locationLabel')} <span className="text-gray-400 font-normal text-xs">{t('admin.employees.avatarOptional')}</span>
                                                 </label>
                                                 <select
                                                     id="emp-location"
@@ -1166,38 +1191,38 @@ export function AdminEmployees() {
                                                     value={form.locationId}
                                                     onChange={e => setForm({ ...form, locationId: e.target.value })}
                                                 >
-                                                    <option value="">— ไม่กำหนดโซน (ลงเวลาได้ทุกที่บนโลก) —</option>
+                                                    <option value="">—</option>
                                                     {locations.map(loc => (
-                                                        <option key={loc.id} value={loc.id}>{loc.name} (ในระยะ {loc.radiusMeters} เมตร)</option>
+                                                        <option key={loc.id} value={loc.id}>{loc.name} ({loc.radiusMeters} {t('common.meters')})</option>
                                                     ))}
                                                 </select>
-                                                <p className="mt-2 text-xs text-[#6f6f6f]">หากมีการตั้งค่าโซน พนักงานจะสามารถเช็คอินได้เมื่ออยู่ในระยะจำกัดเท่านั้น</p>
+                                                <p className="mt-2 text-xs text-[#6f6f6f]"></p>
                                             </div>
 
                                             {/* ── Compensation ── */}
                                             <div className="border-t border-gray-100 pt-6 mt-4">
                                                 <h4 className="text-base font-bold text-[#1d1d1d] mb-4 flex items-center gap-2">
                                                     <DollarSign className="w-5 h-5 text-emerald-500" />
-                                                    ค่าจ้างและอัตรา OT
+                                                    {t('admin.employees.otRateTitle')}
                                                 </h4>
 
                                                 {/* Base Wage */}
                                                 <div className="mb-5">
                                                     <label htmlFor="emp-base-wage" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                                        เงินเดือน/ค่าจ้างพื้นฐาน (บาท) <span className="text-gray-400 font-normal text-xs">(ไม่บังคับ)</span>
+                                                        {t('admin.employees.wageLabel')} <span className="text-gray-400 font-normal text-xs">{t('admin.employees.avatarOptional')}</span>
                                                     </label>
                                                     <Input
                                                         id="emp-base-wage" type="number" min="0" step="100"
                                                         value={form.baseWage}
                                                         onChange={e => setForm({ ...form, baseWage: e.target.value })}
-                                                        placeholder="เช่น 15000"
+                                                        placeholder="15000"
                                                         className="h-11 rounded-xl border-gray-200 focus:border-emerald-500 bg-white font-medium"
                                                     />
                                                 </div>
 
                                                 {/* OT Rate Toggle */}
                                                 <div className="space-y-4">
-                                                    <label className="text-sm font-semibold text-[#1d1d1d] block">อัตราการจ่าย OT ล่วงเวลา</label>
+                                                    <label className="text-sm font-semibold text-[#1d1d1d] block">{t('admin.employees.otRateTitle')}</label>
                                                     <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 transition-colors">
                                                         <input
                                                             type="checkbox"
@@ -1206,9 +1231,9 @@ export function AdminEmployees() {
                                                             onChange={e => setForm({ ...form, otUseDefault: e.target.checked })}
                                                         />
                                                         <span className="text-sm font-medium text-[#1d1d1d]">
-                                                            ใช้อัตราหลักของบริษัท
+                                                            {t('admin.employees.otUseDefault')}
                                                             <span className="ml-2 text-xs font-bold text-[#044F88] bg-[#044F88]/5 border border-[#044F88]/10 px-2 py-0.5 rounded-full">
-                                                                {companySettings.defaultOtRateValue} {companySettings.defaultOtRateType === 'multiplier' ? 'เท่า' : 'บาท/ชม.'}
+                                                                {companySettings.defaultOtRateValue} {companySettings.defaultOtRateType === 'multiplier' ? t('admin.employees.otMultiplierUnit') : t('admin.employees.otFixedUnit')}
                                                             </span>
                                                         </span>
                                                     </label>
@@ -1217,28 +1242,28 @@ export function AdminEmployees() {
                                                         <div className="p-4 rounded-xl border border-[#044F88]/10 bg-[#044F88]/5/50 space-y-4 animate-in slide-in-from-top-2">
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                 <div>
-                                                                    <label className="text-xs font-semibold text-[#6f6f6f] block mb-1.5">คำนวณแบบ</label>
+                                                                    <label className="text-xs font-semibold text-[#6f6f6f] block mb-1.5">{t('admin.employees.otCalcType')}</label>
                                                                     <select
                                                                         className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm text-[#1d1d1d] font-medium focus:outline-none focus:ring-2 focus:ring-[#044F88]/20 focus:border-[#044F88] transition-shadow"
                                                                         value={form.otType}
                                                                         onChange={e => setForm({ ...form, otType: e.target.value as 'multiplier' | 'fixed' })}
                                                                     >
-                                                                        <option value="multiplier">ตัวคูณ (เท่าของค่าจ้าง)</option>
-                                                                        <option value="fixed">เหมาจ่าย (บาท / ชั่วโมง)</option>
+                                                                        <option value="multiplier">{t('admin.employees.otMultiplierLabel')}</option>
+                                                                        <option value="fixed">{t('admin.employees.otFixedLabel')}</option>
                                                                     </select>
                                                                 </div>
                                                                 <div>
-                                                                    <label className="text-xs font-semibold text-[#6f6f6f] block mb-1.5">ตัวเลข</label>
+                                                                    <label className="text-xs font-semibold text-[#6f6f6f] block mb-1.5">{t('admin.employees.otValueLabel')}</label>
                                                                     <div className="relative">
                                                                         <Input
                                                                             type="number" step="0.1" min="0"
                                                                             value={form.otValue}
                                                                             onChange={e => setForm({ ...form, otValue: e.target.value })}
-                                                                            placeholder={form.otType === 'multiplier' ? 'ตัวอย่าง: 1.5' : 'ตัวอย่าง: 50'}
+                                                                            placeholder={form.otType === 'multiplier' ? t('admin.employees.otMultiplierPlaceholder') : t('admin.employees.otFixedPlaceholder')}
                                                                             className="h-11 rounded-lg border-gray-200 focus:border-[#044F88] pr-12 font-medium"
                                                                         />
                                                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#6f6f6f] pointer-events-none">
-                                                                            {form.otType === 'multiplier' ? 'เท่า' : 'บาท'}
+                                                                            {form.otType === 'multiplier' ? t('admin.employees.otMultiplierUnit') : t('common.baht')}
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -1252,13 +1277,13 @@ export function AdminEmployees() {
 
                                     {/* Footer */}
                                     <div className="px-8 py-5 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
-                                        <p className="text-sm font-medium text-gray-400"><span className="text-red-500 mr-1">*</span>ข้อมูลภาคบังคับ</p>
+                                        <p className="text-sm font-medium text-gray-400"><span className="text-red-500 mr-1">*</span>{t('admin.employees.required')}</p>
                                         <div className="flex gap-3">
-                                            <Button type="button" variant="outline" onClick={closeFormModal} disabled={isSubmitting} className="rounded-xl h-11 px-5 border-gray-200 text-[#1d1d1d] hover:bg-gray-50 font-semibold text-sm disabled:opacity-50">ยกเลิก</Button>
+                                            <Button type="button" variant="outline" onClick={closeFormModal} disabled={isSubmitting} className="rounded-xl h-11 px-5 border-gray-200 text-[#1d1d1d] hover:bg-gray-50 font-semibold text-sm disabled:opacity-50">{t('common.cancel')}</Button>
                                             <Button type="submit" disabled={isSubmitting} className="rounded-xl h-11 px-8 bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm font-semibold text-sm disabled:opacity-70 min-w-[160px]">
                                                 {isSubmitting
-                                                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />กำลังบันทึก...</>
-                                                    : (isEditing ? 'บันทึกการปรับปรุง' : 'เพิ่มพนักงานเข้าสู่ระบบ')
+                                                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t('common.saving')}</>
+                                                    : (isEditing ? t('admin.employees.saveEdit') : t('admin.employees.saveAdd'))
                                                 }
                                             </Button>
                                         </div>

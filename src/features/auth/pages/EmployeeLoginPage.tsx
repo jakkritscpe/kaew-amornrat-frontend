@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { loginApi } from '../../../lib/api/auth-api';
 import { setToken, EMPLOYEE_KEY } from '../../../lib/api-client';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 export function EmployeeLoginPage() {
   const [email, setEmail] = useState('');
@@ -14,13 +15,14 @@ export function EmployeeLoginPage() {
   const [touched, setTouched] = useState({ email: false, password: false });
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     emailRef.current?.focus();
   }, []);
 
-  const emailError = touched.email && !email ? 'กรุณากรอกอีเมล' : '';
-  const passwordError = touched.password && !password ? 'กรุณากรอกรหัสผ่าน' : '';
+  const emailError = touched.email && !email ? t('auth.emailRequired') : '';
+  const passwordError = touched.password && !password ? t('auth.passwordRequired') : '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +38,7 @@ export function EmployeeLoginPage() {
       localStorage.setItem(EMPLOYEE_KEY, JSON.stringify(result.user));
       navigate('/employee/attendance/today');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'เข้าสู่ระบบไม่สำเร็จ');
+      setError(err instanceof Error ? err.message : t('auth.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -51,11 +53,11 @@ export function EmployeeLoginPage() {
             <Link to="/">
               <img
                 src="/logo.svg"
-                alt="หจก.แก้วอมรรัตน์"
+                alt={t('common.companyName')}
                 className="h-28 w-auto object-contain mb-4 cursor-pointer"
               />
             </Link>
-            <p className="text-gray-500 text-sm">ระบบบันทึกเวลาทำงาน</p>
+            <p className="text-gray-500 text-sm">{t('auth.employeeSubtitle')}</p>
           </div>
 
           {/* Global error */}
@@ -77,7 +79,7 @@ export function EmployeeLoginPage() {
             {/* Email */}
             <div className="space-y-1.5">
               <label htmlFor="emp-email" className="block text-sm font-medium text-gray-700">
-                อีเมล
+                {t('auth.email')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 pointer-events-none" aria-hidden="true" />
@@ -108,7 +110,7 @@ export function EmployeeLoginPage() {
             {/* Password */}
             <div className="space-y-1.5">
               <label htmlFor="emp-password" className="block text-sm font-medium text-gray-700">
-                รหัสผ่าน
+                {t('auth.password')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 pointer-events-none" aria-hidden="true" />
@@ -132,7 +134,7 @@ export function EmployeeLoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                  aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                   tabIndex={-1}
                 >
                   {showPassword
@@ -155,16 +157,16 @@ export function EmployeeLoginPage() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  กำลังเข้าสู่ระบบ...
+                  {t('auth.loggingIn')}
                 </span>
               ) : (
-                'เข้าสู่ระบบ'
+                t('auth.login')
               )}
             </button>
           </form>
 
           <p className="text-center text-xs text-gray-400 mt-6">
-            ติดต่อผู้ดูแลระบบหากลืมรหัสผ่าน
+            {t('auth.contactAdminForPassword')}
           </p>
         </div>
       </div>

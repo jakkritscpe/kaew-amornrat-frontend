@@ -1,7 +1,10 @@
 import { Phone, Mail, Facebook, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n';
 
 export function Footer() {
+    const { t } = useTranslation();
+
     return (
         <footer className="bg-[#00223A] pt-20 pb-10 border-t border-[#044F88]/30">
             <div className="container mx-auto px-4 md:px-6">
@@ -10,16 +13,14 @@ export function Footer() {
                     {/* Brand Setup */}
                     <div className="lg:col-span-1">
                         <div className="flex items-center gap-3 mb-6">
-                            <img src="/logo.svg" alt="หจก.แก้วอมรรัตน์" className="h-10 w-auto object-contain brightness-0 invert" />
+                            <img src="/logo.svg" alt={t('common.companyName')} className="h-10 w-auto object-contain brightness-0 invert" />
                             <div>
-                                <span className="font-bold text-xl text-white block leading-tight">หจก.แก้วอมรรัตน์</span>
+                                <span className="font-bold text-xl text-white block leading-tight">{t('common.companyName')}</span>
                                 <span className="text-xs text-white/60 tracking-wider font-bold">IT SERVICES & SOLUTIONS</span>
                             </div>
                         </div>
                         <p className="text-white/70 text-sm leading-relaxed mb-8">
-                            บริการอุปกรณ์ไอที ครบวงจร รับติดตั้ง ซ่อมบำรุง ดูแลระบบ
-                            ทั้งในและนอกสถานที่ คอมพิวเตอร์ กล้องวงจรปิด เซิร์ฟเวอร์
-                            เน็ตเวิร์ค แลน ไวไฟ แนส คีย์การ์ด ไฟฟ้า ไฟเบอร์ ออฟติก
+                            {t('landing.footer.description')}
                         </p>
                         <div className="flex gap-4">
                             <a href="https://www.facebook.com/NorFreelance" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors border border-white/10">
@@ -36,17 +37,17 @@ export function Footer() {
 
                     {/* Main Menu */}
                     <div>
-                        <h4 className="text-white font-bold text-lg mb-6">เมนูหลัก</h4>
+                        <h4 className="text-white font-bold text-lg mb-6">{t('landing.footer.mainMenu')}</h4>
                         <ul className="space-y-4">
-                            <li><a href="#home" className="text-white/70 hover:text-white transition-colors">หน้าหลัก</a></li>
-                            <li><a href="#services" className="text-white/70 hover:text-white transition-colors">บริการ</a></li>
-                            <li><a href="#contact" className="text-white/70 hover:text-white transition-colors">ติดต่อ</a></li>
+                            <li><a href="#home" className="text-white/70 hover:text-white transition-colors">{t('landing.footer.home')}</a></li>
+                            <li><a href="#services" className="text-white/70 hover:text-white transition-colors">{t('landing.footer.services')}</a></li>
+                            <li><a href="#contact" className="text-white/70 hover:text-white transition-colors">{t('landing.footer.contact')}</a></li>
                         </ul>
                     </div>
 
                     {/* Services Menu */}
                     <div>
-                        <h4 className="text-white font-bold text-lg mb-6">บริการของเรา</h4>
+                        <h4 className="text-white font-bold text-lg mb-6">{t('landing.footer.ourServices')}</h4>
                         <ul className="space-y-4">
                             <li><a href="#services" className="text-white/70 hover:text-white transition-colors">Computer</a></li>
                             <li><a href="#services" className="text-white/70 hover:text-white transition-colors">CCTV</a></li>
@@ -59,7 +60,7 @@ export function Footer() {
 
                     {/* Contact Info */}
                     <div>
-                        <h4 className="text-white font-bold text-lg mb-6">ติดต่อเรา</h4>
+                        <h4 className="text-white font-bold text-lg mb-6">{t('landing.footer.contactUs')}</h4>
                         <ul className="space-y-4 mb-8 text-white/70">
                             <li>
                                 <a href="tel:0854288897" className="flex items-center gap-3 hover:text-white transition-colors">
@@ -83,7 +84,7 @@ export function Footer() {
                         <a href="tel:0854288897">
                             <Button className="w-full bg-[#C2410C] hover:bg-[#C2410C]/90 text-white gap-2">
                                 <Phone className="w-4 h-4" />
-                                โทรเลย
+                                {t('landing.footer.callNow')}
                             </Button>
                         </a>
                     </div>
@@ -91,7 +92,7 @@ export function Footer() {
                 </div>
 
                 <div className="pt-8 border-t border-white/10 text-center text-white/50 text-sm">
-                    © {new Date().getFullYear()} หจก.แก้วอมรรัตน์. All rights reserved.
+                    © {new Date().getFullYear()} {t('common.companyName')}. All rights reserved.
                 </div>
             </div>
         </footer>

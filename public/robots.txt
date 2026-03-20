@@ -5,4 +5,4 @@ Disallow: /employee
 Disallow: /login
 Disallow: /qr-checkin
 
-Sitemap: https://kaewamornrat.com/sitemap.xml
+Sitemap: https://kaew-amornrat.vercel.app/sitemap.xml

@@ -3,15 +3,18 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Clock, Map, History, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TOKEN_KEY, EMPLOYEE_KEY } from '@/lib/api-client';
-
-const navItems = [
-    { to: '/employee/attendance/today', icon: Clock, label: 'วันนี้' },
-    { to: '/employee/attendance/map', icon: Map, label: 'แผนที่' },
-    { to: '/employee/attendance/history', icon: History, label: 'ประวัติ' },
-    { to: '/employee/attendance/ot-request', icon: FileText, label: 'ขอ OT' },
-];
+import { useTranslation } from '@/i18n';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export function EmployeeLayout() {
+    const { t } = useTranslation();
+
+    const navItems = [
+        { to: '/employee/attendance/today', icon: Clock, label: t('nav.today') },
+        { to: '/employee/attendance/map', icon: Map, label: t('nav.map') },
+        { to: '/employee/attendance/history', icon: History, label: t('nav.history') },
+        { to: '/employee/attendance/ot-request', icon: FileText, label: t('nav.otRequest') },
+    ];
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -24,22 +27,25 @@ export function EmployeeLayout() {
     const initial = employee?.name?.charAt(0)?.toUpperCase() ?? '?';
 
     return (
-        <div className="flex flex-col h-[100svh] bg-[#f1f5f9]">
+        <div className="flex flex-col h-[100svh] bg-[#f1f5f9] overflow-hidden">
             {/* ── Identity bar (inside blue hero of each page, so layout bar is minimal) ── */}
             <header className="shrink-0 bg-[#044F88] px-4 pt-4 pb-2 max-w-lg md:max-w-3xl mx-auto w-full flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                    <p className="text-[10px] font-semibold text-[#044F88]/80 uppercase tracking-widest">ระบบลงเวลา</p>
+                    <p className="text-[10px] font-semibold text-[#044F88]/80 uppercase tracking-widest">{t('employee.layout.attendanceSystem')}</p>
                     <p className="text-sm font-bold text-white leading-snug truncate mt-0.5">
-                        {employee?.name ?? 'พนักงาน'}
+                        {employee?.name ?? t('employee.layout.employee')}
                     </p>
                 </div>
-                <div className="w-9 h-9 rounded-xl bg-white/20 ring-2 ring-white/30 flex items-center justify-center text-white font-bold text-sm shrink-0 select-none">
-                    {initial}
+                <div className="flex items-center gap-2 shrink-0">
+                    <LanguageSwitcher />
+                    <div className="w-9 h-9 rounded-xl bg-white/20 ring-2 ring-white/30 flex items-center justify-center text-white font-bold text-sm select-none">
+                        {initial}
+                    </div>
                 </div>
             </header>
 
             {/* ── Page content ── */}
-            <main className="flex-1 overflow-y-auto w-full max-w-lg md:max-w-3xl mx-auto relative z-0">
+            <main className="flex-1 overflow-y-auto overscroll-contain w-full max-w-lg md:max-w-3xl mx-auto relative z-0">
                 <Outlet />
             </main>
 

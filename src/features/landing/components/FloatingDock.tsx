@@ -1,33 +1,35 @@
 import { useState } from 'react';
 import { Phone, MessageCircle, Facebook } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const dockItems = [
-    {
-        label: 'Facebook',
-        icon: Facebook,
-        href: 'https://www.facebook.com/NorFreelance',
-        activeColor: 'from-[#1877F2] to-[#42a5f5]',
-        iconActive: 'text-white',
-    },
-    {
-        label: 'LINE',
-        icon: MessageCircle,
-        href: 'https://line.me/R/ti/p/@231yswce',
-        activeColor: 'from-[#06C755] to-[#4ade80]',
-        iconActive: 'text-white',
-    },
-    {
-        label: 'โทร',
-        icon: Phone,
-        href: 'tel:0854288897',
-        activeColor: 'from-[#C2410C] to-[#f97316]',
-        iconActive: 'text-white',
-    },
-];
+import { useTranslation } from '@/i18n';
 
 export function FloatingDock() {
+    const { t } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+    const dockItems = [
+        {
+            label: 'Facebook',
+            icon: Facebook,
+            href: 'https://www.facebook.com/NorFreelance',
+            activeColor: 'from-[#1877F2] to-[#42a5f5]',
+            iconActive: 'text-white',
+        },
+        {
+            label: 'LINE',
+            icon: MessageCircle,
+            href: 'https://line.me/R/ti/p/@231yswce',
+            activeColor: 'from-[#06C755] to-[#4ade80]',
+            iconActive: 'text-white',
+        },
+        {
+            label: t('landing.dock.call'),
+            icon: Phone,
+            href: 'tel:0854288897',
+            activeColor: 'from-[#C2410C] to-[#f97316]',
+            iconActive: 'text-white',
+        },
+    ];
 
     return (
         <div className="fixed bottom-6 right-6 z-50">
