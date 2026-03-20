@@ -5,8 +5,9 @@ import { Search, Filter, Download, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { AttendanceLog } from '../../types';
-import { formatTime, formatDate } from '@/lib/utils';
+import { cn, formatTime, formatDate } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
 
 // STATUS_LABEL is now derived from t() inside the component
 
@@ -24,6 +25,7 @@ function downloadCSV(filename: string, headers: string[], rows: string[][]) {
 
 export function AdminAttendanceLogs() {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const { logs, employees, locations } = useAttendance();
 
     const STATUS_LABEL: Record<string, string> = {
@@ -71,64 +73,64 @@ export function AdminAttendanceLogs() {
     }, [filteredLogs, employees, locations, dateFilter]);
 
     return (
-        <div className="p-6 bg-slate-50 min-h-[calc(100vh-4rem)]">
+        <div className="p-6 min-h-[calc(100vh-4rem)]">
             <div className="flex justify-between items-end mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('admin.logs.title')}</h1>
-                    <p className="text-sm text-slate-500 mt-1">{t('admin.logs.subtitle')}</p>
+                    <h1 className={cn('text-2xl font-bold tracking-tight', dark ? 'text-white' : 'text-slate-900')}>{t('admin.logs.title')}</h1>
+                    <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-slate-500')}>{t('admin.logs.subtitle')}</p>
                 </div>
-                <Button variant="outline" className="bg-white border-slate-200" onClick={exportCSV} disabled={!filteredLogs.length}>
-                    <Download className="w-4 h-4 mr-2 text-slate-500" />
+                <Button variant="outline" className={cn(dark ? 'bg-white/[0.06] border-white/10 text-white/70 hover:bg-white/[0.1]' : 'bg-white border-slate-200')} onClick={exportCSV} disabled={!filteredLogs.length}>
+                    <Download className={cn('w-4 h-4 mr-2', dark ? 'text-white/50' : 'text-slate-500')} />
                     {t('admin.logs.exportCsv')}
                 </Button>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-slate-50/50">
+            <div className={cn('rounded-xl overflow-hidden', dark ? 'bg-white/[0.06] border border-white/10 shadow-none' : 'bg-white shadow-sm border border-slate-200')}>
+                <div className={cn('p-4 border-b flex flex-col sm:flex-row gap-4 items-stretch sm:items-center', dark ? 'border-white/10 bg-white/[0.03]' : 'border-slate-100 bg-slate-50/50')}>
                     <div className="relative w-full sm:flex-1 sm:max-w-md group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-md transition-all">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none group-focus-within:text-[#044F88] transition-colors" />
+                        <Search className={cn('absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none group-focus-within:text-[#044F88] transition-colors', dark ? 'text-white/30' : 'text-slate-400')} />
                         <Input
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                             placeholder={t('admin.logs.searchPlaceholder')}
-                            className="pl-9 bg-white transition-all"
+                            className={cn('pl-9 transition-all', dark ? 'bg-white/[0.06] border-white/10 text-white placeholder:text-white/30' : 'bg-white')}
                             autoComplete="off"
                             spellCheck={false}
                         />
                     </div>
                     <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+                        <Filter className={cn('w-4 h-4 shrink-0', dark ? 'text-white/30' : 'text-slate-400')} />
                         <Input
                             type="date"
                             value={dateFilter}
                             onChange={e => setDateFilter(e.target.value)}
-                            className="bg-white text-sm w-full sm:w-auto"
+                            className={cn('text-sm w-full sm:w-auto', dark ? 'bg-white/[0.06] border-white/10 text-white' : 'bg-white')}
                         />
                     </div>
                 </div>
 
                 {/* Mobile View: Cards */}
-                <div className="md:hidden divide-y divide-slate-100">
+                <div className={cn('md:hidden divide-y', dark ? 'divide-white/10' : 'divide-slate-100')}>
                     {filteredLogs.length === 0 ? (
                         <div className="py-12 text-center px-4">
-                            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <Search className="w-6 h-6 text-slate-300" />
+                            <div className={cn('w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3', dark ? 'bg-white/[0.06]' : 'bg-slate-50')}>
+                                <Search className={cn('w-6 h-6', dark ? 'text-white/20' : 'text-slate-300')} />
                             </div>
-                            <p className="text-slate-500 font-medium">{t('admin.logs.noData')}</p>
-                            <p className="text-sm text-slate-400 mt-1">{t('admin.logs.noDataHint')}</p>
+                            <p className={cn('font-medium', dark ? 'text-white/50' : 'text-slate-500')}>{t('admin.logs.noData')}</p>
+                            <p className={cn('text-sm mt-1', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logs.noDataHint')}</p>
                         </div>
                     ) : (
                         filteredLogs.map(log => {
                             const emp = employees.find(e => e.id === log.employeeId);
                             const loc = locations.find(l => l.id === log.locationId);
                             return (
-                                <div key={log.id} className="p-4 hover:bg-slate-50/50 transition-colors">
+                                <div key={log.id} className={cn('p-4 transition-colors', dark ? 'hover:bg-white/[0.04]' : 'hover:bg-slate-50/50')}>
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
-                                            <p className="font-semibold text-slate-900 leading-tight">
-                                                {emp?.name}{emp?.nickname ? <span className="font-normal text-slate-500 ml-1">({emp.nickname})</span> : null}
+                                            <p className={cn('font-semibold leading-tight', dark ? 'text-white' : 'text-slate-900')}>
+                                                {emp?.name}{emp?.nickname ? <span className={cn('font-normal ml-1', dark ? 'text-white/50' : 'text-slate-500')}>({emp.nickname})</span> : null}
                                             </p>
-                                            <p className="text-xs text-slate-500 mt-0.5">{emp?.department}</p>
+                                            <p className={cn('text-xs mt-0.5', dark ? 'text-white/40' : 'text-slate-500')}>{emp?.department}</p>
                                         </div>
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${log.status === 'present' ? 'bg-emerald-100 text-emerald-700' :
                                             log.status === 'late' ? 'bg-orange-100 text-orange-700' :
@@ -137,26 +139,26 @@ export function AdminAttendanceLogs() {
                                             {STATUS_LABEL[log.status] || log.status}
                                         </span>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm bg-slate-50/50 rounded-lg p-3">
+                                    <div className={cn('grid grid-cols-2 gap-y-3 gap-x-4 text-sm rounded-lg p-3', dark ? 'bg-white/[0.03]' : 'bg-slate-50/50')}>
                                         <div>
-                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">{t('admin.logs.checkInOutTime')}</p>
-                                            <div className="flex items-center gap-1.5 text-slate-600">
+                                            <p className={cn('text-[10px] uppercase tracking-wider mb-0.5 font-semibold', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logs.checkInOutTime')}</p>
+                                            <div className={cn('flex items-center gap-1.5', dark ? 'text-white/60' : 'text-slate-600')}>
                                                 <span className="font-semibold text-emerald-600">{formatTime(log.checkInTime)}</span>
-                                                <span className="text-slate-300">-</span>
-                                                <span className="font-semibold text-slate-700">{formatTime(log.checkOutTime)}</span>
+                                                <span className={dark ? 'text-white/20' : 'text-slate-300'}>-</span>
+                                                <span className={cn('font-semibold', dark ? 'text-white/70' : 'text-slate-700')}>{formatTime(log.checkOutTime)}</span>
                                             </div>
                                         </div>
                                         <div>
-                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">{t('admin.logs.workHours')}</p>
+                                            <p className={cn('text-[10px] uppercase tracking-wider mb-0.5 font-semibold', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logs.workHours')}</p>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-slate-700 font-medium">{log.workHours} {t('common.hours')}</span>
+                                                <span className={cn('font-medium', dark ? 'text-white/70' : 'text-slate-700')}>{log.workHours} {t('common.hours')}</span>
                                                 {log.otHours > 0 ? <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-medium">+{log.otHours} OT</span> : null}
                                             </div>
                                         </div>
                                         <div className="col-span-2">
-                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">{t('admin.logs.location')}</p>
-                                            <p className="text-xs font-medium text-slate-600 truncate">{loc?.name || t('admin.logs.unknownLocation')}</p>
-                                            <p className="font-mono text-[9px] text-slate-400 mt-0.5">{log.checkInLat ? `${log.checkInLat.toFixed(4)}, ${log.checkInLng?.toFixed(4)}` : t('admin.logs.noGps')}</p>
+                                            <p className={cn('text-[10px] uppercase tracking-wider mb-0.5 font-semibold', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logs.location')}</p>
+                                            <p className={cn('text-xs font-medium truncate', dark ? 'text-white/60' : 'text-slate-600')}>{loc?.name || t('admin.logs.unknownLocation')}</p>
+                                            <p className={cn('font-mono text-[9px] mt-0.5', dark ? 'text-white/30' : 'text-slate-400')}>{log.checkInLat ? `${log.checkInLat.toFixed(4)}, ${log.checkInLng?.toFixed(4)}` : t('admin.logs.noGps')}</p>
                                         </div>
                                     </div>
                                     <div className="mt-3 flex justify-end">
@@ -176,26 +178,26 @@ export function AdminAttendanceLogs() {
                 {/* Desktop View: Table */}
                 <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-sm text-left whitespace-nowrap">
-                        <thead className="bg-slate-50/80 text-slate-500 font-medium">
+                        <thead className={cn('font-medium', dark ? 'bg-white/[0.03] text-white/50' : 'bg-slate-50/80 text-slate-500')}>
                             <tr>
-                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.employee')}</th>
-                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.date')}</th>
-                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.checkInOut')}</th>
-                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.hoursOt')}</th>
-                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.status')}</th>
-                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.location')}</th>
-                                <th className="px-4 py-4 border-b border-slate-100 text-right"></th>
+                                <th className={cn('px-6 py-4 border-b', dark ? 'border-white/10' : 'border-slate-100')}>{t('admin.logs.employee')}</th>
+                                <th className={cn('px-6 py-4 border-b', dark ? 'border-white/10' : 'border-slate-100')}>{t('admin.logs.date')}</th>
+                                <th className={cn('px-6 py-4 border-b', dark ? 'border-white/10' : 'border-slate-100')}>{t('admin.logs.checkInOut')}</th>
+                                <th className={cn('px-6 py-4 border-b', dark ? 'border-white/10' : 'border-slate-100')}>{t('admin.logs.hoursOt')}</th>
+                                <th className={cn('px-6 py-4 border-b', dark ? 'border-white/10' : 'border-slate-100')}>{t('admin.logs.status')}</th>
+                                <th className={cn('px-6 py-4 border-b', dark ? 'border-white/10' : 'border-slate-100')}>{t('admin.logs.location')}</th>
+                                <th className={cn('px-4 py-4 border-b text-right', dark ? 'border-white/10' : 'border-slate-100')}></th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className={cn('divide-y', dark ? 'divide-white/10' : 'divide-slate-100')}>
                             {filteredLogs.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center">
-                                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <Search className="w-6 h-6 text-slate-300" />
+                                        <div className={cn('w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3', dark ? 'bg-white/[0.06]' : 'bg-slate-50')}>
+                                            <Search className={cn('w-6 h-6', dark ? 'text-white/20' : 'text-slate-300')} />
                                         </div>
-                                        <p className="text-slate-500 font-medium">{t('admin.logs.noData')}</p>
-                                        <p className="text-sm text-slate-400 mt-1">{t('admin.logs.noDataHint')}</p>
+                                        <p className={cn('font-medium', dark ? 'text-white/50' : 'text-slate-500')}>{t('admin.logs.noData')}</p>
+                                        <p className={cn('text-sm mt-1', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logs.noDataHint')}</p>
                                     </td>
                                 </tr>
                             ) : (
@@ -203,23 +205,23 @@ export function AdminAttendanceLogs() {
                                     const emp = employees.find(e => e.id === log.employeeId);
                                     const loc = locations.find(l => l.id === log.locationId);
                                     return (
-                                        <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                                        <tr key={log.id} className={cn('transition-colors', dark ? 'hover:bg-white/[0.04]' : 'hover:bg-slate-50/50')}>
                                             <td className="px-6 py-4">
-                                                <p className="font-medium text-slate-900 leading-tight">
-                                                    {emp?.name}{emp?.nickname ? <span className="font-normal text-slate-500 ml-1">({emp.nickname})</span> : null}
+                                                <p className={cn('font-medium leading-tight', dark ? 'text-white' : 'text-slate-900')}>
+                                                    {emp?.name}{emp?.nickname ? <span className={cn('font-normal ml-1', dark ? 'text-white/50' : 'text-slate-500')}>({emp.nickname})</span> : null}
                                                 </p>
-                                                <p className="text-xs text-slate-500 mt-0.5">{emp?.department}</p>
+                                                <p className={cn('text-xs mt-0.5', dark ? 'text-white/40' : 'text-slate-500')}>{emp?.department}</p>
                                             </td>
-                                            <td className="px-6 py-4 text-slate-600 font-medium">{formatDate(log.date)}</td>
+                                            <td className={cn('px-6 py-4 font-medium', dark ? 'text-white/60' : 'text-slate-600')}>{formatDate(log.date)}</td>
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2 text-slate-600">
+                                                <div className={cn('flex items-center gap-2', dark ? 'text-white/60' : 'text-slate-600')}>
                                                     <span className="font-semibold text-emerald-600">{formatTime(log.checkInTime)}</span>
-                                                    <span className="text-slate-300">-</span>
-                                                    <span className="font-semibold text-slate-700">{formatTime(log.checkOutTime)}</span>
+                                                    <span className={dark ? 'text-white/20' : 'text-slate-300'}>-</span>
+                                                    <span className={cn('font-semibold', dark ? 'text-white/70' : 'text-slate-700')}>{formatTime(log.checkOutTime)}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <p className="text-slate-700 font-medium">{log.workHours} {t('common.hours')}</p>
+                                                <p className={cn('font-medium', dark ? 'text-white/70' : 'text-slate-700')}>{log.workHours} {t('common.hours')}</p>
                                                 {log.otHours > 0 ? <p className="text-[11px] text-purple-600 font-semibold mt-0.5">+{log.otHours} {t('common.hours')} OT</p> : null}
                                             </td>
                                             <td className="px-6 py-4">
@@ -230,9 +232,9 @@ export function AdminAttendanceLogs() {
                                                     {STATUS_LABEL[log.status] || log.status}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-xs text-slate-500">
-                                                <span className="font-medium text-slate-700">{loc?.name || t('admin.logs.unknownLocation')}</span>
-                                                <div className="font-mono text-[10px] text-slate-400 mt-1">
+                                            <td className={cn('px-6 py-4 text-xs', dark ? 'text-white/40' : 'text-slate-500')}>
+                                                <span className={cn('font-medium', dark ? 'text-white/70' : 'text-slate-700')}>{loc?.name || t('admin.logs.unknownLocation')}</span>
+                                                <div className={cn('font-mono text-[10px] mt-1', dark ? 'text-white/30' : 'text-slate-400')}>
                                                     {log.checkInLat ? `${log.checkInLat.toFixed(4)}, ${log.checkInLng?.toFixed(4)}` : t('admin.logs.noGps')}
                                                 </div>
                                             </td>

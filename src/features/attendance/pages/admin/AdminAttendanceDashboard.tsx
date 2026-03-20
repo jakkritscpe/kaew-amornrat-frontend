@@ -6,6 +6,7 @@ import { Users, Clock, AlertTriangle, FileCheck2, CalendarX, ArrowRight } from '
 import { Link } from 'react-router-dom';
 import { cn, formatTime } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,9 +24,10 @@ interface StatCardProps {
     delay: number;
     href?: string;
     inspectLabel?: string;
+    dark?: boolean;
 }
 
-function StatCard({ title, value, suffix, icon: Icon, color, delay, href, inspectLabel }: StatCardProps) {
+function StatCard({ title, value, suffix, icon: Icon, color, delay, href, inspectLabel, dark }: StatCardProps) {
     const cardRef = useRef<HTMLDivElement>(null);
     const [displayValue, setDisplayValue] = useState(0);
 
@@ -74,27 +76,37 @@ function StatCard({ title, value, suffix, icon: Icon, color, delay, href, inspec
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             className={cn(
-                'relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-full',
-                'hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300',
+                'relative rounded-2xl p-6 shadow-sm h-full',
+                'hover:shadow-xl transition-all duration-300',
                 'cursor-pointer overflow-hidden group',
-                href && 'hover:border-[#044F88]'
+                dark
+                    ? 'bg-white/[0.06] border border-white/10 hover:bg-white/[0.1] hover:shadow-white/5'
+                    : 'bg-white border border-gray-100 hover:shadow-gray-200/50',
+                href && !dark && 'hover:border-[#044F88]',
+                href && dark && 'hover:border-white/20'
             )}
             style={{ transformStyle: 'preserve-3d' }}
         >
             {/* Glossy sheen effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className={cn(
+                'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none',
+                dark ? 'bg-gradient-to-br from-white/5 to-transparent' : 'bg-gradient-to-br from-white/50 to-transparent'
+            )} />
 
             <div className="flex items-start justify-between relative z-10 h-full">
                 <div className="flex flex-col h-full justify-between">
                     <div>
-                        <p className="text-sm text-[#6f6f6f] mb-1">{title}</p>
-                        <span className="text-3xl font-bold text-[#1d1d1d] tabular-nums leading-none">
+                        <p className={cn('text-sm mb-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{title}</p>
+                        <span className={cn('text-3xl font-bold tabular-nums leading-none', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                             {displayValue.toLocaleString()}
                         </span>
-                        <p className="text-sm text-gray-400 mt-2">{suffix}</p>
+                        <p className={cn('text-sm mt-2', dark ? 'text-white/30' : 'text-gray-400')}>{suffix}</p>
                     </div>
                     {href && inspectLabel && (
-                        <div className="mt-4 flex items-center text-sm font-medium text-[#044F88] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                        <div className={cn(
+                            'mt-4 flex items-center text-sm font-medium opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300',
+                            dark ? 'text-white/70' : 'text-[#044F88]'
+                        )}>
                             {inspectLabel} <ArrowRight className="w-4 h-4 ml-1" />
                         </div>
                     )}
@@ -115,6 +127,7 @@ function StatCard({ title, value, suffix, icon: Icon, color, delay, href, inspec
 export function AdminAttendanceDashboard() {
     const { t } = useTranslation();
     const { employees, logs, otRequests } = useAttendance();
+    const { dark } = useAdminTheme();
 
     const STATUS_LABEL: Record<string, string> = {
         present: t('status.present'),
@@ -160,30 +173,33 @@ export function AdminAttendanceDashboard() {
             {/* ── Page header ── */}
             <div className="dashboard-section flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">{t('admin.dashboard.title')}</h1>
-                    <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.dashboard.subtitle')}</p>
+                    <h1 className={cn('text-2xl font-bold tracking-tight', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.dashboard.title')}</h1>
+                    <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.dashboard.subtitle')}</p>
                 </div>
-                <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-2 w-max">
+                <div className={cn(
+                    'px-4 py-2 rounded-xl border shadow-sm flex items-center gap-2 w-max',
+                    dark ? 'bg-white/[0.06] border-white/10' : 'bg-white border-gray-100'
+                )}>
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-sm font-semibold text-[#1d1d1d]">{displayDate}</span>
+                    <span className={cn('text-sm font-semibold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{displayDate}</span>
                 </div>
             </div>
 
             {/* ── Stats grid (Match Dashboard) ── */}
             <div className="dashboard-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
-                <StatCard
+                <StatCard dark={dark}
                     title={t('admin.dashboard.statPresent')} value={presentCount} suffix={t('common.person')} icon={Users}
                     color="bg-gradient-to-br from-emerald-500 to-teal-500" delay={0.05}
                 />
-                <StatCard
+                <StatCard dark={dark}
                     title={t('admin.dashboard.statLate')} value={lateCount} suffix={t('common.person')} icon={Clock}
                     color="bg-gradient-to-br from-amber-500 to-orange-500" delay={0.1}
                 />
-                <StatCard
+                <StatCard dark={dark}
                     title={t('admin.dashboard.statAbsent')} value={absentCount} suffix={t('common.person')} icon={AlertTriangle}
                     color="bg-gradient-to-br from-red-500 to-rose-500" delay={0.15}
                 />
-                <StatCard
+                <StatCard dark={dark}
                     title={t('admin.dashboard.statPendingOT')} value={pendingOTs} suffix={t('common.items')} icon={FileCheck2}
                     color="bg-gradient-to-br from-[#044F88] to-[#00223A]" delay={0.2}
                     href="/admin/attendance/ot-approvals"
@@ -192,20 +208,32 @@ export function AdminAttendanceDashboard() {
             </div>
 
             {/* ── Recent Check-ins Table (Matches RequestsTable) ── */}
-            <div className="dashboard-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
+            <div className={cn(
+                'dashboard-section rounded-2xl shadow-sm overflow-hidden',
+                dark ? 'bg-white/[0.06] border border-white/10' : 'bg-white border border-gray-100'
+            )}>
+                <div className={cn(
+                    'px-6 py-5 border-b flex justify-between items-center',
+                    dark ? 'border-white/10' : 'border-gray-100 bg-white'
+                )}>
                     <div>
-                        <h2 className="text-lg font-semibold text-[#1d1d1d]">{t('admin.dashboard.recentCheckIns')}</h2>
-                        <p className="text-sm text-[#6f6f6f] mt-0.5">{t('admin.dashboard.recentCheckInsSubtitle')}</p>
+                        <h2 className={cn('text-lg font-semibold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.dashboard.recentCheckIns')}</h2>
+                        <p className={cn('text-sm mt-0.5', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.dashboard.recentCheckInsSubtitle')}</p>
                     </div>
-                    <Link to="/admin/attendance/logs" className="hidden sm:flex items-center text-sm font-medium text-[#044F88] hover:text-[#00223A] transition-colors group">
+                    <Link to="/admin/attendance/logs" className={cn(
+                        'hidden sm:flex items-center text-sm font-medium transition-colors group',
+                        dark ? 'text-white/60 hover:text-white' : 'text-[#044F88] hover:text-[#00223A]'
+                    )}>
                         {t('admin.dashboard.viewAllHistory')} <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left whitespace-nowrap">
-                        <thead className="bg-gray-50/50 text-[#6f6f6f] text-xs uppercase tracking-wider font-semibold border-b border-gray-200">
+                        <thead className={cn(
+                            'text-xs uppercase tracking-wider font-semibold border-b',
+                            dark ? 'bg-white/[0.03] text-white/40 border-white/10' : 'bg-gray-50/50 text-[#6f6f6f] border-gray-200'
+                        )}>
                             <tr>
                                 <th className="px-6 py-4">{t('admin.dashboard.employee')}</th>
                                 <th className="px-6 py-4 hidden sm:table-cell">{t('admin.dashboard.department')}</th>
@@ -214,7 +242,7 @@ export function AdminAttendanceDashboard() {
                                 <th className="px-6 py-4">{t('admin.dashboard.status')}</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 bg-white">
+                        <tbody className={cn('divide-y', dark ? 'divide-white/5' : 'divide-gray-100 bg-white')}>
                             {todayLogs.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-20 text-center">
@@ -231,7 +259,7 @@ export function AdminAttendanceDashboard() {
                                 todayLogs.map(log => {
                                     const emp = employees.find(e => e.id === log.employeeId);
                                     return (
-                                        <tr key={log.id} className="log-row hover:bg-[#044F88]/30 transition-colors duration-300 group">
+                                        <tr key={log.id} className={cn('log-row transition-colors duration-300 group', dark ? 'hover:bg-white/[0.04]' : 'hover:bg-[#044F88]/5')}>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
                                                     {emp?.avatarUrl ? (
@@ -246,18 +274,18 @@ export function AdminAttendanceDashboard() {
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <p className="font-semibold text-[#1d1d1d] group-hover:text-[#044F88] transition-colors">{emp?.name || t('admin.dashboard.unknownName')}</p>
-                                                        {emp?.nickname && <p className="text-xs text-[#6f6f6f]">({emp.nickname})</p>}
-                                                        <p className="text-xs text-[#6f6f6f] sm:hidden mt-0.5">{emp?.department}</p>
+                                                        <p className={cn('font-semibold transition-colors', dark ? 'text-white group-hover:text-emerald-400' : 'text-[#1d1d1d] group-hover:text-[#044F88]')}>{emp?.name || t('admin.dashboard.unknownName')}</p>
+                                                        {emp?.nickname && <p className={cn('text-xs', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>({emp.nickname})</p>}
+                                                        <p className={cn('text-xs sm:hidden mt-0.5', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{emp?.department}</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-[#6f6f6f] hidden sm:table-cell">{emp?.department}</td>
+                                            <td className={cn('px-6 py-4 hidden sm:table-cell', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{emp?.department}</td>
                                             <td className="px-6 py-4">
-                                                <span className="font-semibold text-[#1d1d1d] tabular-nums">{formatTime(log.checkInTime)}</span>
+                                                <span className={cn('font-semibold tabular-nums', dark ? 'text-emerald-400' : 'text-[#1d1d1d]')}>{formatTime(log.checkInTime)}</span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="font-medium text-[#6f6f6f] tabular-nums">{formatTime(log.checkOutTime)}</span>
+                                                <span className={cn('font-medium tabular-nums', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{formatTime(log.checkOutTime)}</span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={cn(
@@ -279,8 +307,11 @@ export function AdminAttendanceDashboard() {
 
                 {/* Mobile view history button */}
                 {todayLogs.length > 0 && (
-                    <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 sm:hidden">
-                        <Link to="/admin/attendance/logs" className="flex justify-center items-center w-full text-sm font-medium text-[#044F88] bg-white border border-[#044F88]/10 hover:border-[#044F88]/20 hover:bg-[#044F88]/5/50 rounded-xl py-3 shadow-sm transition-all">
+                    <div className={cn('px-6 py-4 border-t sm:hidden', dark ? 'border-white/10' : 'border-gray-100 bg-gray-50/50')}>
+                        <Link to="/admin/attendance/logs" className={cn(
+                            'flex justify-center items-center w-full text-sm font-medium rounded-xl py-3 shadow-sm transition-all border',
+                            dark ? 'text-white/70 bg-white/[0.06] border-white/10 hover:bg-white/10' : 'text-[#044F88] bg-white border-[#044F88]/10 hover:border-[#044F88]/20'
+                        )}>
                             {t('admin.dashboard.viewAllHistory')} <ArrowRight className="w-4 h-4 ml-1" />
                         </Link>
                     </div>

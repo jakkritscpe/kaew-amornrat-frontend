@@ -10,6 +10,7 @@ import type { Employee } from '../features/attendance/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
 
 type Tab = 'rbac' | 'accounts' | 'compensation';
 
@@ -35,6 +36,7 @@ interface AdminModalProps {
 
 function AdminModal({ editTarget, onClose, onSaved }: AdminModalProps) {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const isEdit = !!editTarget;
     const [form, setForm] = useState<AdminFormData>(
         isEdit
@@ -81,8 +83,8 @@ function AdminModal({ editTarget, onClose, onSaved }: AdminModalProps) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+            <div className={cn('rounded-2xl shadow-2xl w-full max-w-md', dark ? 'bg-[#1e293b]' : 'bg-white')} onClick={e => e.stopPropagation()}>
+                <div className={cn('flex items-center justify-between px-6 py-5 border-b', dark ? 'border-white/10' : 'border-gray-100')}>
                     <div>
                         <h3 className="font-bold text-[#1d1d1d]">{isEdit ? t('settings.accounts.editTitle') : t('settings.accounts.addTitle')}</h3>
                         <p className="text-xs text-[#6f6f6f] mt-0.5">{t('settings.accounts.formDesc')}</p>
@@ -164,6 +166,7 @@ function Field({ label, children, className }: { label: string; children: React.
 // ─── Main SettingsPage ──────────────────────────────────────────────────────
 export function SettingsPage() {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const { user } = useAuth();
     const { companySettings, updateCompanySettings } = useAttendance() ?? {};
 
@@ -307,7 +310,7 @@ export function SettingsPage() {
     return (
         <div className="space-y-6">
             {/* ── Tab bar ── */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-1.5 flex gap-1">
+            <div className={cn('rounded-2xl border p-1.5 flex gap-1', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-gray-100 shadow-sm')}>
                 {tabs.map(t => {
                     const Icon = t.icon;
                     return (
@@ -318,7 +321,7 @@ export function SettingsPage() {
                                 'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200',
                                 activeTab === t.id
                                     ? 'bg-[#044F88] text-white shadow-sm'
-                                    : 'text-[#6f6f6f] hover:bg-gray-50'
+                                    : dark ? 'text-white/50 hover:bg-white/[0.04]' : 'text-[#6f6f6f] hover:bg-gray-50'
                             )}
                         >
                             <Icon className="w-4 h-4" />
@@ -332,14 +335,14 @@ export function SettingsPage() {
                 TAB 1 — RBAC
             ══════════════════════════════════════ */}
             {activeTab === 'rbac' && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                <div className={cn('rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                    <div className={cn('px-6 py-5 border-b flex items-center gap-3', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-gray-50/50')}>
                         <div className="p-2 bg-[#044F88]/5 rounded-xl text-[#044F88]">
                             <Shield className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-[#1d1d1d]">{t('settings.rbac.title')}</h2>
-                            <p className="text-xs text-[#6f6f6f] mt-0.5">{t('settings.rbac.subtitle')}</p>
+                            <h2 className={cn('font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('settings.rbac.title')}</h2>
+                            <p className={cn('text-xs mt-0.5', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('settings.rbac.subtitle')}</p>
                         </div>
                     </div>
                     <div className="p-6">
@@ -357,15 +360,15 @@ export function SettingsPage() {
                         ) : (
                             <div className="space-y-6">
                                 {rbacAdmins.map(admin => (
-                                    <div key={admin.id} className="border border-gray-200 rounded-2xl overflow-hidden">
-                                        <div className="bg-gray-50/70 px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+                                    <div key={admin.id} className={cn('border rounded-2xl overflow-hidden', dark ? 'border-white/10' : 'border-gray-200')}>
+                                        <div className={cn('px-5 py-4 border-b flex items-center justify-between', dark ? 'bg-white/[0.03] border-white/10' : 'bg-gray-50/70 border-gray-200')}>
                                             <div className="flex items-center gap-3">
                                                 <div className="w-9 h-9 rounded-xl bg-[#044F88] flex items-center justify-center text-white font-bold text-sm">
                                                     {admin.name.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-[#1d1d1d] text-sm">{admin.name}</p>
-                                                    <p className="text-[11px] text-[#6f6f6f] font-mono">{admin.email}</p>
+                                                    <p className={cn('font-bold text-sm', dark ? 'text-white' : 'text-[#1d1d1d]')}>{admin.name}</p>
+                                                    <p className={cn('text-[11px] font-mono', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{admin.email}</p>
                                                 </div>
                                             </div>
                                             {savedUserId === admin.id && (
@@ -384,16 +387,16 @@ export function SettingsPage() {
                                                         const isAll = checkedCount === childIds.length;
                                                         const isPartial = checkedCount > 0 && !isAll;
                                                         return (
-                                                            <div key={group.id} className="col-span-1 sm:col-span-2 lg:col-span-3 bg-gray-50/60 rounded-xl border border-gray-100 p-4 space-y-3">
+                                                            <div key={group.id} className={cn('col-span-1 sm:col-span-2 lg:col-span-3 rounded-xl border p-4 space-y-3', dark ? 'bg-white/[0.03] border-white/10' : 'bg-gray-50/60 border-gray-100')}>
                                                                 <label className="flex items-center gap-2.5 cursor-pointer">
                                                                     <input type="checkbox" className="w-4 h-4 rounded text-[#044F88] cursor-pointer"
                                                                         checked={isAll || isPartial}
                                                                         ref={el => { if (el) el.indeterminate = isPartial; }}
                                                                         onChange={() => handleTogglePermission(admin.id, group.id, true, childIds)}
                                                                     />
-                                                                    <span className="text-sm font-bold text-[#1d1d1d]">{group.label}</span>
+                                                                    <span className={cn('text-sm font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{group.label}</span>
                                                                 </label>
-                                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pl-6 pt-2 border-t border-gray-100">
+                                                                <div className={cn('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pl-6 pt-2 border-t', dark ? 'border-white/10' : 'border-gray-100')}>
                                                                     {group.subMenus.map(menu => {
                                                                         const has = admin.accessibleMenus?.includes(menu.id) ?? false;
                                                                         return (
@@ -441,15 +444,15 @@ export function SettingsPage() {
                 TAB 2 — Admin Accounts
             ══════════════════════════════════════ */}
             {activeTab === 'accounts' && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div className={cn('rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                    <div className={cn('px-6 py-5 border-b flex items-center justify-between', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-gray-50/50')}>
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
                                 <Users className="w-5 h-5" />
                             </div>
                             <div>
-                                <h2 className="font-bold text-[#1d1d1d]">{t('settings.accounts.title')}</h2>
-                                <p className="text-xs text-[#6f6f6f] mt-0.5">{t('settings.accounts.subtitle')}</p>
+                                <h2 className={cn('font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('settings.accounts.title')}</h2>
+                                <p className={cn('text-xs mt-0.5', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('settings.accounts.subtitle')}</p>
                             </div>
                         </div>
                         <button
@@ -479,13 +482,13 @@ export function SettingsPage() {
                         ) : (
                             <div className="space-y-3">
                                 {adminAccounts.map(acc => (
-                                    <div key={acc.id} className="flex items-center justify-between gap-4 bg-[#f8fafc] rounded-2xl border border-gray-100 px-4 py-3.5">
+                                    <div key={acc.id} className={cn('flex items-center justify-between gap-4 rounded-2xl border px-4 py-3.5', dark ? 'bg-white/[0.03] border-white/10' : 'bg-[#f8fafc] border-gray-100')}>
                                         <div className="flex items-center gap-3 min-w-0">
                                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#044F88] to-[#6366f1] flex items-center justify-center text-white font-bold text-sm shrink-0">
                                                 {acc.name.charAt(0)}
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="font-bold text-[#1d1d1d] text-sm truncate">{acc.name}</p>
+                                                <p className={cn('font-bold text-sm truncate', dark ? 'text-white' : 'text-[#1d1d1d]')}>{acc.name}</p>
                                                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                                     <p className="text-xs text-[#6f6f6f] truncate">{acc.email}</p>
                                                     <span className={cn(
@@ -530,14 +533,14 @@ export function SettingsPage() {
                 TAB 3 — Compensation
             ══════════════════════════════════════ */}
             {activeTab === 'compensation' && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                <div className={cn('rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                    <div className={cn('px-6 py-5 border-b flex items-center gap-3', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-gray-50/50')}>
                         <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600">
                             <DollarSign className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-[#1d1d1d]">{t('settings.compensation.title')}</h2>
-                            <p className="text-xs text-[#6f6f6f] mt-0.5">{t('settings.compensation.subtitle')}</p>
+                            <h2 className={cn('font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('settings.compensation.title')}</h2>
+                            <p className={cn('text-xs mt-0.5', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('settings.compensation.subtitle')}</p>
                         </div>
                     </div>
                     <div className="p-6 max-w-lg space-y-5">
@@ -588,14 +591,14 @@ export function SettingsPage() {
             {/* ── Delete Confirm Modal ── */}
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setDeleteTarget(null)}>
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
+                    <div className={cn('rounded-2xl shadow-2xl w-full max-w-sm p-6', dark ? 'bg-[#1e293b]' : 'bg-white')} onClick={e => e.stopPropagation()}>
                         <div className="flex items-start gap-3 mb-4">
                             <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
                                 <AlertTriangle className="w-5 h-5 text-red-500" />
                             </div>
                             <div>
-                                <p className="font-bold text-[#1d1d1d]">{t('settings.accounts.deleteConfirmTitle')}</p>
-                                <p className="text-sm text-[#6f6f6f] mt-0.5">
+                                <p className={cn('font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('settings.accounts.deleteConfirmTitle')}</p>
+                                <p className={cn('text-sm mt-0.5', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>
                                     {t('settings.accounts.deleteConfirm', { name: deleteTarget.name })}
                                 </p>
                             </div>

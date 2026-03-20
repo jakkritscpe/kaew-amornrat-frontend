@@ -5,6 +5,7 @@ import { AuthProvider } from './features/auth/contexts/AuthContext';
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { AttendanceProvider } from './features/attendance/contexts/AttendanceContext';
+import { AdminThemeProvider } from './hooks/useAdminTheme';
 
 // Static imports for layouts and auth (always needed)
 import { MainLayout } from './layouts/MainLayout';
@@ -53,7 +54,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
 
                 <Route path="/admin" element={<ProtectedRoute />}>
-                  <Route element={<MainLayout />}>
+                  <Route element={<AdminThemeProvider><MainLayout /></AdminThemeProvider>}>
                     <Route index element={<SmartAdminRedirect />} />
                     <Route path="settings" element={<SettingsPage />} />
 

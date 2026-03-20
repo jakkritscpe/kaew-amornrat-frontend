@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn, formatTime } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -91,6 +92,7 @@ type AvatarMode = 'idle' | 'camera';
 
 function StatCard({ title, value, icon: Icon, color, delay }: { title: string, value: number, icon: React.ElementType, color: string, delay: number }) {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const cardRef = useRef<HTMLDivElement>(null);
     const [displayValue, setDisplayValue] = useState(0);
 
@@ -139,20 +141,21 @@ function StatCard({ title, value, icon: Icon, color, delay }: { title: string, v
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             className={cn(
-                'relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100',
-                'hover:shadow-xl hover:shadow-gray-200/50 transition-shadow duration-300',
-                'cursor-pointer overflow-hidden group'
+                'relative rounded-2xl p-6 border',
+                dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100',
+                dark ? 'hover:shadow-none' : 'hover:shadow-xl hover:shadow-gray-200/50',
+                'transition-shadow duration-300 cursor-pointer overflow-hidden group'
             )}
             style={{ transformStyle: 'preserve-3d' }}
         >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className={cn('absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none', dark && 'hidden')} />
             <div className="flex items-start justify-between relative z-10">
                 <div>
-                    <p className="text-sm text-[#6f6f6f] mb-1">{title}</p>
-                    <span className="text-3xl font-bold text-[#1d1d1d] tabular-nums">
+                    <p className={cn('text-sm mb-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{title}</p>
+                    <span className={cn('text-3xl font-bold tabular-nums', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                         {displayValue.toLocaleString()}
                     </span>
-                    <p className="text-sm text-gray-400 mt-1">{t('common.person')}</p>
+                    <p className={cn('text-sm mt-1', dark ? 'text-white/30' : 'text-gray-400')}>{t('common.person')}</p>
                 </div>
                 <div className={cn('stat-icon w-12 h-12 rounded-xl flex items-center justify-center shrink-0', color)}>
                     <Icon className="w-6 h-6 text-white" />
@@ -164,6 +167,7 @@ function StatCard({ title, value, icon: Icon, color, delay }: { title: string, v
 
 export function AdminEmployees() {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const { employees, logs, locations, addEmployee, updateEmployee, removeEmployee, companySettings, refreshAll, loading, error } = useAttendance();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -586,17 +590,17 @@ export function AdminEmployees() {
             {/* ── Page header ── */}
             <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">{t('admin.employees.title')}</h1>
-                    <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.employees.totalDesc', { n: String(employees.length) })}</p>
+                    <h1 className={cn('text-2xl font-bold tracking-tight', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.employees.title')}</h1>
+                    <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.employees.totalDesc', { n: String(employees.length) })}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                     <div className="relative w-full sm:w-auto group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-lg transition-all">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-focus-within:text-[#044F88] transition-colors" />
+                        <Search className={cn('absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none group-focus-within:text-[#044F88] transition-colors', dark ? 'text-white/30' : 'text-gray-400')} />
                         <Input
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                             placeholder={t('admin.employees.searchPlaceholder')}
-                            className="pl-9 w-full sm:w-64 bg-white border-gray-200 focus:border-[#044F88] focus-visible:ring-0 transition-all rounded-lg h-10"
+                            className={cn('pl-9 w-full sm:w-64 focus:border-[#044F88] focus-visible:ring-0 transition-all rounded-lg h-10', dark ? 'bg-white/[0.06] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-gray-200')}
                             autoComplete="off"
                             spellCheck={false}
                         />
@@ -624,8 +628,8 @@ export function AdminEmployees() {
 
                     return (
                         <div key={emp.id} className={cn(
-                            'emp-card relative group bg-white rounded-2xl border border-gray-100 shadow-sm',
-                            'hover:shadow-xl hover:shadow-gray-200/50 hover:border-[#044F88]/20',
+                            'emp-card relative group rounded-2xl border',
+                            dark ? 'bg-white/[0.06] border-white/10 shadow-none hover:border-[#044F88]/30' : 'bg-white border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:border-[#044F88]/20',
                             'transition-all duration-300 flex flex-col',
                         )}>
                             {/* ── Action icons (top-right) ── */}
@@ -664,13 +668,13 @@ export function AdminEmployees() {
                                         </div>
                                     )}
                                     <div className="min-w-0 flex-1 pt-1">
-                                        <h4 className="font-semibold text-[#1d1d1d] truncate group-hover:text-[#044F88] transition-colors">
+                                        <h4 className={cn('font-semibold truncate group-hover:text-[#044F88] transition-colors', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                             {emp.name}
                                             {emp.nickname && (
-                                                <span className="ml-1.5 font-normal text-[#6f6f6f] text-sm">({emp.nickname})</span>
+                                                <span className={cn('ml-1.5 font-normal text-sm', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>({emp.nickname})</span>
                                             )}
                                         </h4>
-                                        <p className="text-sm text-[#6f6f6f] truncate mt-0.5">{emp.position}</p>
+                                        <p className={cn('text-sm truncate mt-0.5', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{emp.position}</p>
                                         {/* Status badge */}
                                         <span className={cn(
                                             'mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium ring-1',
@@ -683,7 +687,7 @@ export function AdminEmployees() {
                                 </div>
 
                                 {/* Divider */}
-                                <div className="border-t border-gray-100" />
+                                <div className={cn('border-t', dark ? 'border-white/10' : 'border-gray-100')} />
 
                                 {/* Info row */}
                                 <div className="grid grid-cols-2 gap-3">
@@ -693,7 +697,7 @@ export function AdminEmployees() {
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-0.5">{t('admin.employees.shift')}</p>
-                                            <p className="text-xs font-semibold text-[#1d1d1d] tabular-nums truncate">{emp.shiftStartTime}–{emp.shiftEndTime}</p>
+                                            <p className={cn('text-xs font-semibold tabular-nums truncate', dark ? 'text-white' : 'text-[#1d1d1d]')}>{emp.shiftStartTime}–{emp.shiftEndTime}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 min-w-0">
@@ -702,7 +706,7 @@ export function AdminEmployees() {
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-0.5">{t('admin.employees.department')}</p>
-                                            <p className="text-xs font-semibold text-[#1d1d1d] truncate">{emp.department}</p>
+                                            <p className={cn('text-xs font-semibold truncate', dark ? 'text-white' : 'text-[#1d1d1d]')}>{emp.department}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -710,9 +714,11 @@ export function AdminEmployees() {
                                 {/* Check-in row */}
                                 <div className={cn(
                                     'flex items-center justify-between rounded-xl px-4 py-3 border',
-                                    todayLog?.checkInTime ? 'bg-emerald-50/50 border-emerald-100/50' : 'bg-gray-50/50 border-gray-100/50',
+                                    todayLog?.checkInTime
+                                        ? (dark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50/50 border-emerald-100/50')
+                                        : (dark ? 'bg-white/[0.03] border-white/5' : 'bg-gray-50/50 border-gray-100/50'),
                                 )}>
-                                    <p className="text-xs font-medium text-[#6f6f6f]">{t('admin.employees.checkedInToday')}</p>
+                                    <p className={cn('text-xs font-medium', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.employees.checkedInToday')}</p>
                                     {todayLog?.checkInTime
                                         ? <p className="text-xs font-bold text-emerald-600 tabular-nums">{formatTime(todayLog.checkInTime)}</p>
                                         : <p className="text-xs text-gray-400">{t('admin.employees.noData')}</p>
@@ -725,7 +731,9 @@ export function AdminEmployees() {
                                 <Button
                                     variant="outline"
                                     onClick={() => setShowQRModal(emp.id)}
-                                    className="w-full text-[#6f6f6f] border-gray-200 hover:text-[#044F88] hover:bg-[#044F88]/5 hover:border-[#044F88]/20 transition-colors rounded-xl h-10"
+                                    className={cn('w-full border transition-colors rounded-xl h-10',
+                                        dark ? 'text-white border-white/20 hover:text-white hover:bg-white/10' : 'text-[#6f6f6f] border-gray-200 hover:text-[#044F88] hover:bg-[#044F88]/5 hover:border-[#044F88]/20'
+                                    )}
                                 >
                                     <QrCode className="w-4 h-4 mr-2" /> {t('admin.employees.scanAttendance')}
                                 </Button>
@@ -736,10 +744,10 @@ export function AdminEmployees() {
 
                 {/* Empty state */}
                 {filteredEmployees.length === 0 ? (
-                    <div className="col-span-1 md:col-span-2 lg:col-span-3 py-24 text-center bg-white rounded-2xl border border-gray-100 shadow-sm">
-                        <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p className="text-[#1d1d1d] font-semibold text-lg">{t('admin.employees.noResults')}</p>
-                        <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.employees.noResultsHint')}</p>
+                    <div className={cn('col-span-1 md:col-span-2 lg:col-span-3 py-24 text-center rounded-2xl border', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-gray-100 shadow-sm')}>
+                        <Users className={cn('w-12 h-12 mx-auto mb-4', dark ? 'text-white/20' : 'text-gray-300')} />
+                        <p className={cn('font-semibold text-lg', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.employees.noResults')}</p>
+                        <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.employees.noResultsHint')}</p>
                     </div>
                 ) : null}
             </div>
@@ -907,7 +915,7 @@ export function AdminEmployees() {
                         const isDelete = secureActionType === 'delete';
                         return (
                             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
-                                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden relative">
+                                <div className={cn('rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden relative', dark ? 'bg-[#1e293b]' : 'bg-white')}>
                                     {/* Step bar */}
                                     {isDelete && (
                                         <div className="flex h-1.5">
@@ -995,20 +1003,20 @@ export function AdminEmployees() {
                     {/* ════ Form Modal ════ */}
                     {showFormModal ? (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 sm:p-6">
-                            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden relative">
+                            <div className={cn('rounded-3xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden relative', dark ? 'bg-[#1e293b]' : 'bg-white')}>
 
                                 {/* Header */}
-                                <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 shrink-0 bg-white">
+                                <div className={cn('flex items-center justify-between px-8 py-6 border-b shrink-0', dark ? 'border-white/10 bg-[#1e293b]' : 'border-gray-100 bg-white')}>
                                     <div>
-                                        <h2 className="text-xl font-bold text-[#1d1d1d]">{isEditing ? t('admin.employees.formTitleEdit') : t('admin.employees.formTitleAdd')}</h2>
-                                        <p className="text-sm text-[#6f6f6f] mt-1">{isEditing ? t('admin.employees.formDescEdit') : t('admin.employees.formDescAdd')}</p>
+                                        <h2 className={cn('text-xl font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{isEditing ? t('admin.employees.formTitleEdit') : t('admin.employees.formTitleAdd')}</h2>
+                                        <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{isEditing ? t('admin.employees.formDescEdit') : t('admin.employees.formDescAdd')}</p>
                                     </div>
                                     <button type="button" onClick={closeFormModal} className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-[#1d1d1d] transition-colors">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
 
-                                <form onSubmit={handleFormSubmit} className="overflow-y-auto bg-gray-50/30">
+                                <form onSubmit={handleFormSubmit} className={cn('overflow-y-auto', dark ? 'bg-white/[0.02]' : 'bg-gray-50/30')}>
                                     <div className="px-8 py-6 flex flex-col md:flex-row gap-8">
 
                                         {/* LEFT: Avatar */}
@@ -1276,7 +1284,7 @@ export function AdminEmployees() {
                                     </div>
 
                                     {/* Footer */}
-                                    <div className="px-8 py-5 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
+                                    <div className={cn('px-8 py-5 border-t flex items-center justify-between shrink-0', dark ? 'border-white/10 bg-[#1e293b]' : 'border-gray-100 bg-white')}>
                                         <p className="text-sm font-medium text-gray-400"><span className="text-red-500 mr-1">*</span>{t('admin.employees.required')}</p>
                                         <div className="flex gap-3">
                                             <Button type="button" variant="outline" onClick={closeFormModal} disabled={isSubmitting} className="rounded-xl h-11 px-5 border-gray-200 text-[#1d1d1d] hover:bg-gray-50 font-semibold text-sm disabled:opacity-50">{t('common.cancel')}</Button>
