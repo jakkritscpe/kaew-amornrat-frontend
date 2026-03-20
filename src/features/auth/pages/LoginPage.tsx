@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 export function LoginPage() {
     const [email, setEmail] = useState('');
@@ -13,13 +14,14 @@ export function LoginPage() {
     const { loginWithCredentials, isLoading } = useAuth();
     const navigate = useNavigate();
     const emailRef = useRef<HTMLInputElement>(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         emailRef.current?.focus();
     }, []);
 
-    const emailError = touched.email && !email ? 'กรุณากรอกอีเมล' : '';
-    const passwordError = touched.password && !password ? 'กรุณากรอกรหัสผ่าน' : '';
+    const emailError = touched.email && !email ? t('auth.emailRequired') : '';
+    const passwordError = touched.password && !password ? t('auth.passwordRequired') : '';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,7 +34,7 @@ export function LoginPage() {
             await loginWithCredentials!(email, password);
             navigate('/admin');
         } catch {
-            setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+            setError(t('auth.invalidCredentials'));
         }
     };
 
@@ -45,11 +47,11 @@ export function LoginPage() {
                         <Link to="/">
                             <img
                                 src="/logo.svg"
-                                alt="หจก.แก้วอมรรัตน์"
+                                alt={t('common.companyName')}
                                 className="h-28 w-auto object-contain mb-4 cursor-pointer"
                             />
                         </Link>
-                        <p className="text-gray-500 text-sm">ระบบจัดการสำหรับผู้ดูแล</p>
+                        <p className="text-gray-500 text-sm">{t('auth.adminSubtitle')}</p>
                     </div>
 
                     {/* Global error */}
@@ -71,7 +73,7 @@ export function LoginPage() {
                         {/* Email */}
                         <div className="space-y-1.5">
                             <label htmlFor="admin-email" className="block text-sm font-medium text-gray-700">
-                                อีเมล
+                                {t('auth.email')}
                             </label>
                             <div className="relative">
                                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 pointer-events-none" aria-hidden="true" />
@@ -102,7 +104,7 @@ export function LoginPage() {
                         {/* Password */}
                         <div className="space-y-1.5">
                             <label htmlFor="admin-password" className="block text-sm font-medium text-gray-700">
-                                รหัสผ่าน
+                                {t('auth.password')}
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 pointer-events-none" aria-hidden="true" />
@@ -126,7 +128,7 @@ export function LoginPage() {
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 transition-colors"
-                                    aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                                    aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                                     tabIndex={-1}
                                 >
                                     {showPassword
@@ -149,16 +151,16 @@ export function LoginPage() {
                             {isLoading ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                                    กำลังเข้าสู่ระบบ...
+                                    {t('auth.loggingIn')}
                                 </span>
                             ) : (
-                                'เข้าสู่ระบบ'
+                                t('auth.login')
                             )}
                         </button>
                     </form>
 
                     <p className="text-center text-xs text-gray-400 mt-6">
-                        &copy; {new Date().getFullYear()} หจก.แก้วอมรรัตน์
+                        &copy; {new Date().getFullYear()} {t('common.companyName')}
                     </p>
                 </div>
             </div>

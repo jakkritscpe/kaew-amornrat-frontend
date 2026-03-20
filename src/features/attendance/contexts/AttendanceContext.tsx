@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import type { Employee, AttendanceLog, WorkLocation, OTRequest } from '../types';
 import { TOKEN_KEY } from '../../../lib/api-client';
+import { useAuth } from '../../auth/hooks/useAuth';
 import { getEmployeesApi, createEmployeeApi, updateEmployeeApi, deleteEmployeeApi } from '../../../lib/api/employees-api';
 import { getLocationsApi, createLocationApi, updateLocationApi, deleteLocationApi } from '../../../lib/api/locations-api';
 import { getLogsApi, checkInApi, checkOutApi } from '../../../lib/api/attendance-api';
@@ -11,6 +12,7 @@ import type { CompanySettings } from './attendance-context-value';
 export type { CompanySettings } from './attendance-context-value';
 
 export function AttendanceProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [logs, setLogs] = useState<AttendanceLog[]>([]);
   const [locations, setLocations] = useState<WorkLocation[]>([]);
@@ -22,7 +24,7 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshAll = useCallback(async () => {
+  const refreshAll = useCallback(async (retries = 2) => {
     try {
       setLoading(true);
       setError(null);
@@ -39,6 +41,10 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
       setLocations(locs);
       setCompanySettings(settings);
     } catch (e) {
+      if (retries > 0) {
+        await new Promise(r => setTimeout(r, 1000));
+        return refreshAll(retries - 1);
+      }
       setError(e instanceof Error ? e.message : 'เกิดข้อผิดพลาด');
     } finally {
       setLoading(false);
@@ -67,11 +73,26 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const prevUserRef = useRef(user);
   useEffect(() => {
-    refreshAll();
-    refreshLogs();
-    refreshOT();
-  }, [refreshAll, refreshLogs, refreshOT]);
+    const justLoggedIn = !prevUserRef.current && !!user;
+    prevUserRef.current = user;
+
+    // Fetch on mount (if token exists) or when user just logged in
+    if (justLoggedIn || user) {
+      refreshAll();
+      refreshLogs();
+      refreshOT();
+    }
+
+    // Clear data on logout
+    if (!user) {
+      setEmployees([]);
+      setLogs([]);
+      setLocations([]);
+      setOTRequests([]);
+    }
+  }, [user, refreshAll, refreshLogs, refreshOT]);
 
   const addLog = useCallback(async (lat: number, lng: number) => {
     const log = await checkInApi(lat, lng);

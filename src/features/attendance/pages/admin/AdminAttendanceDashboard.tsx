@@ -5,14 +5,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Users, Clock, AlertTriangle, FileCheck2, CalendarX, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn, formatTime } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const STATUS_LABEL: Record<string, string> = {
-    present: 'มาทำงาน',
-    late: 'มาสาย',
-    absent: 'ขาดงาน',
-};
+// STATUS_LABEL is now derived from t() inside the component
 
 // ═══════════════════════════════════════════
 // ── STAT CARD (matches Dashboard StatsGrid)
@@ -25,9 +22,10 @@ interface StatCardProps {
     color: string;
     delay: number;
     href?: string;
+    inspectLabel?: string;
 }
 
-function StatCard({ title, value, suffix = 'คน', icon: Icon, color, delay, href }: StatCardProps) {
+function StatCard({ title, value, suffix, icon: Icon, color, delay, href, inspectLabel }: StatCardProps) {
     const cardRef = useRef<HTMLDivElement>(null);
     const [displayValue, setDisplayValue] = useState(0);
 
@@ -95,9 +93,9 @@ function StatCard({ title, value, suffix = 'คน', icon: Icon, color, delay, h
                         </span>
                         <p className="text-sm text-gray-400 mt-2">{suffix}</p>
                     </div>
-                    {href && (
+                    {href && inspectLabel && (
                         <div className="mt-4 flex items-center text-sm font-medium text-[#044F88] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
-                            ตรวจสอบ <ArrowRight className="w-4 h-4 ml-1" />
+                            {inspectLabel} <ArrowRight className="w-4 h-4 ml-1" />
                         </div>
                     )}
                 </div>
@@ -115,7 +113,14 @@ function StatCard({ title, value, suffix = 'คน', icon: Icon, color, delay, h
 }
 
 export function AdminAttendanceDashboard() {
+    const { t } = useTranslation();
     const { employees, logs, otRequests } = useAttendance();
+
+    const STATUS_LABEL: Record<string, string> = {
+        present: t('status.present'),
+        late: t('status.late'),
+        absent: t('status.absent'),
+    };
     const containerRef = useRef<HTMLDivElement>(null);
     const todayDate = new Date().toISOString().split('T')[0];
 
@@ -155,8 +160,8 @@ export function AdminAttendanceDashboard() {
             {/* ── Page header ── */}
             <div className="dashboard-section flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">แดชบอร์ดการลงเวลา</h1>
-                    <p className="text-sm text-[#6f6f6f] mt-1">สรุปภาพรวมการเข้างานประจำวัน</p>
+                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">{t('admin.dashboard.title')}</h1>
+                    <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.dashboard.subtitle')}</p>
                 </div>
                 <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-2 w-max">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -167,21 +172,22 @@ export function AdminAttendanceDashboard() {
             {/* ── Stats grid (Match Dashboard) ── */}
             <div className="dashboard-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
                 <StatCard
-                    title="มาทำงาน" value={presentCount} icon={Users}
+                    title={t('admin.dashboard.statPresent')} value={presentCount} suffix={t('common.person')} icon={Users}
                     color="bg-gradient-to-br from-emerald-500 to-teal-500" delay={0.05}
                 />
                 <StatCard
-                    title="มาสาย" value={lateCount} icon={Clock}
+                    title={t('admin.dashboard.statLate')} value={lateCount} suffix={t('common.person')} icon={Clock}
                     color="bg-gradient-to-br from-amber-500 to-orange-500" delay={0.1}
                 />
                 <StatCard
-                    title="ขาดงาน" value={absentCount} icon={AlertTriangle}
+                    title={t('admin.dashboard.statAbsent')} value={absentCount} suffix={t('common.person')} icon={AlertTriangle}
                     color="bg-gradient-to-br from-red-500 to-rose-500" delay={0.15}
                 />
                 <StatCard
-                    title="รออนุมัติ OT" value={pendingOTs} suffix="รายการ" icon={FileCheck2}
+                    title={t('admin.dashboard.statPendingOT')} value={pendingOTs} suffix={t('common.items')} icon={FileCheck2}
                     color="bg-gradient-to-br from-[#044F88] to-[#00223A]" delay={0.2}
                     href="/admin/attendance/ot-approvals"
+                    inspectLabel={t('admin.dashboard.inspect')}
                 />
             </div>
 
@@ -189,11 +195,11 @@ export function AdminAttendanceDashboard() {
             <div className="dashboard-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
                     <div>
-                        <h2 className="text-lg font-semibold text-[#1d1d1d]">การเช็คอินล่าสุดวันนี้</h2>
-                        <p className="text-sm text-[#6f6f6f] mt-0.5">รายการลงเวลาเข้า-ออกงานประจำวัน</p>
+                        <h2 className="text-lg font-semibold text-[#1d1d1d]">{t('admin.dashboard.recentCheckIns')}</h2>
+                        <p className="text-sm text-[#6f6f6f] mt-0.5">{t('admin.dashboard.recentCheckInsSubtitle')}</p>
                     </div>
                     <Link to="/admin/attendance/logs" className="hidden sm:flex items-center text-sm font-medium text-[#044F88] hover:text-[#00223A] transition-colors group">
-                        ดูประวัติทั้งหมด <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                        {t('admin.dashboard.viewAllHistory')} <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
 
@@ -201,11 +207,11 @@ export function AdminAttendanceDashboard() {
                     <table className="w-full text-sm text-left whitespace-nowrap">
                         <thead className="bg-gray-50/50 text-[#6f6f6f] text-xs uppercase tracking-wider font-semibold border-b border-gray-200">
                             <tr>
-                                <th className="px-6 py-4">พนักงาน</th>
-                                <th className="px-6 py-4 hidden sm:table-cell">แผนก</th>
-                                <th className="px-6 py-4">เวลาเข้า</th>
-                                <th className="px-6 py-4">เวลาออก</th>
-                                <th className="px-6 py-4">สถานะ</th>
+                                <th className="px-6 py-4">{t('admin.dashboard.employee')}</th>
+                                <th className="px-6 py-4 hidden sm:table-cell">{t('admin.dashboard.department')}</th>
+                                <th className="px-6 py-4">{t('admin.dashboard.checkIn')}</th>
+                                <th className="px-6 py-4">{t('admin.dashboard.checkOut')}</th>
+                                <th className="px-6 py-4">{t('admin.dashboard.status')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 bg-white">
@@ -216,8 +222,8 @@ export function AdminAttendanceDashboard() {
                                             <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
                                                 <CalendarX className="w-8 h-8 text-gray-300" />
                                             </div>
-                                            <p className="text-[#1d1d1d] font-semibold text-lg mb-1">ยังไม่มีข้อมูลการลงเวลาวันนี้</p>
-                                            <p className="text-[#6f6f6f] text-sm">เมื่อพนักงานเช็คอิน ข้อมูลจะแสดงที่นี่โดยอัตโนมัติ</p>
+                                            <p className="text-[#1d1d1d] font-semibold text-lg mb-1">{t('admin.dashboard.noDataToday')}</p>
+                                            <p className="text-[#6f6f6f] text-sm">{t('admin.dashboard.noDataTodayHint')}</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -240,7 +246,7 @@ export function AdminAttendanceDashboard() {
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <p className="font-semibold text-[#1d1d1d] group-hover:text-[#044F88] transition-colors">{emp?.name || 'ไม่ทราบชื่อ'}</p>
+                                                        <p className="font-semibold text-[#1d1d1d] group-hover:text-[#044F88] transition-colors">{emp?.name || t('admin.dashboard.unknownName')}</p>
                                                         {emp?.nickname && <p className="text-xs text-[#6f6f6f]">({emp.nickname})</p>}
                                                         <p className="text-xs text-[#6f6f6f] sm:hidden mt-0.5">{emp?.department}</p>
                                                     </div>
@@ -275,7 +281,7 @@ export function AdminAttendanceDashboard() {
                 {todayLogs.length > 0 && (
                     <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 sm:hidden">
                         <Link to="/admin/attendance/logs" className="flex justify-center items-center w-full text-sm font-medium text-[#044F88] bg-white border border-[#044F88]/10 hover:border-[#044F88]/20 hover:bg-[#044F88]/5/50 rounded-xl py-3 shadow-sm transition-all">
-                            ดูประวัติทั้งหมด <ArrowRight className="w-4 h-4 ml-1" />
+                            {t('admin.dashboard.viewAllHistory')} <ArrowRight className="w-4 h-4 ml-1" />
                         </Link>
                     </div>
                 )}

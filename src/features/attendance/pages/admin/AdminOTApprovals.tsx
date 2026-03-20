@@ -5,24 +5,28 @@ import { Button } from '@/components/ui/button';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FILTER_LABELS: Record<string, string> = {
-    all: 'ทั้งหมด',
-    pending: 'รออนุมัติ',
-    approved: 'อนุมัติแล้ว',
-    rejected: 'ปฏิเสธแล้ว',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-    approved: 'อนุมัติแล้ว',
-    rejected: 'ปฏิเสธแล้ว',
-    pending: 'รออนุมัติ',
-};
+// FILTER_LABELS and STATUS_LABELS are derived from t() inside the component
 
 export function AdminOTApprovals() {
+    const { t } = useTranslation();
     const { otRequests, employees, updateOTStatus } = useAttendance();
+
+    const FILTER_LABELS: Record<string, string> = {
+        all: t('admin.otApprovals.all'),
+        pending: t('status.pending'),
+        approved: t('status.approved'),
+        rejected: t('status.rejectedFull'),
+    };
+
+    const STATUS_LABELS: Record<string, string> = {
+        approved: t('status.approved'),
+        rejected: t('status.rejectedFull'),
+        pending: t('status.pending'),
+    };
     const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -65,8 +69,8 @@ export function AdminOTApprovals() {
             {/* ── Page header ── */}
             <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">อนุมัติทำงานล่วงเวลา (OT)</h1>
-                    <p className="text-sm text-[#6f6f6f] mt-1">ตรวจสอบและจัดการคำขอทำ OT ของพนักงานในระบบ</p>
+                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">{t('admin.otApprovals.title')}</h1>
+                    <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.otApprovals.subtitle')}</p>
                 </div>
             </div>
 
@@ -109,7 +113,7 @@ export function AdminOTApprovals() {
                         {filtered.length === 0 ? (
                             <div className="py-16 text-center text-[#6f6f6f] text-sm flex flex-col items-center">
                                 <FileText className="w-12 h-12 text-gray-200 mb-4" />
-                                <p className="font-semibold text-lg text-[#1d1d1d]">ไม่มีคำขอ OT ในหมวดหมู่นี้</p>
+                                <p className="font-semibold text-lg text-[#1d1d1d]">{t('admin.otApprovals.noRequests')}</p>
                             </div>
                         ) : (
                             filtered.map(req => {
@@ -138,7 +142,7 @@ export function AdminOTApprovals() {
                                             </div>
                                             {req.status === 'pending' ? (
                                                 <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-500/20 shrink-0">
-                                                    รออนุมัติ
+                                                    {t('status.pending')}
                                                 </span>
                                             ) : (
                                                 <span className={cn(
@@ -154,7 +158,7 @@ export function AdminOTApprovals() {
                                             <div className="flex items-start gap-2">
                                                 <Clock className="w-4 h-4 text-[#044F88] shrink-0 mt-0.5" />
                                                 <div>
-                                                    <p className="text-[10px] font-bold text-[#6f6f6f] uppercase tracking-wider mb-0.5">วันที่และเวลา</p>
+                                                    <p className="text-[10px] font-bold text-[#6f6f6f] uppercase tracking-wider mb-0.5">{t('admin.otApprovals.dateAndTime')}</p>
                                                     <p className="font-semibold text-sm text-[#1d1d1d] tabular-nums leading-tight">{req.date}</p>
                                                     <p className="text-xs text-[#6f6f6f] font-medium mt-0.5">{req.startTime} - {req.endTime} น.</p>
                                                 </div>
@@ -162,7 +166,7 @@ export function AdminOTApprovals() {
                                             <div className="flex items-start gap-2">
                                                 <AlignLeft className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                                                 <div className="min-w-0">
-                                                    <p className="text-[10px] font-bold text-[#6f6f6f] uppercase tracking-wider mb-0.5">เหตุผล</p>
+                                                    <p className="text-[10px] font-bold text-[#6f6f6f] uppercase tracking-wider mb-0.5">{t('admin.otApprovals.reason')}</p>
                                                     <p className="text-xs text-[#1d1d1d] leading-relaxed line-clamp-2">{req.reason}</p>
                                                 </div>
                                             </div>
@@ -176,7 +180,7 @@ export function AdminOTApprovals() {
                                                     className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-sm h-10 rounded-xl font-semibold"
                                                 >
                                                     {/* Changed Check to FileCheck2/CheckStar equivalent */}
-                                                    <span className="w-4 h-4 mr-2" >✓</span> อนุมัติ
+                                                    <span className="w-4 h-4 mr-2" >✓</span> {t('admin.otApprovals.approve')}
                                                 </Button>
                                                 <Button
                                                     size="sm"
@@ -185,7 +189,7 @@ export function AdminOTApprovals() {
                                                     className="flex-1 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 h-10 rounded-xl font-semibold bg-white"
                                                 >
                                                     {/* Changed X to Ban/Cancel equivalent */}
-                                                    <Ban className="w-4 h-4 mr-2" /> ปฏิเสธ
+                                                    <Ban className="w-4 h-4 mr-2" /> {t('admin.otApprovals.reject')}
                                                 </Button>
                                             </div>
                                         )}
@@ -200,10 +204,10 @@ export function AdminOTApprovals() {
                         <table className="w-full text-sm text-left whitespace-nowrap">
                             <thead className="bg-gray-50/50 text-[#6f6f6f] text-xs uppercase tracking-wider font-semibold border-b border-gray-200">
                                 <tr>
-                                    <th className="px-6 py-4">พนักงาน</th>
-                                    <th className="px-6 py-4">วันที่ และ ช่วงเวลา</th>
-                                    <th className="px-6 py-4 w-1/3">เหตุผล</th>
-                                    <th className="px-6 py-4 text-center">การดำเนินการ / สถานะ</th>
+                                    <th className="px-6 py-4">{t('admin.otApprovals.employee')}</th>
+                                    <th className="px-6 py-4">{t('admin.otApprovals.dateAndTimeRange')}</th>
+                                    <th className="px-6 py-4 w-1/3">{t('admin.otApprovals.reason')}</th>
+                                    <th className="px-6 py-4 text-center">{t('admin.otApprovals.actionOrStatus')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 bg-white">
@@ -214,8 +218,8 @@ export function AdminOTApprovals() {
                                                 <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
                                                     <FileText className="w-8 h-8 text-gray-300" />
                                                 </div>
-                                                <p className="text-[#1d1d1d] font-semibold text-lg mb-1">ไม่พบคำขอ OT ในหมวดหมู่นี้</p>
-                                                <p className="text-[#6f6f6f] text-sm">ลองเปลี่ยนแท็บตัวกรองด้านบนเพื่อดูรายการอื่น</p>
+                                                <p className="text-[#1d1d1d] font-semibold text-lg mb-1">{t('admin.otApprovals.noRequests')}</p>
+                                                <p className="text-[#6f6f6f] text-sm">{t('admin.otApprovals.noRequestsHint')}</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -238,7 +242,7 @@ export function AdminOTApprovals() {
                                                             </div>
                                                         )}
                                                         <div>
-                                                            <p className="font-semibold text-[#1d1d1d] group-hover:text-[#044F88] transition-colors">{emp?.name || 'ไม่ทราบชื่อ'}</p>
+                                                            <p className="font-semibold text-[#1d1d1d] group-hover:text-[#044F88] transition-colors">{emp?.name || t('admin.otApprovals.unknownName')}</p>
                                                             {emp?.nickname && <p className="text-xs text-[#6f6f6f]">({emp.nickname})</p>}
                                                             <p className="text-xs text-[#6f6f6f] mt-0.5">{emp?.department}</p>
                                                         </div>
@@ -262,7 +266,7 @@ export function AdminOTApprovals() {
                                                                 onClick={() => updateOTStatus(req.id, 'approved')}
                                                                 className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg h-9 px-4 shadow-sm"
                                                             >
-                                                                <span className="w-3.5 h-3.5 mr-1.5">✓</span> อนุมัติ
+                                                                <span className="w-3.5 h-3.5 mr-1.5">✓</span> {t('admin.otApprovals.approve')}
                                                             </Button>
                                                             <Button
                                                                 size="sm"
@@ -270,7 +274,7 @@ export function AdminOTApprovals() {
                                                                 onClick={() => updateOTStatus(req.id, 'rejected')}
                                                                 className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 rounded-lg h-9 px-4 shadow-sm bg-white"
                                                             >
-                                                                <Ban className="w-3.5 h-3.5 mr-1.5" /> ปฏิเสธ
+                                                                <Ban className="w-3.5 h-3.5 mr-1.5" /> {t('admin.otApprovals.reject')}
                                                             </Button>
                                                         </div>
                                                     ) : (

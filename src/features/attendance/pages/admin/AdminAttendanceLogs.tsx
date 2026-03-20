@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAttendance } from '../../contexts/useAttendance';
 import { Search, Filter, Download, ChevronRight } from 'lucide-react';
@@ -6,15 +6,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { AttendanceLog } from '../../types';
 import { formatTime, formatDate } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
-const STATUS_LABEL: Record<string, string> = {
-    present: 'มาทำงาน',
-    late: 'มาสาย',
-    absent: 'ขาดงาน',
-};
+// STATUS_LABEL is now derived from t() inside the component
+
+function downloadCSV(filename: string, headers: string[], rows: string[][]) {
+    const BOM = '\uFEFF';
+    const csv = BOM + [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
 export function AdminAttendanceLogs() {
+    const { t } = useTranslation();
     const { logs, employees, locations } = useAttendance();
+
+    const STATUS_LABEL: Record<string, string> = {
+        present: t('status.present'),
+        late: t('status.late'),
+        absent: t('status.absent'),
+    };
     const [searchTerm, setSearchTerm] = useState('');
     const [dateFilter, setDateFilter] = useState('');
 
@@ -31,16 +47,39 @@ export function AdminAttendanceLogs() {
         return tb - ta;
     });
 
+    const exportCSV = useCallback(() => {
+        if (!filteredLogs.length) return;
+        const headers = [t('admin.logs.csvHeaders.date'), t('admin.logs.csvHeaders.name'), t('admin.logs.csvHeaders.nickname'), t('admin.logs.csvHeaders.department'), t('admin.logs.csvHeaders.checkIn'), t('admin.logs.csvHeaders.checkOut'), t('admin.logs.csvHeaders.workHours'), t('admin.logs.csvHeaders.ot'), t('admin.logs.csvHeaders.status'), t('admin.logs.csvHeaders.location')];
+        const rows = filteredLogs.map(log => {
+            const emp = employees.find(e => e.id === log.employeeId);
+            const loc = locations.find(l => l.id === log.locationId);
+            return [
+                log.date,
+                emp?.name ?? '-',
+                emp?.nickname ?? '',
+                emp?.department ?? '-',
+                formatTime(log.checkInTime),
+                formatTime(log.checkOutTime),
+                String(log.workHours),
+                String(log.otHours),
+                STATUS_LABEL[log.status] ?? log.status,
+                loc?.name ?? '-',
+            ];
+        });
+        const suffix = dateFilter || new Date().toISOString().split('T')[0];
+        downloadCSV(`attendance-logs-${suffix}.csv`, headers, rows);
+    }, [filteredLogs, employees, locations, dateFilter]);
+
     return (
         <div className="p-6 bg-slate-50 min-h-[calc(100vh-4rem)]">
             <div className="flex justify-between items-end mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">ประวัติการลงเวลา</h1>
-                    <p className="text-sm text-slate-500 mt-1">รายละเอียดการเข้า-ออกงานของพนักงานทุกคน</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('admin.logs.title')}</h1>
+                    <p className="text-sm text-slate-500 mt-1">{t('admin.logs.subtitle')}</p>
                 </div>
-                <Button variant="outline" className="bg-white border-slate-200">
+                <Button variant="outline" className="bg-white border-slate-200" onClick={exportCSV} disabled={!filteredLogs.length}>
                     <Download className="w-4 h-4 mr-2 text-slate-500" />
-                    ส่งออก CSV
+                    {t('admin.logs.exportCsv')}
                 </Button>
             </div>
 
@@ -51,7 +90,7 @@ export function AdminAttendanceLogs() {
                         <Input
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            placeholder="ค้นหาชื่อพนักงานหรือแผนก..."
+                            placeholder={t('admin.logs.searchPlaceholder')}
                             className="pl-9 bg-white transition-all"
                             autoComplete="off"
                             spellCheck={false}
@@ -75,8 +114,8 @@ export function AdminAttendanceLogs() {
                             <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <Search className="w-6 h-6 text-slate-300" />
                             </div>
-                            <p className="text-slate-500 font-medium">ไม่พบข้อมูลการลงเวลา</p>
-                            <p className="text-sm text-slate-400 mt-1">ลองเปลี่ยนคำค้นหา หรือเลือกวันที่อื่น</p>
+                            <p className="text-slate-500 font-medium">{t('admin.logs.noData')}</p>
+                            <p className="text-sm text-slate-400 mt-1">{t('admin.logs.noDataHint')}</p>
                         </div>
                     ) : (
                         filteredLogs.map(log => {
@@ -100,7 +139,7 @@ export function AdminAttendanceLogs() {
                                     </div>
                                     <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm bg-slate-50/50 rounded-lg p-3">
                                         <div>
-                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">เวลาเข้า-ออก</p>
+                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">{t('admin.logs.checkInOutTime')}</p>
                                             <div className="flex items-center gap-1.5 text-slate-600">
                                                 <span className="font-semibold text-emerald-600">{formatTime(log.checkInTime)}</span>
                                                 <span className="text-slate-300">-</span>
@@ -108,16 +147,16 @@ export function AdminAttendanceLogs() {
                                             </div>
                                         </div>
                                         <div>
-                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">ชั่วโมงทำงาน</p>
+                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">{t('admin.logs.workHours')}</p>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-slate-700 font-medium">{log.workHours} ชม.</span>
+                                                <span className="text-slate-700 font-medium">{log.workHours} {t('common.hours')}</span>
                                                 {log.otHours > 0 ? <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-medium">+{log.otHours} OT</span> : null}
                                             </div>
                                         </div>
                                         <div className="col-span-2">
-                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">สถานที่</p>
-                                            <p className="text-xs font-medium text-slate-600 truncate">{loc?.name || 'ไม่ทราบสถานที่'}</p>
-                                            <p className="font-mono text-[9px] text-slate-400 mt-0.5">{log.checkInLat ? `${log.checkInLat.toFixed(4)}, ${log.checkInLng?.toFixed(4)}` : 'ไม่มีพิกัด GPS'}</p>
+                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 font-semibold">{t('admin.logs.location')}</p>
+                                            <p className="text-xs font-medium text-slate-600 truncate">{loc?.name || t('admin.logs.unknownLocation')}</p>
+                                            <p className="font-mono text-[9px] text-slate-400 mt-0.5">{log.checkInLat ? `${log.checkInLat.toFixed(4)}, ${log.checkInLng?.toFixed(4)}` : t('admin.logs.noGps')}</p>
                                         </div>
                                     </div>
                                     <div className="mt-3 flex justify-end">
@@ -125,7 +164,7 @@ export function AdminAttendanceLogs() {
                                             to={`/admin/attendance/logs/${log.id}`}
                                             className="inline-flex items-center gap-1 text-xs font-medium text-[#044F88] hover:text-[#00223A] hover:bg-[#044F88]/5 px-3 py-1.5 rounded-md border border-[#044F88]/20 transition-colors"
                                         >
-                                            ดูรายละเอียด <ChevronRight className="w-3.5 h-3.5" />
+                                            {t('admin.logs.viewDetails')} <ChevronRight className="w-3.5 h-3.5" />
                                         </Link>
                                     </div>
                                 </div>
@@ -139,12 +178,12 @@ export function AdminAttendanceLogs() {
                     <table className="w-full text-sm text-left whitespace-nowrap">
                         <thead className="bg-slate-50/80 text-slate-500 font-medium">
                             <tr>
-                                <th className="px-6 py-4 border-b border-slate-100">พนักงาน</th>
-                                <th className="px-6 py-4 border-b border-slate-100">วันที่</th>
-                                <th className="px-6 py-4 border-b border-slate-100">เข้า / ออก</th>
-                                <th className="px-6 py-4 border-b border-slate-100">ชั่วโมง / OT</th>
-                                <th className="px-6 py-4 border-b border-slate-100">สถานะ</th>
-                                <th className="px-6 py-4 border-b border-slate-100">สถานที่</th>
+                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.employee')}</th>
+                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.date')}</th>
+                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.checkInOut')}</th>
+                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.hoursOt')}</th>
+                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.status')}</th>
+                                <th className="px-6 py-4 border-b border-slate-100">{t('admin.logs.location')}</th>
                                 <th className="px-4 py-4 border-b border-slate-100 text-right"></th>
                             </tr>
                         </thead>
@@ -155,8 +194,8 @@ export function AdminAttendanceLogs() {
                                         <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
                                             <Search className="w-6 h-6 text-slate-300" />
                                         </div>
-                                        <p className="text-slate-500 font-medium">ไม่พบข้อมูลการลงเวลา</p>
-                                        <p className="text-sm text-slate-400 mt-1">ลองเปลี่ยนคำค้นหา หรือเลือกวันที่อื่น</p>
+                                        <p className="text-slate-500 font-medium">{t('admin.logs.noData')}</p>
+                                        <p className="text-sm text-slate-400 mt-1">{t('admin.logs.noDataHint')}</p>
                                     </td>
                                 </tr>
                             ) : (
@@ -180,8 +219,8 @@ export function AdminAttendanceLogs() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <p className="text-slate-700 font-medium">{log.workHours} ชม.</p>
-                                                {log.otHours > 0 ? <p className="text-[11px] text-purple-600 font-semibold mt-0.5">+{log.otHours} ชม. OT</p> : null}
+                                                <p className="text-slate-700 font-medium">{log.workHours} {t('common.hours')}</p>
+                                                {log.otHours > 0 ? <p className="text-[11px] text-purple-600 font-semibold mt-0.5">+{log.otHours} {t('common.hours')} OT</p> : null}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${log.status === 'present' ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' :
@@ -192,9 +231,9 @@ export function AdminAttendanceLogs() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-xs text-slate-500">
-                                                <span className="font-medium text-slate-700">{loc?.name || 'ไม่ทราบสถานที่'}</span>
+                                                <span className="font-medium text-slate-700">{loc?.name || t('admin.logs.unknownLocation')}</span>
                                                 <div className="font-mono text-[10px] text-slate-400 mt-1">
-                                                    {log.checkInLat ? `${log.checkInLat.toFixed(4)}, ${log.checkInLng?.toFixed(4)}` : 'ไม่มีพิกัด GPS'}
+                                                    {log.checkInLat ? `${log.checkInLat.toFixed(4)}, ${log.checkInLng?.toFixed(4)}` : t('admin.logs.noGps')}
                                                 </div>
                                             </td>
                                             <td className="px-4 py-4 text-right">
@@ -202,7 +241,7 @@ export function AdminAttendanceLogs() {
                                                     to={`/admin/attendance/logs/${log.id}`}
                                                     className="inline-flex items-center gap-1 text-xs font-medium text-[#044F88] hover:text-[#00223A] hover:bg-[#044F88]/5 px-2.5 py-1.5 rounded-md transition-colors whitespace-nowrap"
                                                 >
-                                                    รายละเอียด <ChevronRight className="w-3.5 h-3.5" />
+                                                    {t('admin.logs.details')} <ChevronRight className="w-3.5 h-3.5" />
                                                 </Link>
                                             </td>
                                         </tr>

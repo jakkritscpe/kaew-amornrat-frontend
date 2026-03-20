@@ -2,34 +2,29 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { ArrowRight, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { gsap } from 'gsap';
+import { useTranslation } from '@/i18n';
 
-const heroImages = [
-    // Computer / แผงวงจร PCB close-up
+const heroImageSrcs = [
     'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
-    // CCTV / กล้องวงจรปิด
     'https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=2070&auto=format&fit=crop',
-    // Server / data center ตู้เซิร์ฟเวอร์
     'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2070&auto=format&fit=crop',
-    // Network LAN / สาย ethernet patch panel
     'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=2070&auto=format&fit=crop',
-    // Firewall / motherboard มืดๆ
     'https://images.unsplash.com/photo-1631375937044-6dd5beac01d2?q=80&w=2070&auto=format&fit=crop',
-    // NAS & Backup / hard drive
     'https://images.unsplash.com/photo-1593448848024-77a27f0690b1?q=80&w=2070&auto=format&fit=crop',
-    // Fiber Optic / แสงไฟเบอร์
     'https://images.unsplash.com/photo-1517433456519-e8073893c6e0?q=80&w=2070&auto=format&fit=crop',
-    // Network switch / อุปกรณ์เน็ตเวิร์ค
     'https://images.unsplash.com/photo-1606904825846-647eb07f5be2?q=80&w=2070&auto=format&fit=crop',
 ];
 
 export function Hero() {
+    const { t } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const [current, setCurrent] = useState(0);
     const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
 
     const next = useCallback(() => {
-        setCurrent(prev => (prev + 1) % heroImages.length);
+        setCurrent(prev => (prev + 1) % heroImageSrcs.length);
     }, []);
+
 
     useEffect(() => {
         intervalRef.current = setInterval(next, 5000);
@@ -51,7 +46,7 @@ export function Hero() {
     return (
         <section ref={containerRef} id="home" className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden bg-[#00223A]">
             {/* Background Slideshow */}
-            {heroImages.map((src, i) => (
+            {heroImageSrcs.map((src, i) => (
                 <div
                     key={i}
                     className="absolute inset-0 z-0 transition-opacity duration-1000 ease-in-out"
@@ -59,7 +54,7 @@ export function Hero() {
                 >
                     <img
                         src={src}
-                        alt=""
+                        alt={t(`landing.hero.alt.${i}`)}
                         className="w-full h-full object-cover scale-105"
                         style={{
                             animation: i === current ? 'heroZoom 6s ease-out forwards' : 'none',
@@ -75,29 +70,28 @@ export function Hero() {
                 <div className="max-w-3xl">
                     <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8">
                         <Clock className="w-4 h-4 text-[#C2410C]" />
-                        <span className="text-white text-sm font-medium">บริการ 24 ชั่วโมง</span>
+                        <span className="text-white text-sm font-medium">{t('landing.hero.service24h')}</span>
                     </div>
 
                     <h1 className="hero-element text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
-                        บริการไอทีมืออาชีพ<br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">มาถึงที่คุณ</span>
+                        {t('landing.hero.title')}<br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">{t('landing.hero.subtitle')}</span>
                     </h1>
 
-                    <p className="hero-element text-lg md:text-xl text-white/80 mb-10 max-w-2xl leading-relaxed">
-                        ซ่อม ติดตั้ง ดูแลระบบไอทีครบวงจร โดยทีมช่างผู้เชี่ยวชาญ<br />
-                        พร้อมให้บริการทั่วกรุงเทพและปริมณฑล
+                    <p className="hero-element text-lg md:text-xl text-white/80 mb-10 max-w-2xl leading-relaxed whitespace-pre-line">
+                        {t('landing.hero.description')}
                     </p>
 
                     <div className="hero-element flex flex-wrap gap-4 mb-16">
                         <a href="#contact">
                             <Button size="lg" className="bg-[#C2410C] hover:bg-[#C2410C]/90 text-white text-lg h-14 px-8 rounded-full">
-                                ติดต่อเรา
+                                {t('landing.hero.contactUs')}
                                 <ArrowRight className="w-5 h-5 ml-2" />
                             </Button>
                         </a>
                         <a href="#services">
                             <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-lg h-14 px-8 rounded-full backdrop-blur-sm">
-                                ดูบริการของเรา
+                                {t('landing.hero.viewServices')}
                             </Button>
                         </a>
                     </div>
@@ -113,12 +107,12 @@ export function Hero() {
 
                     {/* Slide Indicators */}
                     <div className="hero-element flex gap-2 mt-10">
-                        {heroImages.map((_, i) => (
+                        {heroImageSrcs.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => setCurrent(i)}
                                 className={`h-1 rounded-full transition-all duration-500 ${i === current ? 'w-8 bg-white' : 'w-4 bg-white/30 hover:bg-white/50'}`}
-                                aria-label={`ภาพที่ ${i + 1}`}
+                                aria-label={t('landing.hero.slideLabel', { n: i + 1 })}
                             />
                         ))}
                     </div>

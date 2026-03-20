@@ -3,6 +3,7 @@ import { useAttendance } from '../../contexts/useAttendance';
 import { CheckCircle2, AlertCircle, XCircle, CalendarX, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatTime, formatDate, cn, decodeJwt } from '@/lib/utils';
 import { EMPLOYEE_KEY, TOKEN_KEY } from '@/lib/api-client';
+import { useTranslation } from '@/i18n';
 
 function getEmployeeId(): string {
     try {
@@ -35,14 +36,21 @@ function getMonthOptions() {
 }
 
 const STATUS_CFG = {
-    present:  { label: 'ปกติ',    icon: CheckCircle2, dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-    late:     { label: 'มาสาย',   icon: AlertCircle,  dot: 'bg-amber-500',   badge: 'bg-amber-50 text-amber-700 border-amber-200' },
-    absent:   { label: 'ขาดงาน',  icon: XCircle,      dot: 'bg-red-500',     badge: 'bg-red-50 text-red-700 border-red-200' },
-    on_leave: { label: 'ลางาน',   icon: CalendarX,    dot: 'bg-[#044F88]',    badge: 'bg-[#044F88]/5 text-[#00223A] border-[#044F88]/20' },
+    present:  { icon: CheckCircle2, dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    late:     { icon: AlertCircle,  dot: 'bg-amber-500',   badge: 'bg-amber-50 text-amber-700 border-amber-200' },
+    absent:   { icon: XCircle,      dot: 'bg-red-500',     badge: 'bg-red-50 text-red-700 border-red-200' },
+    on_leave: { icon: CalendarX,    dot: 'bg-[#044F88]',    badge: 'bg-[#044F88]/5 text-[#00223A] border-[#044F88]/20' },
 } as const;
+const STATUS_LABEL_KEYS: Record<string, string> = {
+    present: 'status.normal',
+    late: 'status.late',
+    absent: 'status.absent',
+    on_leave: 'status.onLeave',
+};
 type StatusKey = keyof typeof STATUS_CFG;
 
 export function EmployeeHistory() {
+    const { t } = useTranslation();
     const { logs } = useAttendance();
     const employeeId = getEmployeeId();
 
@@ -72,7 +80,7 @@ export function EmployeeHistory() {
                 {/* Month navigator */}
                 <div className="flex items-center justify-between mb-5">
                     <div>
-                        <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">ประวัติการทำงาน</p>
+                        <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">{t('employee.history.title')}</p>
                         <h2 className="text-xl font-black text-white mt-0.5">{monthOptions[monthIdx].label}</h2>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -92,10 +100,10 @@ export function EmployeeHistory() {
                 {/* Summary stats */}
                 <div className="grid grid-cols-4 gap-2">
                     {[
-                        { label: 'มาปกติ',  value: summary.present,            color: 'text-emerald-300' },
-                        { label: 'มาสาย',   value: summary.late,               color: 'text-amber-300' },
-                        { label: 'ขาดงาน',  value: summary.absent,             color: 'text-red-300' },
-                        { label: 'OT ชม.',  value: summary.otHours.toFixed(1), color: 'text-white' },
+                        { label: t('employee.history.onTimeCount'),  value: summary.present,            color: 'text-emerald-300' },
+                        { label: t('employee.history.lateCount'),   value: summary.late,               color: 'text-amber-300' },
+                        { label: t('employee.history.absentCount'),  value: summary.absent,             color: 'text-red-300' },
+                        { label: t('employee.history.otHours'),  value: summary.otHours.toFixed(1), color: 'text-white' },
                     ].map(s => (
                         <div key={s.label} className="bg-white/15 rounded-2xl p-2.5 text-center">
                             <p className={cn('text-2xl font-black tabular-nums leading-none', s.color)}>{s.value}</p>
@@ -112,8 +120,8 @@ export function EmployeeHistory() {
                         <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center">
                             <CalendarX className="w-7 h-7 text-gray-300" />
                         </div>
-                        <p className="font-bold text-[#1d1d1d]">ไม่มีข้อมูลในเดือนนี้</p>
-                        <p className="text-sm text-[#6f6f6f]">ลองเดือนอื่น</p>
+                        <p className="font-bold text-[#1d1d1d]">{t('employee.history.noDataThisMonth')}</p>
+                        <p className="text-sm text-[#6f6f6f]">{t('employee.history.tryOtherMonth')}</p>
                     </div>
                 ) : (
                     <div className="space-y-2.5">
@@ -134,7 +142,7 @@ export function EmployeeHistory() {
                                                 <span className="tabular-nums">{formatTime(log.checkOutTime)}</span>
                                                 {(log.workHours ?? 0) > 0 && (
                                                     <span className="font-semibold text-[#1d1d1d]">
-                                                        · {log.workHours.toFixed(1)} ชม.
+                                                        · {log.workHours.toFixed(1)} {t('common.hours')}
                                                     </span>
                                                 )}
                                             </div>
@@ -146,7 +154,7 @@ export function EmployeeHistory() {
                                             cfg.badge
                                         )}>
                                             <Icon className="w-3 h-3" />
-                                            {cfg.label}
+                                            {t(STATUS_LABEL_KEYS[log.status as string] ?? 'status.absent')}
                                         </span>
                                         {(log.otHours ?? 0) > 0 && (
                                             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
