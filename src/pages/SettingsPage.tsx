@@ -4,7 +4,7 @@ import {
     Shield, Check, DollarSign, Users, Plus, Pencil, Trash2,
     Loader2, X, Eye, EyeOff, ShieldAlert, AlertTriangle, UserCog,
 } from 'lucide-react';
-import { useAttendance } from '../features/attendance/contexts/AttendanceContext';
+import { useAttendance } from '../features/attendance/contexts/useAttendance';
 import { getEmployeesApi, createEmployeeApi, updateEmployeeApi, deleteEmployeeApi, updateEmployeeMenusApi } from '../lib/api/employees-api';
 import type { Employee } from '../features/attendance/types';
 import { cn } from '@/lib/utils';
@@ -82,7 +82,7 @@ function AdminModal({ editTarget, onClose, onSaved }: AdminModalProps) {
                     department: form.department || 'IT', position: form.position || 'Admin',
                     role: form.role, shiftStartTime: '09:00:00', shiftEndTime: '18:00:00',
                     otRateUseDefault: true,
-                } as any);
+                } as Omit<Employee, 'id'> & { password: string });
                 toast.success('เพิ่มบัญชีผู้ดูแลแล้ว');
             }
             onSaved();

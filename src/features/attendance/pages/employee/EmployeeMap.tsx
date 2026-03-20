@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Loader2, AlertCircle, Navigation2, MapPin } from 'lucide-react';
@@ -25,10 +25,12 @@ const userIcon = new L.DivIcon({
 export function EmployeeMap() {
     const { locations } = useAttendance();
     const [currentLoc, setCurrentLoc] = useState<{ lat: number; lng: number } | null>(null);
-    const [geoError, setGeoError] = useState<string | null>(null);
+    const [geoError, setGeoError] = useState<string | null>(
+        !navigator.geolocation ? 'อุปกรณ์ไม่รองรับ GPS' : null
+    );
 
     useEffect(() => {
-        if (!navigator.geolocation) { setGeoError('อุปกรณ์ไม่รองรับ GPS'); return; }
+        if (!navigator.geolocation) { return; }
         navigator.geolocation.getCurrentPosition(
             (p) => setCurrentLoc({ lat: p.coords.latitude, lng: p.coords.longitude }),
             () => setGeoError('ไม่สามารถเข้าถึง GPS กรุณาอนุญาตตำแหน่ง'),

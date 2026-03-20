@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { Input } from '@/components/ui/input';
 import { Clock, Calendar, FileText, CheckCircle2, XCircle, Hourglass, Send, Zap } from 'lucide-react';
 import { toast } from 'sonner';

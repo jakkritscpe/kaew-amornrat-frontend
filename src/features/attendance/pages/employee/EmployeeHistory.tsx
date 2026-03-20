@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { CheckCircle2, AlertCircle, XCircle, CalendarX, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatTime, formatDate, cn } from '@/lib/utils';
 

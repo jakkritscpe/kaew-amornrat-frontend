@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { createPortal } from 'react-dom';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';

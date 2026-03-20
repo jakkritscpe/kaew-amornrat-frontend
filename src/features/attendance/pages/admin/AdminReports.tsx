@@ -1,4 +1,4 @@
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { Card } from '@/components/ui/card';
 import { BarChart3, TrendingUp, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';

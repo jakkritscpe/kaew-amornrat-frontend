@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { Employee, AttendanceLog, WorkLocation, OTRequest } from '../types';
 import { TOKEN_KEY } from '../../../lib/api-client';
 import { getEmployeesApi, createEmployeeApi, updateEmployeeApi, deleteEmployeeApi } from '../../../lib/api/employees-api';
@@ -6,47 +6,9 @@ import { getLocationsApi, createLocationApi, updateLocationApi, deleteLocationAp
 import { getLogsApi, checkInApi, checkOutApi } from '../../../lib/api/attendance-api';
 import { getOTRequestsApi, submitOTRequestApi, updateOTStatusApi } from '../../../lib/api/ot-api';
 import { getSettingsApi, updateSettingsApi } from '../../../lib/api/settings-api';
-
-export interface CompanySettings {
-  defaultOtRateType: 'multiplier' | 'fixed';
-  defaultOtRateValue: number;
-}
-
-interface AttendanceContextType {
-  employees: Employee[];
-  logs: AttendanceLog[];
-  locations: WorkLocation[];
-  otRequests: OTRequest[];
-  companySettings: CompanySettings;
-  loading: boolean;
-  error: string | null;
-
-  refreshAll: () => Promise<void>;
-
-  // Logs
-  addLog: (lat: number, lng: number) => Promise<AttendanceLog | null>;
-  checkOut: (lat: number, lng: number) => Promise<AttendanceLog | null>;
-  updateLog: (id: string, updates: Partial<AttendanceLog>) => void;
-
-  // Employees
-  addEmployee: (emp: Omit<Employee, 'id'> & { password: string }) => Promise<void>;
-  updateEmployee: (id: string, updates: Partial<Employee> & { password?: string }) => Promise<void>;
-  removeEmployee: (id: string) => Promise<void>;
-
-  // Locations
-  addLocation: (loc: Omit<WorkLocation, 'id'>) => Promise<void>;
-  updateLocation: (id: string, updates: Partial<WorkLocation>) => Promise<void>;
-  removeLocation: (id: string) => Promise<void>;
-
-  // OT
-  submitOTRequest: (req: Omit<OTRequest, 'id' | 'status'>) => Promise<void>;
-  updateOTStatus: (id: string, status: OTRequest['status']) => Promise<void>;
-
-  // Settings
-  updateCompanySettings: (settings: Partial<CompanySettings>) => Promise<void>;
-}
-
-const AttendanceContext = createContext<AttendanceContextType | null>(null);
+import { AttendanceContext } from './attendance-context-value';
+import type { CompanySettings } from './attendance-context-value';
+export type { CompanySettings } from './attendance-context-value';
 
 export function AttendanceProvider({ children }: { children: ReactNode }) {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -189,8 +151,3 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAttendance() {
-  const ctx = useContext(AttendanceContext);
-  if (!ctx) throw new Error('useAttendance must be used within AttendanceProvider');
-  return ctx;
-}

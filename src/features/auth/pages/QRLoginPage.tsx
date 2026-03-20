@@ -7,16 +7,12 @@ import type { User } from '../types';
 export function QRLoginPage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(token ? 'loading' : 'error');
+  const [errorMsg, setErrorMsg] = useState(token ? '' : 'QR code ไม่ถูกต้อง');
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (!token) {
-      setStatus('error');
-      setErrorMsg('QR code ไม่ถูกต้อง');
-      return;
-    }
+    if (!token) return;
 
     qrLoginApi(token)
       .then((result) => {

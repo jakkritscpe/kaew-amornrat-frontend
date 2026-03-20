@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { FileText, Filter, Clock, Ban, AlignLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { gsap } from 'gsap';

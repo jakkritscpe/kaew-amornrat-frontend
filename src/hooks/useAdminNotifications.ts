@@ -20,6 +20,7 @@ export function useAdminNotifications(token: string | null) {
   const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef(0);
   const pingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const connectRef = useRef<() => void>(() => {});
 
   const connect = useCallback(() => {
     if (!token) return;
@@ -57,13 +58,14 @@ export function useAdminNotifications(token: string | null) {
       // auto-reconnect with backoff
       const delay = RECONNECT_DELAY_MS[Math.min(retryRef.current, RECONNECT_DELAY_MS.length - 1)];
       retryRef.current++;
-      setTimeout(connect, delay);
+      setTimeout(() => connectRef.current(), delay);
     };
 
     ws.onerror = () => ws.close();
   }, [token]);
 
   useEffect(() => {
+    connectRef.current = connect;
     connect();
     return () => {
       wsRef.current?.close();

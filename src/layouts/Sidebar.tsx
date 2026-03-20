@@ -75,7 +75,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
 
   useEffect(() => {
     if (location.pathname.includes('/attendance')) {
-      setOpenSubmenus(prev => ({ ...prev, 'attendance': true }));
+      // Use queueMicrotask to avoid synchronous setState within effect
+      queueMicrotask(() => setOpenSubmenus(prev => ({ ...prev, 'attendance': true })));
     }
   }, [location.pathname]);
 

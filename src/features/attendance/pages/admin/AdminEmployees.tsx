@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { QRCodeSVG } from 'qrcode.react';
 import { regenerateQRApi } from '../../../../lib/api/auth-api';
 import { toast } from 'sonner';
