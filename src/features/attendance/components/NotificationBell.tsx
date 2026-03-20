@@ -4,19 +4,20 @@ import { toast } from 'sonner';
 import { useAdminNotifications } from '../../../hooks/useAdminNotifications';
 import { EVENT_CONFIG } from '../../../types/notifications';
 import type { NotificationEvent } from '../../../types/notifications';
+import { useTranslation } from '@/i18n';
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatMeta(event: NotificationEvent): string {
+function formatMeta(event: NotificationEvent, t: (key: string) => string): string {
   const { type, meta } = event;
-  if (type === 'CHECK_IN') return `เข้างาน ${formatTime(meta.time as string)}`;
-  if (type === 'CHECK_OUT') return `ออกงาน ${formatTime(meta.time as string)} • ${meta.workHours} ชม.`;
-  if (type === 'LATE') return `มาสาย ${meta.minutesLate} นาที`;
-  if (type === 'OT_REQUEST') return `ขอ OT วันที่ ${meta.date} (${meta.startTime}–${meta.endTime})`;
-  if (type === 'OT_APPROVED') return 'คำขอ OT ได้รับการอนุมัติ';
-  if (type === 'OT_REJECTED') return 'คำขอ OT ถูกปฏิเสธ';
+  if (type === 'CHECK_IN') return t('notifications.checkInAt').replace('{time}', formatTime(meta.time as string));
+  if (type === 'CHECK_OUT') return t('notifications.checkOutAt').replace('{time}', formatTime(meta.time as string)).replace('{hours}', String(meta.workHours));
+  if (type === 'LATE') return t('notifications.lateMinutes').replace('{n}', String(meta.minutesLate));
+  if (type === 'OT_REQUEST') return t('notifications.otRequestDetail').replace('{date}', String(meta.date)).replace('{start}', String(meta.startTime)).replace('{end}', String(meta.endTime));
+  if (type === 'OT_APPROVED') return t('notifications.otApprovedDetail');
+  if (type === 'OT_REJECTED') return t('notifications.otRejectedDetail');
   return '';
 }
 
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function NotificationBell({ token }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { notifications, unreadCount, connected, markAllRead, clearAll } =
@@ -38,7 +40,7 @@ export function NotificationBell({ token }: Props) {
       const cfg = EVENT_CONFIG[latest.type];
       toast(
         `${cfg.icon} ${latest.employeeName}`,
-        { description: formatMeta(latest), duration: 4000 }
+        { description: formatMeta(latest, t), duration: 4000 }
       );
     }
     prevCountRef.current = notifications.length;
@@ -66,7 +68,7 @@ export function NotificationBell({ token }: Props) {
       <button
         onClick={handleOpen}
         className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors"
-        title="การแจ้งเตือน"
+        title={t('notifications.title')}
       >
         {unreadCount > 0 ? (
           <BellRing className="w-5 h-5 text-[#044F88] animate-bounce" />
@@ -86,13 +88,13 @@ export function NotificationBell({ token }: Props) {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-800 text-sm">การแจ้งเตือน</span>
+              <span className="font-semibold text-gray-800 text-sm">{t('notifications.title')}</span>
               <span className={`flex items-center gap-1 text-xs ${connected ? 'text-green-500' : 'text-red-400'}`}>
                 {connected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                {connected ? 'เชื่อมต่อแล้ว' : 'ออฟไลน์'}
+                {connected ? t('notifications.connected') : t('notifications.offline')}
               </span>
             </div>
-            <button onClick={clearAll} className="text-gray-400 hover:text-red-500 transition-colors" title="ล้างทั้งหมด">
+            <button onClick={clearAll} className="text-gray-400 hover:text-red-500 transition-colors" title={t('notifications.clearAll')}>
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
@@ -102,7 +104,7 @@ export function NotificationBell({ token }: Props) {
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-gray-400">
                 <Bell className="w-8 h-8 mb-2 opacity-30" />
-                <p className="text-sm">ยังไม่มีการแจ้งเตือน</p>
+                <p className="text-sm">{t('notifications.noNotifications')}</p>
               </div>
             ) : (
               notifications.map((n) => {
@@ -112,7 +114,7 @@ export function NotificationBell({ token }: Props) {
                     <span className="text-lg mt-0.5">{cfg.icon}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-800 truncate">{n.employeeName}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{formatMeta(n)}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{formatMeta(n, t)}</p>
                     </div>
                     <span className="text-[10px] text-gray-400 whitespace-nowrap mt-1">
                       {formatTime(n.timestamp)}

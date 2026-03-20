@@ -3,12 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { qrLoginApi } from '../../../lib/api/auth-api';
 import { setToken, EMPLOYEE_KEY, USER_KEY } from '../../../lib/api-client';
 import type { User } from '../types';
+import { useTranslation } from '@/i18n';
 
 export function QRLoginPage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>(token ? 'loading' : 'error');
-  const [errorMsg, setErrorMsg] = useState(token ? '' : 'QR code ไม่ถูกต้อง');
+  const [errorMsg, setErrorMsg] = useState(token ? '' : t('auth.qrInvalid'));
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export function QRLoginPage() {
       })
       .catch((err) => {
         setStatus('error');
-        setErrorMsg(err instanceof Error ? err.message : 'QR code ไม่ถูกต้องหรือหมดอายุ');
+        setErrorMsg(err instanceof Error ? err.message : t('auth.qrExpired'));
       });
   }, [token, navigate]);
 
@@ -49,8 +51,8 @@ export function QRLoginPage() {
       <div className="min-h-screen bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center">
         <div className="text-center text-white">
           <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-6" />
-          <h2 className="text-xl font-semibold">กำลังเข้าสู่ระบบ...</h2>
-          <p className="text-[#044F88]/80 mt-2 text-sm">กรุณารอสักครู่</p>
+          <h2 className="text-xl font-semibold">{t('auth.loggingIn')}</h2>
+          <p className="text-[#044F88]/80 mt-2 text-sm">{t('auth.pleaseWait')}</p>
         </div>
       </div>
     );
@@ -63,9 +65,9 @@ export function QRLoginPage() {
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-4xl">✓</span>
           </div>
-          <h2 className="text-2xl font-bold">เข้าสู่ระบบสำเร็จ</h2>
+          <h2 className="text-2xl font-bold">{t('auth.loginSuccess')}</h2>
           <p className="text-green-200 mt-2">
-            {isAdmin ? 'กำลังนำไปยังหน้าแดชบอร์ด...' : 'กำลังนำไปยังหน้าบันทึกเวลา...'}
+            {isAdmin ? t('auth.redirectToDashboard') : t('auth.redirectToAttendance')}
           </p>
         </div>
       </div>
@@ -78,9 +80,9 @@ export function QRLoginPage() {
         <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <span className="text-4xl">✕</span>
         </div>
-        <h2 className="text-2xl font-bold">QR Code ไม่ถูกต้อง</h2>
+        <h2 className="text-2xl font-bold">{t('auth.qrInvalid')}</h2>
         <p className="text-red-200 mt-2 mb-6">{errorMsg}</p>
-        <p className="text-sm text-red-200">กรุณาติดต่อผู้ดูแลระบบเพื่อขอ QR code ใหม่</p>
+        <p className="text-sm text-red-200">{t('auth.noQrContact')} {t('auth.systemAdmin')}</p>
       </div>
     </div>
   );

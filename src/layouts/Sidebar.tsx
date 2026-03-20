@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '../features/auth/hooks/useAuth';
+import { useTranslation } from '@/i18n';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -36,25 +38,26 @@ type MenuItem = {
   subItems?: { id: string; label: string; icon: React.ElementType }[];
 };
 
-const menuItems: MenuItem[] = [
-  {
-    id: 'attendance',
-    label: 'ระบบลงเวลา',
-    icon: Clock,
-    subItems: [
-      { id: 'attendance/dashboard', label: 'แดชบอร์ด', icon: LayoutDashboard },
-      { id: 'attendance/logs', label: 'ประวัติลงเวลา', icon: ClipboardList },
-      { id: 'attendance/employees', label: 'พนักงาน', icon: Users },
-      { id: 'attendance/locations', label: 'สถานที่', icon: MapPin },
-      { id: 'attendance/ot-approvals', label: 'อนุมัติ OT', icon: FileCheck2 },
-      { id: 'attendance/ot-calculator', label: 'คำนวณ OT', icon: Calculator },
-      { id: 'attendance/reports', label: 'รายงานเวลา', icon: BarChart3 },
-    ]
-  },
-  { id: 'settings', label: 'ตั้งค่า', icon: Settings },
-];
-
 export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onMobileClose }: SidebarProps) {
+  const { t } = useTranslation();
+
+  const menuItems: MenuItem[] = [
+    {
+      id: 'attendance',
+      label: t('nav.attendanceSystem'),
+      icon: Clock,
+      subItems: [
+        { id: 'attendance/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
+        { id: 'attendance/logs', label: t('nav.attendanceLogs'), icon: ClipboardList },
+        { id: 'attendance/employees', label: t('nav.employees'), icon: Users },
+        { id: 'attendance/locations', label: t('nav.locations'), icon: MapPin },
+        { id: 'attendance/ot-approvals', label: t('nav.otApprovals'), icon: FileCheck2 },
+        { id: 'attendance/ot-calculator', label: t('nav.otCalculator'), icon: Calculator },
+        { id: 'attendance/reports', label: t('nav.reports'), icon: BarChart3 },
+      ]
+    },
+    { id: 'settings', label: t('nav.settings'), icon: Settings },
+  ];
   const location = useLocation();
   const { user, logout } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -119,16 +122,16 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
           'lg:translate-x-0',
           // On mobile when collapsed=false, slide open nicely
         )}
-        aria-label="แถบนำทาง"
+        aria-label={t('nav.navbar')}
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 shrink-0">
           <Link to="/" className="flex items-center gap-3 overflow-hidden">
-            <img src="/logo.svg" alt="หจก.แก้วอมรรัตน์" className="w-9 h-9 shrink-0 object-contain" />
+            <img src="/logo.svg" alt={t('common.companyName')} className="w-9 h-9 shrink-0 object-contain" />
             {!isCollapsed && (
               <div className="flex flex-col">
                 <span className="font-bold text-[15px] text-[#00223A] whitespace-nowrap leading-tight">
-                  หจก.แก้วอมรรัตน์
+                  {t('common.companyName')}
                 </span>
                 <span className="text-[10px] font-bold text-[#044F88] tracking-widest leading-none mt-0.5">
                   IT SERVICES & SOLUTIONS
@@ -146,7 +149,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
               }
             }}
             className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
-            aria-label="ปิดเมนู"
+            aria-label={t('nav.closeMenu')}
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -159,7 +162,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
             if (!isCollapsed) setOpenSubmenus({});
           }}
           className="hidden lg:flex absolute -right-3 top-[72px] w-6 h-6 bg-white rounded-full shadow-md border border-gray-200 items-center justify-center hover:bg-gray-50 transition-colors z-10"
-          aria-label={isCollapsed ? 'ขยายเมนู' : 'ย่อเมนู'}
+          aria-label={isCollapsed ? t('nav.expandMenu') : t('nav.collapseMenu')}
         >
           {isCollapsed
             ? <ChevronRight className="w-3 h-3 text-gray-500" aria-hidden="true" />
@@ -168,7 +171,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
         </button>
 
         {/* Nav items */}
-        <nav ref={menuRef} className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5" aria-label="เมนูหลัก">
+        <nav ref={menuRef} className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5" aria-label={t('nav.mainMenu')}>
           {menuItems.filter(item => {
             if (user?.role === 'super_admin') return true;
             if (user?.role === 'admin') {
@@ -302,10 +305,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
               </span>
             </div>
             {!isCollapsed && (
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-sm text-[#1d1d1d] truncate">{user?.name || 'แอดมิน'}</p>
-                <p className="text-xs text-[#6f6f6f]">ผู้ดูแลระบบ</p>
-              </div>
+              <>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-sm text-[#1d1d1d] truncate">{user?.name || t('nav.admin')}</p>
+                  <p className="text-xs text-[#6f6f6f]">{t('nav.adminRole')}</p>
+                </div>
+                <LanguageSwitcher className="bg-gray-100 shrink-0" />
+              </>
             )}
           </div>
 
@@ -315,11 +321,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
               'mt-2 flex items-center gap-2 w-full py-2 px-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-medium',
               isCollapsed ? 'justify-center px-0' : ''
             )}
-            aria-label="ออกจากระบบ"
+            aria-label={t('nav.logout')}
           >
             <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
-            {!isCollapsed && <span>ออกจากระบบ</span>}
+            {!isCollapsed && <span>{t('nav.logout')}</span>}
           </button>
+
         </div>
       </aside>
     </>

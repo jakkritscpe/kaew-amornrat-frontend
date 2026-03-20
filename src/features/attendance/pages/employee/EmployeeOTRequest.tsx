@@ -5,6 +5,7 @@ import { Clock, Calendar, FileText, CheckCircle2, XCircle, Hourglass, Send, Zap,
 import { toast } from 'sonner';
 import { formatDate, cn, decodeJwt } from '@/lib/utils';
 import { EMPLOYEE_KEY, TOKEN_KEY } from '@/lib/api-client';
+import { useTranslation } from '@/i18n';
 
 function getEmployeeId(): string {
     try {
@@ -25,21 +26,30 @@ function getEmployeeId(): string {
 }
 
 const STATUS_CFG = {
-    pending:  { label: 'รออนุมัติ',   icon: Hourglass,    badge: 'bg-amber-50 text-amber-700 border-amber-200' },
-    approved: { label: 'อนุมัติแล้ว', icon: CheckCircle2, badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-    rejected: { label: 'ปฏิเสธ',      icon: XCircle,      badge: 'bg-red-50 text-red-700 border-red-200' },
+    pending:  { icon: Hourglass,    badge: 'bg-amber-50 text-amber-700 border-amber-200' },
+    approved: { icon: CheckCircle2, badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    rejected: { icon: XCircle,      badge: 'bg-red-50 text-red-700 border-red-200' },
 } as const;
+const OT_STATUS_LABEL_KEYS: Record<string, string> = {
+    pending: 'status.pending',
+    approved: 'status.approved',
+    rejected: 'status.rejected',
+};
 
-function calcDuration(start: string, end: string) {
+function calcDurationMinutes(start: string, end: string) {
     const [sh, sm] = start.split(':').map(Number);
     const [eh, em] = end.split(':').map(Number);
     const mins = eh * 60 + em - sh * 60 - sm;
-    if (mins <= 0) return null;
+    return mins > 0 ? mins : null;
+}
+
+function formatDuration(mins: number, tFn: (key: string) => string) {
     const h = Math.floor(mins / 60), m = mins % 60;
-    return h > 0 ? (m > 0 ? `${h} ชม. ${m} นาที` : `${h} ชม.`) : `${m} นาที`;
+    return h > 0 ? (m > 0 ? `${h} ${tFn('common.hours')} ${m} ${tFn('common.minutes')}` : `${h} ${tFn('common.hours')}`) : `${m} ${tFn('common.minutes')}`;
 }
 
 export function EmployeeOTRequest() {
+    const { t } = useTranslation();
     const { otRequests, submitOTRequest } = useAttendance();
     const employeeId = getEmployeeId();
 
@@ -55,7 +65,8 @@ export function EmployeeOTRequest() {
         [otRequests, employeeId]
     );
 
-    const dur = startTime && endTime ? calcDuration(startTime, endTime) : null;
+    const durMins = startTime && endTime ? calcDurationMinutes(startTime, endTime) : null;
+    const dur = durMins ? formatDuration(durMins, t) : null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -63,10 +74,10 @@ export function EmployeeOTRequest() {
         setSubmitting(true);
         try {
             await submitOTRequest({ employeeId, date, startTime, endTime, reason: reason.trim() });
-            toast.success('ส่งคำขอ OT สำเร็จ', { description: `${formatDate(date)} · ${startTime} – ${endTime}` });
+            toast.success(t('employee.otRequest.submitSuccess'), { description: `${formatDate(date)} · ${startTime} – ${endTime}` });
             setReason('');
         } catch (err) {
-            toast.error('ส่งไม่สำเร็จ', { description: err instanceof Error ? err.message : 'กรุณาลองใหม่' });
+            toast.error(t('employee.otRequest.submitFailed'), { description: err instanceof Error ? err.message : t('employee.otRequest.submitRetry') });
         } finally {
             setSubmitting(false);
         }
@@ -77,36 +88,36 @@ export function EmployeeOTRequest() {
 
             {/* ── Blue hero ── */}
             <div className="bg-[#044F88] px-5 pt-3 pb-14">
-                <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">ขอทำล่วงเวลา</p>
+                <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">{t('employee.otRequest.title')}</p>
                 <h2 className="text-xl font-black text-white mt-0.5">OT Request</h2>
 
                 {dur ? (
                     <div className="inline-flex items-center gap-2 mt-3 px-3.5 py-1.5 rounded-full bg-white/20 text-white text-sm font-semibold">
                         <Zap className="w-3.5 h-3.5" />
-                        รวม {dur}
+                        {t('employee.otRequest.total')} {dur}
                     </div>
                 ) : (
                     <div className="inline-flex items-center gap-2 mt-3 px-3.5 py-1.5 rounded-full bg-white/15 text-[#044F88]/80 text-sm">
                         <Clock className="w-3.5 h-3.5" />
-                        เลือกช่วงเวลา OT
+                        {t('employee.otRequest.selectOtTime')}
                     </div>
                 )}
             </div>
 
             {/* ── Content ── */}
-            <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 sm:px-6 pt-5 pb-6 relative z-10">
+            <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 sm:px-6 pt-5 pb-6 relative z-10 overflow-hidden">
 
                 {/* Desktop: 2 columns / Mobile: single column */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
 
                     {/* ── Form column ── */}
                     <div>
-                        <h3 className="hidden md:block text-base font-bold text-[#1d1d1d] mb-4">สร้างคำขอ OT</h3>
+                        <h3 className="hidden md:block text-base font-bold text-[#1d1d1d] mb-4">{t('employee.otRequest.createRequest')}</h3>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Date */}
                             <div className="space-y-1.5">
                                 <label className="flex items-center gap-1.5 text-xs font-bold text-[#1d1d1d] uppercase tracking-wider">
-                                    <Calendar className="w-3.5 h-3.5 text-[#044F88]" /> วันที่
+                                    <Calendar className="w-3.5 h-3.5 text-[#044F88]" /> {t('employee.otRequest.date')}
                                 </label>
                                 <Input
                                     type="date"
@@ -121,7 +132,7 @@ export function EmployeeOTRequest() {
                             {/* Time range */}
                             <div className="space-y-1.5">
                                 <label className="flex items-center gap-1.5 text-xs font-bold text-[#1d1d1d] uppercase tracking-wider">
-                                    <Clock className="w-3.5 h-3.5 text-[#044F88]" /> ช่วงเวลา
+                                    <Clock className="w-3.5 h-3.5 text-[#044F88]" /> {t('employee.otRequest.timeRange')}
                                 </label>
                                 <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
                                     <Input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} required
@@ -140,7 +151,7 @@ export function EmployeeOTRequest() {
                             {/* Reason */}
                             <div className="space-y-1.5">
                                 <label className="flex items-center gap-1.5 text-xs font-bold text-[#1d1d1d] uppercase tracking-wider">
-                                    <FileText className="w-3.5 h-3.5 text-[#044F88]" /> เหตุผล
+                                    <FileText className="w-3.5 h-3.5 text-[#044F88]" /> {t('employee.otRequest.reason')}
                                 </label>
                                 <textarea
                                     className={cn(
@@ -149,7 +160,7 @@ export function EmployeeOTRequest() {
                                         'focus:outline-none focus:ring-2 focus:ring-[#044F88]/20 focus:border-[#044F88] focus:bg-white',
                                         'transition-colors'
                                     )}
-                                    placeholder="เช่น ขึ้นระบบใหม่ให้ลูกค้า, ปิดงานด่วน..."
+                                    placeholder={t('employee.otRequest.reasonPlaceholder')}
                                     value={reason}
                                     onChange={e => setReason(e.target.value)}
                                     required
@@ -170,7 +181,7 @@ export function EmployeeOTRequest() {
                                 {submitting
                                     ? <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>
                                     : <Send className="w-4 h-4" />}
-                                {submitting ? 'กำลังส่ง...' : 'ส่งคำขอ OT'}
+                                {submitting ? t('employee.otRequest.sending') : t('employee.otRequest.submitOt')}
                             </button>
                         </form>
                     </div>
@@ -180,14 +191,14 @@ export function EmployeeOTRequest() {
                         {/* Divider — mobile only */}
                         <div className="flex items-center gap-3 md:hidden mb-4">
                             <div className="flex-1 h-px bg-gray-100" />
-                            <p className="text-[11px] font-bold text-[#6f6f6f] uppercase tracking-widest">ประวัติคำขอ</p>
+                            <p className="text-[11px] font-bold text-[#6f6f6f] uppercase tracking-widest">{t('employee.otRequest.requestHistory')}</p>
                             <div className="flex-1 h-px bg-gray-100" />
                         </div>
 
                         {/* Title — desktop only */}
                         <h3 className="hidden md:flex items-center gap-2 text-base font-bold text-[#1d1d1d] mb-4">
                             <History className="w-4 h-4 text-[#044F88]" />
-                            ประวัติคำขอ
+                            {t('employee.otRequest.requestHistory')}
                             {myOTs.length > 0 && (
                                 <span className="text-xs font-semibold text-[#044F88] bg-[#044F88]/10 px-2 py-0.5 rounded-full">
                                     {myOTs.length}
@@ -200,14 +211,15 @@ export function EmployeeOTRequest() {
                                 <div className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center">
                                     <FileText className="w-6 h-6 text-gray-200" />
                                 </div>
-                                <p className="text-sm text-[#6f6f6f]">ยังไม่มีประวัติคำขอ</p>
+                                <p className="text-sm text-[#6f6f6f]">{t('employee.otRequest.noHistory')}</p>
                             </div>
                         ) : (
                             <div className="space-y-2.5 md:max-h-[calc(100vh-320px)] md:overflow-y-auto md:pr-1">
                                 {myOTs.map(req => {
                                     const cfg = STATUS_CFG[req.status as keyof typeof STATUS_CFG] ?? STATUS_CFG.pending;
                                     const Icon = cfg.icon;
-                                    const d = calcDuration(req.startTime, req.endTime);
+                                    const dMins = calcDurationMinutes(req.startTime, req.endTime);
+                                    const d = dMins ? formatDuration(dMins, t) : null;
                                     return (
                                         <div key={req.id} className="bg-[#f8fafc] rounded-2xl border border-gray-100 px-4 py-3.5 hover:border-[#044F88]/20 transition-colors">
                                             <div className="flex items-start justify-between gap-2 mb-2">
@@ -224,7 +236,7 @@ export function EmployeeOTRequest() {
                                                     cfg.badge
                                                 )}>
                                                     <Icon className="w-3 h-3" />
-                                                    {cfg.label}
+                                                    {t(OT_STATUS_LABEL_KEYS[req.status as string] ?? 'status.pending')}
                                                 </span>
                                             </div>
                                             <p className="text-xs text-[#6f6f6f] line-clamp-2 leading-relaxed">{req.reason}</p>

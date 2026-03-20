@@ -15,6 +15,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useTranslation } from '@/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -123,6 +124,7 @@ function LocationPicker({
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function AdminLocations() {
+    const { t } = useTranslation();
     const { locations, addLocation } = useAttendance();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -155,7 +157,7 @@ export function AdminLocations() {
 
     const handleGetCurrentLocation = useCallback(() => {
         if (!navigator.geolocation) {
-            toast.error('เบราว์เซอร์ไม่รองรับ GPS');
+            toast.error(t('admin.locations.gpsNotSupported'));
             return;
         }
         setGettingLocation(true);
@@ -169,7 +171,7 @@ export function AdminLocations() {
                 setGettingLocation(false);
             },
             () => {
-                toast.error('ไม่สามารถเข้าถึง GPS กรุณาอนุญาตตำแหน่ง');
+                toast.error(t('admin.locations.gpsAccessDenied'));
                 setGettingLocation(false);
             },
             { enableHighAccuracy: true, timeout: 10000 },
@@ -182,10 +184,10 @@ export function AdminLocations() {
         try {
             setIsSubmitting(true);
             await addLocation({ ...form });
-            toast.success(`เพิ่ม "${form.name}" สำเร็จ`);
+            toast.success(t('admin.locations.addSuccess', { name: form.name }));
             closeModal();
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+            toast.error(err instanceof Error ? err.message : t('common.genericError'));
         } finally {
             setIsSubmitting(false);
         }
@@ -250,14 +252,14 @@ export function AdminLocations() {
             {/* ── Page header ── */}
             <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">จัดการสถานที่ทำงาน</h1>
-                    <p className="text-sm text-[#6f6f6f] mt-1">กำหนดพิกัด GPS และขอบเขตพื้นที่สำหรับการลงเวลา</p>
+                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">{t('admin.locations.title')}</h1>
+                    <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.locations.subtitle')}</p>
                 </div>
                 <Button
                     onClick={openModal}
                     className="w-full sm:w-auto bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0"
                 >
-                    <Plus className="w-4 h-4 mr-2" /> เพิ่มสถานที่
+                    <Plus className="w-4 h-4 mr-2" /> {t('admin.locations.addLocation')}
                 </Button>
             </div>
 
@@ -277,9 +279,9 @@ export function AdminLocations() {
                     <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                     <div className="flex items-start justify-between relative z-10">
                         <div>
-                            <p className="text-sm text-[#6f6f6f] mb-1">สถานที่ทั้งหมด</p>
+                            <p className="text-sm text-[#6f6f6f] mb-1">{t('admin.locations.totalLocations')}</p>
                             <span className="text-3xl font-bold text-[#1d1d1d] tabular-nums">{locations.length}</span>
-                            <p className="text-sm text-gray-400 mt-1">จุด</p>
+                            <p className="text-sm text-gray-400 mt-1">{t('common.point')}</p>
                         </div>
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-[#044F88] to-[#00223A] group-hover:scale-110 transition-transform duration-500">
                             <MapIcon className="w-6 h-6 text-white" />
@@ -299,7 +301,7 @@ export function AdminLocations() {
                             <Input
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                placeholder="ค้นหาสถานที่..."
+                                placeholder={t('admin.locations.searchPlaceholder')}
                                 className="pl-9 bg-white border-gray-200 focus:border-[#044F88] focus-visible:ring-0 transition-all rounded-lg h-10"
                                 autoComplete="off"
                                 spellCheck={false}
@@ -321,7 +323,7 @@ export function AdminLocations() {
                                             <span className="bg-gray-100 px-2 py-0.5 rounded-md">Lng: {loc.lng}</span>
                                         </div>
                                         <div className="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 tracking-wide uppercase">
-                                            รัศมี {loc.radiusMeters} เมตร
+                                            {t('admin.locations.radius')} {loc.radiusMeters} {t('admin.locations.meters')}
                                         </div>
                                     </div>
                                 </div>
@@ -330,7 +332,7 @@ export function AdminLocations() {
                         {filtered.length === 0 && (
                             <div className="py-16 text-center text-[#6f6f6f] text-sm flex flex-col items-center">
                                 <MapPin className="w-10 h-10 text-gray-200 mb-3" />
-                                ไม่พบสถานที่ที่ค้นหา
+                                {t('admin.locations.notFound')}
                             </div>
                         )}
                     </div>
@@ -355,7 +357,7 @@ export function AdminLocations() {
                                         <Popup>
                                             <div className="text-center font-sans">
                                                 <b className="text-[#1d1d1d] text-sm block mb-1">{loc.name}</b>
-                                                <span className="text-xs text-[#6f6f6f]">รัศมี {loc.radiusMeters} เมตร</span>
+                                                <span className="text-xs text-[#6f6f6f]">{t('admin.locations.radius')} {loc.radiusMeters} {t('admin.locations.meters')}</span>
                                             </div>
                                         </Popup>
                                     </Marker>
@@ -376,7 +378,7 @@ export function AdminLocations() {
                 <div
                     role="dialog"
                     aria-modal="true"
-                    aria-label="เพิ่มสถานที่ใหม่"
+                    aria-label={t('admin.locations.addTitle')}
                     className="fixed inset-0 z-[2000] flex items-center justify-center bg-gray-900/70 backdrop-blur-sm p-3 sm:p-6"
                     onClick={closeModal}
                 >
@@ -387,8 +389,8 @@ export function AdminLocations() {
                         {/* ── Header ── */}
                         <div className="flex items-center justify-between px-6 sm:px-8 py-5 border-b border-gray-100 shrink-0">
                             <div>
-                                <h2 className="text-xl font-bold text-[#1d1d1d]">เพิ่มสถานที่ใหม่</h2>
-                                <p className="text-sm text-[#6f6f6f] mt-0.5">คลิกบนแผนที่หรือลากหมุดเพื่อกำหนดพิกัด</p>
+                                <h2 className="text-xl font-bold text-[#1d1d1d]">{t('admin.locations.addTitle')}</h2>
+                                <p className="text-sm text-[#6f6f6f] mt-0.5">{t('admin.locations.addSubtitle')}</p>
                             </div>
                             <button
                                 type="button"
@@ -411,7 +413,7 @@ export function AdminLocations() {
                                 <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[500] pointer-events-none">
                                     <div className="bg-white/90 backdrop-blur-sm border border-gray-200 text-xs text-[#1d1d1d] font-medium px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap">
                                         <Crosshair className="w-3 h-3 text-[#044F88] shrink-0" />
-                                        คลิกหรือลากหมุดเพื่อเลือกพิกัด
+                                        {t('admin.locations.clickOrDrag')}
                                     </div>
                                 </div>
 
@@ -443,14 +445,14 @@ export function AdminLocations() {
                                     {/* Name */}
                                     <div>
                                         <label className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                            ชื่อสถานที่ <span className="text-red-500">*</span>
+                                            {t('admin.locations.nameLabel')} <span className="text-red-500">*</span>
                                         </label>
                                         <Input
                                             value={form.name}
                                             onChange={e => setForm({ ...form, name: e.target.value })}
                                             required
                                             autoFocus
-                                            placeholder="เช่น สำนักงานใหญ่"
+                                            placeholder={t('admin.locations.namePlaceholder')}
                                             className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]"
                                         />
                                     </div>
@@ -459,10 +461,10 @@ export function AdminLocations() {
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
                                             <label className="text-sm font-semibold text-[#1d1d1d]">
-                                                รัศมีขอบเขต <span className="text-red-500">*</span>
+                                                {t('admin.locations.radiusLabel')} <span className="text-red-500">*</span>
                                             </label>
                                             <span className="text-sm font-bold text-[#044F88] tabular-nums bg-[#044F88]/5 px-2.5 py-0.5 rounded-lg border border-[#044F88]/10">
-                                                {form.radiusMeters} ม.
+                                                {form.radiusMeters} {t('admin.locations.meters')}
                                             </span>
                                         </div>
                                         <input
@@ -475,18 +477,18 @@ export function AdminLocations() {
                                             className="w-full h-2 rounded-full accent-[#044F88] cursor-pointer"
                                         />
                                         <div className="flex justify-between text-[10px] text-gray-400 mt-1 font-medium select-none">
-                                            <span>50 ม.</span>
-                                            <span>2,000 ม.</span>
+                                            <span>50 {t('admin.locations.meters')}</span>
+                                            <span>2,000 {t('admin.locations.meters')}</span>
                                         </div>
                                         <p className="text-xs text-[#00223A] bg-[#044F88]/5 border border-[#044F88]/10 px-3 py-2 rounded-xl mt-3 font-medium leading-relaxed">
-                                            💡 แนะนำ 200–500 ม. เพื่อรองรับความคลาดเคลื่อนของ GPS
+                                            💡 {t('admin.locations.radiusHint')}
                                         </p>
                                     </div>
 
                                     {/* Coordinates — synced with map picker */}
                                     <div>
                                         <label className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                            พิกัด GPS
+                                            {t('admin.locations.gpsCoords')}
                                         </label>
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
@@ -529,8 +531,8 @@ export function AdminLocations() {
                                         className="w-full h-10 rounded-xl border-gray-200 text-[#1d1d1d] hover:bg-[#044F88]/5 hover:border-[#044F88]/30 hover:text-[#044F88] transition-all font-medium text-sm disabled:opacity-60"
                                     >
                                         {gettingLocation
-                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> กำลังหาตำแหน่ง...</>
-                                            : <><Navigation className="w-4 h-4 mr-2 text-[#044F88]" /> ใช้ตำแหน่งปัจจุบัน</>
+                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('admin.locations.findingLocation')}</>
+                                            : <><Navigation className="w-4 h-4 mr-2 text-[#044F88]" /> {t('admin.locations.useCurrentLocation')}</>
                                         }
                                     </Button>
                                 </div>
@@ -544,7 +546,7 @@ export function AdminLocations() {
                                         disabled={isSubmitting}
                                         className="flex-1 rounded-xl h-11 border-gray-200 text-[#1d1d1d] hover:bg-gray-50 font-semibold text-sm disabled:opacity-50"
                                     >
-                                        ยกเลิก
+                                        {t('common.cancel')}
                                     </Button>
                                     <Button
                                         type="submit"
@@ -552,8 +554,8 @@ export function AdminLocations() {
                                         className="flex-1 rounded-xl h-11 bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm font-semibold text-sm disabled:opacity-60"
                                     >
                                         {isSubmitting
-                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> กำลังบันทึก...</>
-                                            : <><MapPin className="w-4 h-4 mr-2" /> บันทึกสถานที่</>
+                                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('common.saving')}</>
+                                            : <><MapPin className="w-4 h-4 mr-2" /> {t('admin.locations.saveLocation')}</>
                                         }
                                     </Button>
                                 </div>

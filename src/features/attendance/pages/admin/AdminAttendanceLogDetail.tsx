@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatTime, formatDate } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 // Fix Leaflet default icon broken by bundlers — same as EmployeeMap.tsx
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,17 +70,26 @@ function calcLateMinutes(checkInTime: string, shiftStart: string): number {
     return Math.max(0, Math.floor((checkIn.getTime() - start.getTime()) / 60000));
 }
 
-const STATUS_CONFIG = {
-    present: { label: 'มาทำงาน', bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-600/20', dot: 'bg-emerald-500' },
-    late:    { label: 'มาสาย',   bg: 'bg-orange-100',  text: 'text-orange-700',  ring: 'ring-orange-600/20',  dot: 'bg-orange-500'  },
-    absent:  { label: 'ขาดงาน',  bg: 'bg-red-100',     text: 'text-red-700',     ring: 'ring-red-600/20',     dot: 'bg-red-500'     },
-    on_leave:{ label: 'ลางาน',   bg: 'bg-[#044F88]/10',    text: 'text-[#00223A]',    ring: 'ring-[#044F88]/20',    dot: 'bg-[#044F88]'    },
+// STATUS_CONFIG labels are derived from t() inside the component
+const STATUS_CONFIG_STYLES = {
+    present: { bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-600/20', dot: 'bg-emerald-500' },
+    late:    { bg: 'bg-orange-100',  text: 'text-orange-700',  ring: 'ring-orange-600/20',  dot: 'bg-orange-500'  },
+    absent:  { bg: 'bg-red-100',     text: 'text-red-700',     ring: 'ring-red-600/20',     dot: 'bg-red-500'     },
+    on_leave:{ bg: 'bg-[#044F88]/10',    text: 'text-[#00223A]',    ring: 'ring-[#044F88]/20',    dot: 'bg-[#044F88]'    },
 } as const;
 
 export function AdminAttendanceLogDetail() {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { logs, employees, locations } = useAttendance();
+
+    const STATUS_LABELS: Record<string, string> = {
+        present: t('status.present'),
+        late: t('status.late'),
+        absent: t('status.absent'),
+        on_leave: t('status.onLeave'),
+    };
 
     const log = logs.find(l => l.id === id);
     const emp = log ? employees.find(e => e.id === log.employeeId) : undefined;
@@ -103,17 +113,18 @@ export function AdminAttendanceLogDetail() {
                     <AlertCircle className="w-8 h-8 text-slate-400" />
                 </div>
                 <div className="text-center">
-                    <p className="text-lg font-semibold text-slate-700">ไม่พบข้อมูลการลงเวลา</p>
-                    <p className="text-sm text-slate-400 mt-1">รหัสบันทึก: {id}</p>
+                    <p className="text-lg font-semibold text-slate-700">{t('admin.logDetail.notFound')}</p>
+                    <p className="text-sm text-slate-400 mt-1">{t('admin.logDetail.recordId')}: {id}</p>
                 </div>
                 <Button variant="outline" onClick={() => navigate('/admin/attendance/logs')}>
-                    <ArrowLeft className="w-4 h-4 mr-2" /> กลับไปรายการ
+                    <ArrowLeft className="w-4 h-4 mr-2" /> {t('admin.logDetail.backToList')}
                 </Button>
             </div>
         );
     }
 
-    const status = STATUS_CONFIG[log.status] ?? STATUS_CONFIG.absent;
+    const statusStyle = STATUS_CONFIG_STYLES[log.status] ?? STATUS_CONFIG_STYLES.absent;
+    const statusLabel = STATUS_LABELS[log.status] ?? log.status;
     const lateMinutes = (log.status === 'late' && log.checkInTime && emp?.shiftStartTime)
         ? calcLateMinutes(log.checkInTime, emp.shiftStartTime)
         : 0;
@@ -134,7 +145,7 @@ export function AdminAttendanceLogDetail() {
                         className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors rounded-md px-2 py-1 -ml-2 hover:bg-slate-100"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        ประวัติการลงเวลา
+                        {t('admin.logDetail.attendanceLogs')}
                     </button>
                     <span className="text-slate-300">/</span>
                     <span className="text-sm text-slate-700 font-medium truncate">{emp?.name ?? '—'}</span>
@@ -159,7 +170,7 @@ export function AdminAttendanceLogDetail() {
                             <div>
                                 <div className="flex items-center gap-2 flex-wrap">
                                     <h1 className="text-xl font-bold text-slate-900 leading-tight">
-                                        {emp?.name ?? 'ไม่ทราบชื่อ'}
+                                        {emp?.name ?? t('admin.dashboard.unknownName')}
                                     </h1>
                                     {emp?.nickname && (
                                         <span className="text-slate-400 font-normal text-base">({emp.nickname})</span>
@@ -173,9 +184,9 @@ export function AdminAttendanceLogDetail() {
                         </div>
 
                         {/* Status badge */}
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold ring-1 ring-inset self-start shrink-0 ${status.bg} ${status.text} ${status.ring}`}>
-                            <span className={`w-2 h-2 rounded-full ${status.dot}`} />
-                            {status.label}
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold ring-1 ring-inset self-start shrink-0 ${statusStyle.bg} ${statusStyle.text} ${statusStyle.ring}`}>
+                            <span className={`w-2 h-2 rounded-full ${statusStyle.dot}`} />
+                            {statusLabel}
                         </span>
                     </div>
 
@@ -194,7 +205,7 @@ export function AdminAttendanceLogDetail() {
                         {emp && (
                             <div className="flex items-center gap-2 sm:ml-4">
                                 <Clock className="w-4 h-4 text-slate-400 shrink-0" />
-                                <span>กะ {emp.shiftStartTime} – {emp.shiftEndTime}</span>
+                                <span>{t('admin.logDetail.shift')} {emp.shiftStartTime} – {emp.shiftEndTime}</span>
                             </div>
                         )}
                     </div>
@@ -208,19 +219,19 @@ export function AdminAttendanceLogDetail() {
                             <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
                                 <Clock className="w-4 h-4 text-emerald-600" />
                             </div>
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">เข้างาน</span>
+                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('admin.logDetail.checkInTime')}</span>
                         </div>
                         <p className="text-2xl font-bold text-slate-900 tabular-nums">{formatTime(log.checkInTime)}</p>
                         {log.status === 'late' && lateMinutes > 0 ? (
                             <p className="text-xs text-orange-600 font-medium mt-1 flex items-center gap-1">
-                                <Timer className="w-3 h-3" /> สาย {lateMinutes} นาที
+                                <Timer className="w-3 h-3" /> {t('admin.logDetail.lateMinutes').replace('{n}', String(lateMinutes))}
                             </p>
                         ) : log.checkInTime ? (
                             <p className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" /> ตรงเวลา
+                                <CheckCircle2 className="w-3 h-3" /> {t('admin.logDetail.onTime')}
                             </p>
                         ) : (
-                            <p className="text-xs text-slate-400 mt-1">ไม่มีข้อมูล</p>
+                            <p className="text-xs text-slate-400 mt-1">{t('admin.logDetail.noData')}</p>
                         )}
                     </div>
 
@@ -230,12 +241,12 @@ export function AdminAttendanceLogDetail() {
                             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
                                 <Clock className="w-4 h-4 text-slate-500" />
                             </div>
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">ออกงาน</span>
+                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('admin.logDetail.checkOutTime')}</span>
                         </div>
                         <p className="text-2xl font-bold text-slate-900 tabular-nums">{formatTime(log.checkOutTime)}</p>
                         {!log.checkOutTime && (
                             <p className="text-xs text-amber-600 font-medium mt-1 flex items-center gap-1">
-                                <Info className="w-3 h-3" /> ยังไม่ออกงาน
+                                <Info className="w-3 h-3" /> {t('admin.logDetail.notCheckedOut')}
                             </p>
                         )}
                     </div>
@@ -246,12 +257,12 @@ export function AdminAttendanceLogDetail() {
                             <div className="w-8 h-8 rounded-lg bg-[#044F88]/5 flex items-center justify-center">
                                 <User className="w-4 h-4 text-[#044F88]" />
                             </div>
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">ชั่วโมงงาน</span>
+                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('admin.logDetail.workHours')}</span>
                         </div>
                         <p className="text-2xl font-bold text-slate-900 tabular-nums">
                             {log.workHours > 0 ? log.workHours.toFixed(2) : '—'}
                         </p>
-                        <p className="text-xs text-slate-400 mt-1">ชั่วโมง</p>
+                        <p className="text-xs text-slate-400 mt-1">{t('admin.logDetail.hours')}</p>
                     </div>
 
                     {/* OT */}
@@ -260,12 +271,12 @@ export function AdminAttendanceLogDetail() {
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${log.otHours > 0 ? 'bg-purple-100' : 'bg-slate-100'}`}>
                                 <TrendingUp className={`w-4 h-4 ${log.otHours > 0 ? 'text-purple-600' : 'text-slate-400'}`} />
                             </div>
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">โอที</span>
+                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('admin.logDetail.overtime')}</span>
                         </div>
                         <p className={`text-2xl font-bold tabular-nums ${log.otHours > 0 ? 'text-purple-700' : 'text-slate-400'}`}>
                             {log.otHours > 0 ? `+${log.otHours.toFixed(2)}` : '—'}
                         </p>
-                        <p className="text-xs text-slate-400 mt-1">{log.otHours > 0 ? 'ชั่วโมง OT' : 'ไม่มี OT'}</p>
+                        <p className="text-xs text-slate-400 mt-1">{log.otHours > 0 ? t('admin.logDetail.otHours') : t('admin.logDetail.noOt')}</p>
                     </div>
                 </div>
 
@@ -273,18 +284,18 @@ export function AdminAttendanceLogDetail() {
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
-                            <h2 className="text-sm font-semibold text-slate-800">แผนที่การเข้า-ออกงาน</h2>
-                            <p className="text-xs text-slate-400 mt-0.5">แสดงตำแหน่ง GPS ที่บันทึกขณะ Check-in และ Check-out</p>
+                            <h2 className="text-sm font-semibold text-slate-800">{t('admin.logDetail.mapTitle')}</h2>
+                            <p className="text-xs text-slate-400 mt-0.5">{t('admin.logDetail.mapSubtitle')}</p>
                         </div>
                         {/* Legend */}
                         <div className="hidden sm:flex items-center gap-4 text-xs text-slate-500">
                             <span className="flex items-center gap-1.5">
                                 <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block shadow-sm" />
-                                เข้างาน
+                                {t('admin.logDetail.checkInTime')}
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <span className="w-3 h-3 rounded-full bg-red-500 inline-block shadow-sm" />
-                                ออกงาน
+                                {t('admin.logDetail.checkOutTime')}
                             </span>
                             {loc && (
                                 <span className="flex items-center gap-1.5">
@@ -301,8 +312,8 @@ export function AdminAttendanceLogDetail() {
                                 <MapPin className="w-7 h-7 text-slate-300" />
                             </div>
                             <div className="text-center">
-                                <p className="text-slate-500 font-medium text-sm">ไม่มีข้อมูล GPS</p>
-                                <p className="text-xs text-slate-400 mt-1">ไม่พบพิกัดการเข้า-ออกงาน</p>
+                                <p className="text-slate-500 font-medium text-sm">{t('admin.logDetail.noGpsData')}</p>
+                                <p className="text-xs text-slate-400 mt-1">{t('admin.logDetail.noGpsPositions')}</p>
                             </div>
                         </div>
                     ) : (
@@ -339,7 +350,7 @@ export function AdminAttendanceLogDetail() {
                                     <Marker position={[log.checkInLat, log.checkInLng]} icon={checkInIcon}>
                                         <Popup>
                                             <div className="text-sm space-y-0.5">
-                                                <p className="font-semibold text-emerald-700">เข้างาน</p>
+                                                <p className="font-semibold text-emerald-700">{t('admin.logDetail.checkInTime')}</p>
                                                 <p className="text-gray-600">{formatTime(log.checkInTime)}</p>
                                                 <p className="font-mono text-[11px] text-gray-400">
                                                     {log.checkInLat.toFixed(6)}, {log.checkInLng.toFixed(6)}
@@ -354,7 +365,7 @@ export function AdminAttendanceLogDetail() {
                                     <Marker position={[log.checkOutLat, log.checkOutLng]} icon={checkOutIcon}>
                                         <Popup>
                                             <div className="text-sm space-y-0.5">
-                                                <p className="font-semibold text-red-600">ออกงาน</p>
+                                                <p className="font-semibold text-red-600">{t('admin.logDetail.checkOutTime')}</p>
                                                 <p className="text-gray-600">{formatTime(log.checkOutTime)}</p>
                                                 <p className="font-mono text-[11px] text-gray-400">
                                                     {log.checkOutLat.toFixed(6)}, {log.checkOutLng.toFixed(6)}
@@ -370,10 +381,10 @@ export function AdminAttendanceLogDetail() {
                     {/* Mobile legend */}
                     <div className="sm:hidden px-5 py-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
                         <span className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" /> เข้างาน
+                            <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" /> {t('admin.logDetail.checkInTime')}
                         </span>
                         <span className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 rounded-full bg-red-500 inline-block" /> ออกงาน
+                            <span className="w-3 h-3 rounded-full bg-red-500 inline-block" /> {t('admin.logDetail.checkOutTime')}
                         </span>
                         {loc && (
                             <span className="flex items-center gap-1.5">
@@ -389,7 +400,7 @@ export function AdminAttendanceLogDetail() {
                     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
                         <div className="flex items-center gap-2 mb-4">
                             <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
-                            <h3 className="text-sm font-semibold text-slate-700">ข้อมูล GPS: เข้างาน</h3>
+                            <h3 className="text-sm font-semibold text-slate-700">{t('admin.logDetail.gpsCheckIn')}</h3>
                         </div>
                         {log.checkInLat != null && log.checkInLng != null ? (
                             <div className="space-y-2">
@@ -402,13 +413,13 @@ export function AdminAttendanceLogDetail() {
                                     <span className="font-mono text-sm text-slate-800">{log.checkInLng.toFixed(6)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2">
-                                    <span className="text-xs text-slate-500">เวลา</span>
+                                    <span className="text-xs text-slate-500">{t('admin.logDetail.time')}</span>
                                     <span className="text-sm font-medium text-emerald-700">{formatTime(log.checkInTime)}</span>
                                 </div>
                             </div>
                         ) : (
                             <div className="flex items-center gap-2 text-sm text-slate-400">
-                                <AlertCircle className="w-4 h-4" /> ไม่มีข้อมูล GPS
+                                <AlertCircle className="w-4 h-4" /> {t('admin.logDetail.noGpsData')}
                             </div>
                         )}
                     </div>
@@ -417,7 +428,7 @@ export function AdminAttendanceLogDetail() {
                     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
                         <div className="flex items-center gap-2 mb-4">
                             <span className="w-3 h-3 rounded-full bg-red-500 shrink-0" />
-                            <h3 className="text-sm font-semibold text-slate-700">ข้อมูล GPS: ออกงาน</h3>
+                            <h3 className="text-sm font-semibold text-slate-700">{t('admin.logDetail.gpsCheckOut')}</h3>
                         </div>
                         {log.checkOutLat != null && log.checkOutLng != null ? (
                             <div className="space-y-2">
@@ -430,14 +441,14 @@ export function AdminAttendanceLogDetail() {
                                     <span className="font-mono text-sm text-slate-800">{log.checkOutLng.toFixed(6)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2">
-                                    <span className="text-xs text-slate-500">เวลา</span>
+                                    <span className="text-xs text-slate-500">{t('admin.logDetail.time')}</span>
                                     <span className="text-sm font-medium text-slate-700">{formatTime(log.checkOutTime)}</span>
                                 </div>
                             </div>
                         ) : (
                             <div className="flex items-center gap-2 text-sm text-slate-400">
                                 <AlertCircle className="w-4 h-4" />
-                                {log.checkOutTime ? 'ไม่มีข้อมูล GPS' : 'ยังไม่ได้ออกงาน'}
+                                {log.checkOutTime ? t('admin.logDetail.noGpsData') : t('admin.logDetail.notCheckedOutYet')}
                             </div>
                         )}
                     </div>

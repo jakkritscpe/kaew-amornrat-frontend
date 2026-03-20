@@ -3,23 +3,25 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { useTranslation } from '@/i18n';
 
 export function MainLayout() {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const location = useLocation();
+    const { t } = useTranslation();
 
     const getPageTitle = () => {
         const path = location.pathname;
-        if (path.includes('/settings')) return 'ตั้งค่า';
-        if (path.includes('/attendance/dashboard')) return 'แดชบอร์ดลงเวลา';
-        if (path.includes('/attendance/logs')) return 'ประวัติลงเวลา';
-        if (path.includes('/attendance/employees')) return 'จัดการพนักงาน';
-        if (path.includes('/attendance/locations')) return 'สถานที่ตั้ง (GPS)';
-        if (path.includes('/attendance/ot-approvals')) return 'อนุมัติ OT';
-        if (path.includes('/attendance/ot-calculator')) return 'คำนวณค่าล่วงเวลา';
-        if (path.includes('/attendance/reports')) return 'รายงานการทำงาน';
-        return 'แดชบอร์ด';
+        if (path.includes('/settings')) return t('nav.settings');
+        if (path.includes('/attendance/dashboard')) return t('admin.dashboard.title');
+        if (path.includes('/attendance/logs')) return t('nav.attendanceLogs');
+        if (path.includes('/attendance/employees')) return t('admin.employees.title');
+        if (path.includes('/attendance/locations')) return t('admin.locations.title');
+        if (path.includes('/attendance/ot-approvals')) return t('nav.otApprovals');
+        if (path.includes('/attendance/ot-calculator')) return t('nav.otCalculator');
+        if (path.includes('/attendance/reports')) return t('nav.reports');
+        return t('nav.dashboard');
     };
 
     return (

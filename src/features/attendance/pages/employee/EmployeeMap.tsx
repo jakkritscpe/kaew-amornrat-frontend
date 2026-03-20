@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { Loader2, AlertCircle, Navigation2, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import L from 'leaflet';
+import { useTranslation } from '@/i18n';
 
 // Leaflet's default icon URL detection doesn't work with bundlers — this is the standard fix
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,17 +24,18 @@ const userIcon = new L.DivIcon({
 });
 
 export function EmployeeMap() {
+    const { t } = useTranslation();
     const { locations } = useAttendance();
     const [currentLoc, setCurrentLoc] = useState<{ lat: number; lng: number } | null>(null);
     const [geoError, setGeoError] = useState<string | null>(
-        !navigator.geolocation ? 'อุปกรณ์ไม่รองรับ GPS' : null
+        !navigator.geolocation ? t('employee.map.gpsNotSupported') : null
     );
 
     useEffect(() => {
         if (!navigator.geolocation) { return; }
         navigator.geolocation.getCurrentPosition(
             (p) => setCurrentLoc({ lat: p.coords.latitude, lng: p.coords.longitude }),
-            () => setGeoError('ไม่สามารถเข้าถึง GPS กรุณาอนุญาตตำแหน่ง'),
+            () => setGeoError(t('employee.map.gpsAccessDenied')),
             { enableHighAccuracy: true }
         );
     }, []);
@@ -42,7 +44,7 @@ export function EmployeeMap() {
         return (
             <div className="flex flex-col min-h-full bg-[#f1f5f9]">
                 <div className="bg-[#044F88] px-5 pt-3 pb-14">
-                    <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">แผนที่การทำงาน</p>
+                    <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">{t('employee.map.title')}</p>
                     <h2 className="text-xl font-black text-white mt-0.5">Work Zone</h2>
                 </div>
                 <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] flex flex-col items-center justify-center gap-4 relative z-10">
@@ -50,8 +52,8 @@ export function EmployeeMap() {
                         <Loader2 className="w-7 h-7 text-[#044F88] animate-spin" />
                     </div>
                     <div className="text-center">
-                        <p className="font-bold text-[#1d1d1d]">กำลังค้นหาตำแหน่ง</p>
-                        <p className="text-sm text-[#6f6f6f] mt-1">โปรดรออีกสักครู่...</p>
+                        <p className="font-bold text-[#1d1d1d]">{t('employee.map.findingLocation')}</p>
+                        <p className="text-sm text-[#6f6f6f] mt-1">{t('employee.map.pleaseWait')}</p>
                     </div>
                 </div>
             </div>
@@ -62,7 +64,7 @@ export function EmployeeMap() {
         return (
             <div className="flex flex-col min-h-full bg-[#f1f5f9]">
                 <div className="bg-[#044F88] px-5 pt-3 pb-14">
-                    <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">แผนที่การทำงาน</p>
+                    <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">{t('employee.map.title')}</p>
                     <h2 className="text-xl font-black text-white mt-0.5">Work Zone</h2>
                 </div>
                 <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] flex flex-col items-center justify-center gap-4 px-6 relative z-10">
@@ -70,7 +72,7 @@ export function EmployeeMap() {
                         <AlertCircle className="w-7 h-7 text-red-500" />
                     </div>
                     <div className="text-center">
-                        <p className="font-bold text-[#1d1d1d]">ไม่พบตำแหน่ง</p>
+                        <p className="font-bold text-[#1d1d1d]">{t('employee.map.locationNotFound')}</p>
                         <p className="text-sm text-[#6f6f6f] mt-1">{geoError}</p>
                     </div>
                 </div>
@@ -86,12 +88,12 @@ export function EmployeeMap() {
         <div className="flex flex-col h-full bg-[#f1f5f9]">
             {/* Blue header strip */}
             <div className="bg-[#044F88] px-5 pt-3 pb-5 shrink-0">
-                <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">แผนที่การทำงาน</p>
+                <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">{t('employee.map.title')}</p>
                 <div className="flex items-center justify-between mt-0.5">
                     <h2 className="text-xl font-black text-white">Work Zone</h2>
                     <div className="flex items-center gap-1.5 bg-emerald-400/25 text-emerald-100 px-2.5 py-1 rounded-full text-xs font-semibold">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
-                        GPS พร้อม
+                        {t('employee.map.gpsReady')}
                     </div>
                 </div>
             </div>
@@ -109,14 +111,14 @@ export function EmployeeMap() {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     <Marker position={center} icon={userIcon}>
-                        <Popup className="text-sm font-semibold">ตำแหน่งของคุณ</Popup>
+                        <Popup className="text-sm font-semibold">{t('employee.map.youAreHere')}</Popup>
                     </Marker>
                     {locations.map(loc => (
                         <React.Fragment key={loc.id}>
                             <Marker position={[loc.lat, loc.lng]}>
                                 <Popup>
                                     <p className="font-bold text-sm">{loc.name}</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">รัศมี {loc.radiusMeters} ม.</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">{t('employee.map.radius')} {loc.radiusMeters} {t('employee.map.radiusUnit')}</p>
                                 </Popup>
                             </Marker>
                             <Circle
@@ -134,10 +136,10 @@ export function EmployeeMap() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 text-xs text-[#6f6f6f]">
                         <span className="flex items-center gap-1.5">
-                            <Navigation2 className="w-3.5 h-3.5 text-[#044F88]" /> คุณอยู่ที่นี่
+                            <Navigation2 className="w-3.5 h-3.5 text-[#044F88]" /> {t('employee.map.yourLocation')}
                         </span>
                         <span className="flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-gray-500" /> จุดทำงาน
+                            <MapPin className="w-3.5 h-3.5 text-gray-500" /> {t('employee.map.workPoint')}
                         </span>
                         <span className="flex items-center gap-1.5">
                             <span className={cn('w-4 h-4 rounded-full border-2 border-dashed border-[#044F88]/60 bg-[#044F88]/5 inline-block')} />

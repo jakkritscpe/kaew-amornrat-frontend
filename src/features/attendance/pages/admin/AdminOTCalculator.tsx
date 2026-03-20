@@ -8,13 +8,9 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const MONTHS_FULL = [
-    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
-];
 
 type PeriodMode = 'monthly' | 'custom';
 
@@ -127,8 +123,10 @@ function StatCard({ title, value, suffix, icon: Icon, color, delay, format }: St
 // ── MAIN COMPONENT
 // ═══════════════════════════════════════════
 export function AdminOTCalculator() {
+    const { t } = useTranslation();
     const { employees, logs, companySettings } = useAttendance();
     const containerRef = useRef<HTMLDivElement>(null);
+    const MONTHS_FULL = Array.from({ length: 12 }, (_, i) => t(`months.full.${i}`));
 
     const now = new Date();
     const [periodMode, setPeriodMode] = useState<PeriodMode>('monthly');
@@ -208,10 +206,10 @@ export function AdminOTCalculator() {
     };
 
     const exportCSV = () => {
-        const h = 'พนักงาน,แผนก,ชั่วโมง OT,อัตรา,ประเภท,ค่า OT (บาท)';
-        const r = otData.map(d => `"${d.emp.name}","${d.emp.department}",${d.hrs},${d.rVal},${d.rType === 'multiplier' ? 'เท่า' : 'บาท/ชม.'},${d.pay}`);
-        const lbl = periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} ถึง ${dateRange.end}`;
-        const csv = `\uFEFF# สรุปค่าล่วงเวลา – ${lbl}\n${h}\n${r.join('\n')}\n\n# ยอดรวม,,${totHrs},,,${totPay}`;
+        const h = `${t('admin.otCalculator.employee')},${t('admin.otCalculator.department')},${t('admin.otCalculator.otHours')},${t('admin.otCalculator.rate')},${t('admin.otCalculator.otPay')}`;
+        const r = otData.map(d => `"${d.emp.name}","${d.emp.department}",${d.hrs},${d.rVal},${d.rType === 'multiplier' ? t('admin.otCalculator.multiplierUnit') : t('admin.otCalculator.fixedUnit')},${d.pay}`);
+        const lbl = periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} ${t('admin.otCalculator.to')} ${dateRange.end}`;
+        const csv = `\uFEFF# ${t('admin.otCalculator.csvSummary')} – ${lbl}\n${h}\n${r.join('\n')}\n\n# ${t('admin.otCalculator.csvGrandTotal')},,${totHrs},,,${totPay}`;
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url;
@@ -225,8 +223,8 @@ export function AdminOTCalculator() {
             <div className="ot-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <h3 className="font-semibold text-lg text-[#1d1d1d]">เลือกช่วงเวลา</h3>
-                        <p className="text-sm text-[#6f6f6f]">เลือกเดือนหรือกำหนดช่วงวันที่เอง</p>
+                        <h3 className="font-semibold text-lg text-[#1d1d1d]">{t('admin.otCalculator.selectPeriod')}</h3>
+                        <p className="text-sm text-[#6f6f6f]">{t('admin.otCalculator.selectPeriodDesc')}</p>
                     </div>
                     {/* Mode Tabs */}
                     <div className="flex items-center gap-0 border border-gray-200 rounded-lg overflow-hidden bg-white self-start sm:self-auto">
@@ -240,7 +238,7 @@ export function AdminOTCalculator() {
                                         : 'bg-white text-[#6f6f6f] hover:bg-gray-50',
                                 )}
                             >
-                                {mode === 'monthly' ? 'รายเดือน' : 'กำหนดเอง'}
+                                {mode === 'monthly' ? t('admin.otCalculator.monthly') : t('admin.otCalculator.custom')}
                             </button>
                         ))}
                     </div>
@@ -269,7 +267,7 @@ export function AdminOTCalculator() {
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                             <input type="date" className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#044F88]/30 focus:border-[#044F88] transition-all" value={startDate} onChange={e => setStartDate(e.target.value)} />
                             <span className="text-gray-300 text-sm text-center hidden sm:block">→</span>
-                            <span className="text-[#6f6f6f] text-xs text-center sm:hidden">ถึง</span>
+                            <span className="text-[#6f6f6f] text-xs text-center sm:hidden">{t('admin.otCalculator.to')}</span>
                             <input type="date" className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#044F88]/30 focus:border-[#044F88] transition-all" value={endDate} onChange={e => setEndDate(e.target.value)} />
                         </div>
                     )}
@@ -279,35 +277,35 @@ export function AdminOTCalculator() {
             {/* ═══════════ STATS GRID (same as Dashboard) ═══════════ */}
             <div className="ot-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
                 <StatCard
-                    title="ยอดค่า OT รวม"
+                    title={t('admin.otCalculator.totalOtPay')}
                     value={totPay}
-                    suffix="บาท"
+                    suffix={t('common.baht')}
                     icon={DollarSign}
                     color="bg-gradient-to-br from-emerald-500 to-teal-500"
                     delay={0.1}
                     format={v => `฿${fmt(v)}`}
                 />
                 <StatCard
-                    title="ชั่วโมง OT รวม"
+                    title={t('admin.otCalculator.totalOtHours')}
                     value={totHrs}
-                    suffix="ชั่วโมง"
+                    suffix={t('common.hours')}
                     icon={Clock}
                     color="bg-gradient-to-br from-[#044F88] to-[#00223A]"
                     delay={0.2}
                     format={v => v.toFixed(1)}
                 />
                 <StatCard
-                    title="พนักงานที่มี OT"
+                    title={t('admin.otCalculator.employeesWithOt')}
                     value={pplWithOt}
-                    suffix="คน"
+                    suffix={t('common.person')}
                     icon={Users}
                     color="bg-gradient-to-br from-amber-500 to-orange-500"
                     delay={0.3}
                 />
                 <StatCard
-                    title="เฉลี่ยต่อคน"
+                    title={t('admin.otCalculator.averagePerPerson')}
                     value={avgHrs}
-                    suffix="ชม./คน"
+                    suffix={t('admin.otCalculator.hoursPerPerson')}
                     icon={TrendingUp}
                     color="bg-gradient-to-br from-[#044F88] to-[#00223A]"
                     delay={0.4}
@@ -320,22 +318,22 @@ export function AdminOTCalculator() {
                 {/* Card Header */}
                 <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                     <div>
-                        <h3 className="font-semibold text-lg text-[#1d1d1d]">รายละเอียด OT รายบุคคล</h3>
+                        <h3 className="font-semibold text-lg text-[#1d1d1d]">{t('admin.otCalculator.detailTitle')}</h3>
                         <p className="text-sm text-[#6f6f6f]">
-                            รายการทั้งหมด {otData.length} รายการ · {periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} – ${dateRange.end}`}
+                            {t('admin.otCalculator.totalItems')} {otData.length} {t('common.items')} · {periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} – ${dateRange.end}`}
                         </p>
                     </div>
                     <Button onClick={exportCSV} variant="outline" className="gap-2">
                         <Download className="w-4 h-4" />
-                        <span className="hidden sm:inline">ส่งออก CSV</span>
+                        <span className="hidden sm:inline">{t('common.exportCsv')}</span>
                     </Button>
                 </div>
 
                 {otData.length === 0 ? (
                     <div className="py-20 text-center">
                         <CalendarRange className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-                        <p className="text-[#1d1d1d] font-medium">ไม่พบข้อมูล OT ในช่วงเวลานี้</p>
-                        <p className="text-sm text-[#6f6f6f] mt-1">ลองเปลี่ยนเดือนหรือช่วงวันที่</p>
+                        <p className="text-[#1d1d1d] font-medium">{t('admin.otCalculator.noOtData')}</p>
+                        <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.otCalculator.noOtHint')}</p>
                     </div>
                 ) : (
                     <>
@@ -345,11 +343,11 @@ export function AdminOTCalculator() {
                                 <thead>
                                     <tr className="bg-gray-50/50 border-b border-gray-200">
                                         <th className="w-[60px] text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider pl-6 pr-4 py-4">#</th>
-                                        <th className="text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4">พนักงาน</th>
-                                        <th className="w-[160px] text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell">แผนก</th>
-                                        <th className="w-[120px] text-right text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4">ชั่วโมง OT</th>
-                                        <th className="w-[120px] text-center text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell">อัตรา</th>
-                                        <th className="w-[140px] text-right text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider pl-4 pr-6 py-4">ค่า OT (฿)</th>
+                                        <th className="text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4">{t('admin.otCalculator.employee')}</th>
+                                        <th className="w-[160px] text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell">{t('admin.otCalculator.department')}</th>
+                                        <th className="w-[120px] text-right text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4">{t('admin.otCalculator.otHours')}</th>
+                                        <th className="w-[120px] text-center text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell">{t('admin.otCalculator.rate')}</th>
+                                        <th className="w-[140px] text-right text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider pl-4 pr-6 py-4">{t('admin.otCalculator.otPay')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -373,11 +371,11 @@ export function AdminOTCalculator() {
                                             <td className="px-4 py-4 text-sm text-[#6f6f6f] align-top hidden lg:table-cell">{d.emp.department}</td>
                                             <td className="px-4 py-4 text-right align-top">
                                                 <span className="font-semibold text-sm text-[#1d1d1d] tabular-nums">{d.hrs.toFixed(1)}</span>
-                                                <span className="text-xs text-[#6f6f6f] ml-1">ชม.</span>
+                                                <span className="text-xs text-[#6f6f6f] ml-1">{t('common.hours')}</span>
                                             </td>
                                             <td className="px-4 py-4 text-center align-top hidden lg:table-cell">
                                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-[#6f6f6f]">
-                                                    {d.rVal}{d.rType === 'multiplier' ? '×' : '฿/ชม.'}
+                                                    {d.rVal}{d.rType === 'multiplier' ? '×' : `฿/${t('common.hours')}`}
                                                 </span>
                                             </td>
                                             <td className="pl-4 pr-6 py-4 text-right align-top">
@@ -389,10 +387,10 @@ export function AdminOTCalculator() {
                                 <tfoot>
                                     <tr className="bg-gray-50/50 border-t border-gray-200">
                                         <td className="pl-6 pr-4 py-4" colSpan={3}>
-                                            <span className="font-semibold text-sm text-[#1d1d1d]">รวมทั้งหมด</span>
+                                            <span className="font-semibold text-sm text-[#1d1d1d]">{t('admin.otCalculator.grandTotal')}</span>
                                         </td>
                                         <td className="px-4 py-4 text-right">
-                                            <span className="font-semibold text-sm text-[#1d1d1d] tabular-nums">{totHrs.toFixed(1)} ชม.</span>
+                                            <span className="font-semibold text-sm text-[#1d1d1d] tabular-nums">{totHrs.toFixed(1)} {t('common.hours')}</span>
                                         </td>
                                         <td className="px-4 py-4 hidden lg:table-cell"></td>
                                         <td className="pl-4 pr-6 py-4 text-right">
@@ -413,17 +411,17 @@ export function AdminOTCalculator() {
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <p className="font-medium text-sm text-[#1d1d1d] group-hover:text-[#044F88] transition-colors truncate">{d.emp.name}</p>
-                                        <p className="text-xs text-[#6f6f6f] truncate">{d.emp.department} · {d.hrs.toFixed(1)} ชม. · อัตรา {d.rVal}{d.rType === 'multiplier' ? '×' : '฿/ชม.'}</p>
+                                        <p className="text-xs text-[#6f6f6f] truncate">{d.emp.department} · {d.hrs.toFixed(1)} {t('common.hours')} · {t('admin.otCalculator.rate')} {d.rVal}{d.rType === 'multiplier' ? '×' : `฿/${t('common.hours')}`}</p>
                                     </div>
                                     <p className="font-semibold text-sm text-emerald-600 tabular-nums shrink-0">฿{fmt(d.pay)}</p>
                                 </div>
                             ))}
                             {/* Mobile Total */}
                             <div className="p-4 flex items-center justify-between bg-gray-50/50">
-                                <span className="font-semibold text-sm text-[#1d1d1d]">รวมทั้งหมด</span>
+                                <span className="font-semibold text-sm text-[#1d1d1d]">{t('admin.otCalculator.grandTotal')}</span>
                                 <div className="text-right">
                                     <p className="font-bold text-base text-emerald-600 tabular-nums">฿{fmt(totPay)}</p>
-                                    <p className="text-xs text-[#6f6f6f]">{totHrs.toFixed(1)} ชม. · {pplWithOt} คน</p>
+                                    <p className="text-xs text-[#6f6f6f]">{totHrs.toFixed(1)} {t('common.hours')} · {pplWithOt} {t('common.person')}</p>
                                 </div>
                             </div>
                         </div>
