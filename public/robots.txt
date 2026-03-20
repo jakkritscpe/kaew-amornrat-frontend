@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /employee
+Disallow: /login
+Disallow: /qr-checkin
+
+Sitemap: https://kaewamornrat.com/sitemap.xml

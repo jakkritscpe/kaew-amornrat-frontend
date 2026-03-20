@@ -4,22 +4,14 @@ import { Button } from '@/components/ui/button';
 import { gsap } from 'gsap';
 
 const heroImages = [
-    // Computer / แผงวงจร PCB close-up
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
-    // CCTV / กล้องวงจรปิด
-    'https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=2070&auto=format&fit=crop',
-    // Server / data center ตู้เซิร์ฟเวอร์
-    'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2070&auto=format&fit=crop',
-    // Network LAN / สาย ethernet patch panel
-    'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=2070&auto=format&fit=crop',
-    // Firewall / motherboard มืดๆ
-    'https://images.unsplash.com/photo-1631375937044-6dd5beac01d2?q=80&w=2070&auto=format&fit=crop',
-    // NAS & Backup / hard drive
-    'https://images.unsplash.com/photo-1593448848024-77a27f0690b1?q=80&w=2070&auto=format&fit=crop',
-    // Fiber Optic / แสงไฟเบอร์
-    'https://images.unsplash.com/photo-1517433456519-e8073893c6e0?q=80&w=2070&auto=format&fit=crop',
-    // Network switch / อุปกรณ์เน็ตเวิร์ค
-    'https://images.unsplash.com/photo-1606904825846-647eb07f5be2?q=80&w=2070&auto=format&fit=crop',
+    { src: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop', alt: 'บริการซ่อมคอมพิวเตอร์ แผงวงจร PCB โดยช่างมืออาชีพ' },
+    { src: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=2070&auto=format&fit=crop', alt: 'ติดตั้งกล้องวงจรปิด CCTV ระบบรักษาความปลอดภัย' },
+    { src: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2070&auto=format&fit=crop', alt: 'ติดตั้งและดูแลระบบเซิร์ฟเวอร์ Data Center' },
+    { src: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=2070&auto=format&fit=crop', alt: 'ติดตั้งระบบ Network LAN สาย Ethernet' },
+    { src: 'https://images.unsplash.com/photo-1631375937044-6dd5beac01d2?q=80&w=2070&auto=format&fit=crop', alt: 'ระบบความปลอดภัยเครือข่าย Firewall' },
+    { src: 'https://images.unsplash.com/photo-1593448848024-77a27f0690b1?q=80&w=2070&auto=format&fit=crop', alt: 'ระบบจัดเก็บข้อมูล NAS และสำรองข้อมูล Backup' },
+    { src: 'https://images.unsplash.com/photo-1517433456519-e8073893c6e0?q=80&w=2070&auto=format&fit=crop', alt: 'ติดตั้งสาย Fiber Optic ระบบเครือข่ายความเร็วสูง' },
+    { src: 'https://images.unsplash.com/photo-1606904825846-647eb07f5be2?q=80&w=2070&auto=format&fit=crop', alt: 'อุปกรณ์ Network Switch ระบบเครือข่ายองค์กร' },
 ];
 
 export function Hero() {
@@ -30,6 +22,7 @@ export function Hero() {
     const next = useCallback(() => {
         setCurrent(prev => (prev + 1) % heroImages.length);
     }, []);
+
 
     useEffect(() => {
         intervalRef.current = setInterval(next, 5000);
@@ -51,15 +44,15 @@ export function Hero() {
     return (
         <section ref={containerRef} id="home" className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden bg-[#00223A]">
             {/* Background Slideshow */}
-            {heroImages.map((src, i) => (
+            {heroImages.map((image, i) => (
                 <div
                     key={i}
                     className="absolute inset-0 z-0 transition-opacity duration-1000 ease-in-out"
                     style={{ opacity: i === current ? 1 : 0 }}
                 >
                     <img
-                        src={src}
-                        alt=""
+                        src={image.src}
+                        alt={image.alt}
                         className="w-full h-full object-cover scale-105"
                         style={{
                             animation: i === current ? 'heroZoom 6s ease-out forwards' : 'none',
