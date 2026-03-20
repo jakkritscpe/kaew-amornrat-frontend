@@ -11,7 +11,6 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  FileText,
   X,
   Clock,
   MapPin,
@@ -39,10 +38,6 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { id: 'dashboard', label: 'แดชบอร์ด', icon: LayoutDashboard },
-  { id: 'requests', label: 'รายการแจ้งซ่อม', icon: ClipboardList },
-  { id: 'jobs', label: 'ระบบใบงาน', icon: FileText },
-  { id: 'technicians', label: 'ช่าง', icon: Users },
   {
     id: 'attendance',
     label: 'ระบบลงเวลา',

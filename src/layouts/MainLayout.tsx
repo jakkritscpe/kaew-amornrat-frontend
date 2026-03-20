@@ -3,33 +3,14 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import { useRepairRequests } from '../features/repair-requests/hooks/useRepairRequests';
-import NewRequestModal from '../features/repair-requests/components/NewRequestModal';
-import RequestDetailModal from '../features/repair-requests/components/RequestDetailModal';
 
 export function MainLayout() {
-    const {
-        setIsNewRequestModalOpen,
-        setEditRequest,
-        isNewRequestModalOpen,
-        selectedRequest,
-        isDetailModalOpen,
-        editRequest,
-        setIsDetailModalOpen,
-        setSelectedRequest,
-        handleNewRequest,
-        handleEditRequest,
-        handleUpdateStatus
-    } = useRepairRequests();
-
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const location = useLocation();
 
     const getPageTitle = () => {
         const path = location.pathname;
-        if (path.includes('/requests')) return 'รายการแจ้งซ่อม';
-        if (path.includes('/technicians')) return 'ทีมช่าง';
         if (path.includes('/settings')) return 'ตั้งค่า';
         if (path.includes('/attendance/dashboard')) return 'แดชบอร์ดลงเวลา';
         if (path.includes('/attendance/logs')) return 'ประวัติลงเวลา';
@@ -68,26 +49,6 @@ export function MainLayout() {
                 </main>
             </div>
 
-            {/* Modals */}
-            <NewRequestModal
-                isOpen={isNewRequestModalOpen}
-                onClose={() => {
-                    setIsNewRequestModalOpen(false);
-                    setEditRequest(null);
-                }}
-                onSubmit={editRequest ? handleEditRequest : handleNewRequest}
-                editRequest={editRequest}
-            />
-
-            <RequestDetailModal
-                request={selectedRequest}
-                isOpen={isDetailModalOpen}
-                onClose={() => {
-                    setIsDetailModalOpen(false);
-                    setSelectedRequest(null);
-                }}
-                onUpdateStatus={handleUpdateStatus}
-            />
         </div>
     );
 }

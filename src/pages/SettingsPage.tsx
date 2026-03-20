@@ -12,10 +12,6 @@ import { toast } from 'sonner';
 
 // ─── Menu groups for RBAC (no 'settings' — super_admin only) ───────────────
 const MENU_GROUPS = [
-    { id: 'dashboard', label: 'แดชบอร์ดหลัก' },
-    { id: 'requests', label: 'รายการแจ้งซ่อม' },
-    { id: 'jobs', label: 'ระบบใบงาน' },
-    { id: 'technicians', label: 'ทีมช่าง' },
     {
         id: 'attendance',
         label: 'ระบบลงเวลา',
