@@ -186,7 +186,7 @@ export function AdminAttendanceDashboard() {
             </div>
 
             {/* ── Stats grid (Match Dashboard) ── */}
-            <div className="dashboard-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
+            <div data-tour="stat-cards" className="dashboard-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
                 <StatCard dark={dark}
                     title={t('admin.dashboard.statPresent')} value={presentCount} suffix={t('common.person')} icon={Users}
                     color="bg-gradient-to-br from-emerald-500 to-teal-500" delay={0.05}
@@ -208,7 +208,7 @@ export function AdminAttendanceDashboard() {
             </div>
 
             {/* ── Recent Check-ins Table (Matches RequestsTable) ── */}
-            <div className={cn(
+            <div data-tour="recent-checkins" className={cn(
                 'dashboard-section rounded-2xl shadow-sm overflow-hidden',
                 dark ? 'bg-white/[0.06] border border-white/10' : 'bg-white border border-gray-100'
             )}>

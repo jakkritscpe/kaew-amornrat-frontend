@@ -594,7 +594,7 @@ export function AdminEmployees() {
                     <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.employees.totalDesc', { n: String(employees.length) })}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                    <div className="relative w-full sm:w-auto group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-lg transition-all">
+                    <div data-tour="employee-search" className="relative w-full sm:w-auto group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-lg transition-all">
                         <Search className={cn('absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none group-focus-within:text-[#044F88] transition-colors', dark ? 'text-white/30' : 'text-gray-400')} />
                         <Input
                             value={searchTerm}
@@ -605,7 +605,7 @@ export function AdminEmployees() {
                             spellCheck={false}
                         />
                     </div>
-                    <Button onClick={openAddForm} className="bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0">
+                    <Button data-tour="add-employee" onClick={openAddForm} className="bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0">
                         <Plus className="w-4 h-4 mr-2" /> {t('admin.employees.addEmployee')}
                     </Button>
                 </div>
@@ -621,13 +621,13 @@ export function AdminEmployees() {
 
             {/* ── Employee cards ── */}
             <div ref={sectionRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredEmployees.map(emp => {
+                {filteredEmployees.map((emp, empIdx) => {
                     const todayLog = logs.find(l => l.employeeId === emp.id && l.date === todayDate);
                     const status = getStatus(emp.id);
                     const statusConfig = STATUS_STYLE[status];
 
                     return (
-                        <div key={emp.id} className={cn(
+                        <div key={emp.id} {...(empIdx === 0 ? { 'data-tour': 'employee-card' } : {})} className={cn(
                             'emp-card relative group rounded-2xl border',
                             dark ? 'bg-white/[0.06] border-white/10 shadow-none hover:border-[#044F88]/30' : 'bg-white border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:border-[#044F88]/20',
                             'transition-all duration-300 flex flex-col',
@@ -730,6 +730,7 @@ export function AdminEmployees() {
                             <div className="px-6 pb-6 pt-0">
                                 <Button
                                     variant="outline"
+                                    {...(empIdx === 0 ? { 'data-tour': 'qr-button' } : {})}
                                     onClick={() => setShowQRModal(emp.id)}
                                     className={cn('w-full border transition-colors rounded-xl h-10',
                                         dark ? 'text-white border-white/20 hover:text-white hover:bg-white/10' : 'text-[#6f6f6f] border-gray-200 hover:text-[#044F88] hover:bg-[#044F88]/5 hover:border-[#044F88]/20'

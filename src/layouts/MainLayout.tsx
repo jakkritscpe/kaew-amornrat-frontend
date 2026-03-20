@@ -1,10 +1,28 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { useTranslation } from '@/i18n';
 import { useAdminTheme } from '@/hooks/useAdminTheme';
+import { useTour } from '@/hooks/useTour';
+import {
+    getDashboardTourSteps, getEmployeesTourSteps, getLogsTourSteps,
+    getLocationsTourSteps, getOTApprovalsTourSteps, getOTCalculatorTourSteps,
+    getReportsTourSteps, getSettingsTourSteps,
+} from '@/tours';
+
+function getTourConfig(path: string) {
+    if (path.includes('/attendance/dashboard')) return { id: 'dashboard', steps: getDashboardTourSteps() };
+    if (path.includes('/attendance/employees')) return { id: 'employees', steps: getEmployeesTourSteps() };
+    if (path.includes('/attendance/logs') && !path.includes('/logs/')) return { id: 'logs', steps: getLogsTourSteps() };
+    if (path.includes('/attendance/locations')) return { id: 'locations', steps: getLocationsTourSteps() };
+    if (path.includes('/attendance/ot-approvals')) return { id: 'ot-approvals', steps: getOTApprovalsTourSteps() };
+    if (path.includes('/attendance/ot-calculator')) return { id: 'ot-calculator', steps: getOTCalculatorTourSteps() };
+    if (path.includes('/attendance/reports')) return { id: 'reports', steps: getReportsTourSteps() };
+    if (path.includes('/settings')) return { id: 'settings', steps: getSettingsTourSteps() };
+    return { id: 'dashboard', steps: getDashboardTourSteps() };
+}
 
 export function MainLayout() {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -12,6 +30,11 @@ export function MainLayout() {
     const location = useLocation();
     const { t } = useTranslation();
     const { dark, toggle: toggleTheme } = useAdminTheme();
+
+    const tourConfig = useMemo(() => getTourConfig(location.pathname), [location.pathname]);
+    const isFirstDashboard = tourConfig.id === 'dashboard';
+    const { start: startTour } = useTour(tourConfig.id, tourConfig.steps, { autoStart: isFirstDashboard });
+    const handleHelp = useCallback(() => startTour(), [startTour]);
 
     const getPageTitle = () => {
         const path = location.pathname;
@@ -46,6 +69,7 @@ export function MainLayout() {
                     onMenuClick={() => setIsMobileSidebarOpen(true)}
                     dark={dark}
                     onToggleTheme={toggleTheme}
+                    onHelpClick={handleHelp}
                 />
 
                 <main className="flex-1 p-4 lg:p-6">

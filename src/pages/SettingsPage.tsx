@@ -310,7 +310,7 @@ export function SettingsPage() {
     return (
         <div className="space-y-6">
             {/* ── Tab bar ── */}
-            <div className={cn('rounded-2xl border p-1.5 flex gap-1', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-gray-100 shadow-sm')}>
+            <div data-tour="settings-tabs" className={cn('rounded-2xl border p-1.5 flex gap-1', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-gray-100 shadow-sm')}>
                 {tabs.map(t => {
                     const Icon = t.icon;
                     return (
@@ -335,7 +335,7 @@ export function SettingsPage() {
                 TAB 1 — RBAC
             ══════════════════════════════════════ */}
             {activeTab === 'rbac' && (
-                <div className={cn('rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                <div data-tour="settings-rbac" className={cn('rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
                     <div className={cn('px-6 py-5 border-b flex items-center gap-3', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-gray-50/50')}>
                         <div className="p-2 bg-[#044F88]/5 rounded-xl text-[#044F88]">
                             <Shield className="w-5 h-5" />
@@ -444,7 +444,7 @@ export function SettingsPage() {
                 TAB 2 — Admin Accounts
             ══════════════════════════════════════ */}
             {activeTab === 'accounts' && (
-                <div className={cn('rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                <div data-tour="settings-accounts" className={cn('rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
                     <div className={cn('px-6 py-5 border-b flex items-center justify-between', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-gray-50/50')}>
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
