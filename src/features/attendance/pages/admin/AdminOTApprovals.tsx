@@ -82,7 +82,7 @@ export function AdminOTApprovals() {
                             className={cn(
                                 'px-4 py-2 text-sm font-semibold rounded-xl transition-all whitespace-nowrap',
                                 filter === f
-                                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20'
+                                    ? 'bg-[#044F88] text-white shadow-md shadow-[#044F88]/20'
                                     : 'bg-gray-50 text-[#6f6f6f] hover:bg-gray-100 border border-gray-100 hover:text-[#1d1d1d]'
                             )}
                         >
@@ -116,19 +116,19 @@ export function AdminOTApprovals() {
                                 const emp = employees.find(e => e.id === req.employeeId);
                                 return (
                                     <div key={req.id} className="ot-row bg-white rounded-2xl p-5 border border-gray-100 shadow-sm relative overflow-hidden group">
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-transparent to-transparent group-hover:from-blue-400 group-hover:to-blue-600 transition-colors duration-300" />
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-transparent to-transparent group-hover:from-[#044F88] group-hover:to-[#00223A] transition-colors duration-300" />
 
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="flex items-center gap-3">
                                                 {emp?.avatarUrl ? (
-                                                    <img src={emp.avatarUrl} alt={emp.name} className="w-10 h-10 rounded-full object-cover shrink-0 bg-blue-50 ring-2 ring-white shadow-sm" />
+                                                    <img src={emp.avatarUrl} alt={emp.name} className="w-10 h-10 rounded-full object-cover shrink-0 bg-[#044F88]/5 ring-2 ring-white shadow-sm" />
                                                 ) : (
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0 ring-2 ring-white shadow-sm">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center text-white text-sm font-bold shrink-0 ring-2 ring-white shadow-sm">
                                                         {emp?.name.charAt(0) || '?'}
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <p className="font-bold text-[#1d1d1d] leading-tight group-hover:text-[#2075f8] transition-colors">
+                                                    <p className="font-bold text-[#1d1d1d] leading-tight group-hover:text-[#044F88] transition-colors">
                                                         {emp?.name}
                                                     </p>
                                                     <p className="text-xs text-[#6f6f6f] mt-0.5 flex items-center gap-1">
@@ -152,7 +152,7 @@ export function AdminOTApprovals() {
 
                                         <div className="bg-gray-50 rounded-xl p-3.5 mb-4 grid grid-cols-2 gap-3 border border-gray-100/50">
                                             <div className="flex items-start gap-2">
-                                                <Clock className="w-4 h-4 text-[#2075f8] shrink-0 mt-0.5" />
+                                                <Clock className="w-4 h-4 text-[#044F88] shrink-0 mt-0.5" />
                                                 <div>
                                                     <p className="text-[10px] font-bold text-[#6f6f6f] uppercase tracking-wider mb-0.5">วันที่และเวลา</p>
                                                     <p className="font-semibold text-sm text-[#1d1d1d] tabular-nums leading-tight">{req.date}</p>
@@ -223,22 +223,22 @@ export function AdminOTApprovals() {
                                     filtered.map(req => {
                                         const emp = employees.find(e => e.id === req.employeeId);
                                         return (
-                                            <tr key={req.id} className="ot-row hover:bg-[#e8f1fe]/30 transition-colors duration-300 group">
+                                            <tr key={req.id} className="ot-row hover:bg-[#044F88]/30 transition-colors duration-300 group">
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-4">
                                                         {emp?.avatarUrl ? (
                                                             <img
                                                                 src={emp.avatarUrl}
                                                                 alt={emp.name}
-                                                                className="w-10 h-10 rounded-full object-cover shrink-0 bg-blue-50 ring-2 ring-white shadow-sm"
+                                                                className="w-10 h-10 rounded-full object-cover shrink-0 bg-[#044F88]/5 ring-2 ring-white shadow-sm"
                                                             />
                                                         ) : (
-                                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0 ring-2 ring-white shadow-sm">
+                                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center text-white text-sm font-bold shrink-0 ring-2 ring-white shadow-sm">
                                                                 {emp?.name.charAt(0) || '?'}
                                                             </div>
                                                         )}
                                                         <div>
-                                                            <p className="font-semibold text-[#1d1d1d] group-hover:text-[#2075f8] transition-colors">{emp?.name || 'ไม่ทราบชื่อ'}</p>
+                                                            <p className="font-semibold text-[#1d1d1d] group-hover:text-[#044F88] transition-colors">{emp?.name || 'ไม่ทราบชื่อ'}</p>
                                                             {emp?.nickname && <p className="text-xs text-[#6f6f6f]">({emp.nickname})</p>}
                                                             <p className="text-xs text-[#6f6f6f] mt-0.5">{emp?.department}</p>
                                                         </div>
@@ -247,7 +247,7 @@ export function AdminOTApprovals() {
                                                 <td className="px-6 py-4">
                                                     <p className="font-semibold text-[#1d1d1d] tabular-nums mb-0.5">{req.date}</p>
                                                     <p className="text-xs font-medium text-[#6f6f6f] tabular-nums flex items-center gap-1.5">
-                                                        <ClockIcon className="w-3.5 h-3.5 text-[#2075f8]" />
+                                                        <ClockIcon className="w-3.5 h-3.5 text-[#044F88]" />
                                                         {req.startTime} - {req.endTime} น.
                                                     </p>
                                                 </td>

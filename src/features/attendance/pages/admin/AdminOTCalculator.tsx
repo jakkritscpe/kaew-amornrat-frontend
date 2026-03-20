@@ -236,7 +236,7 @@ export function AdminOTCalculator() {
                                 className={cn(
                                     'px-4 py-2.5 sm:py-2 text-sm font-medium transition-colors min-w-[5.5rem] sm:min-w-0',
                                     periodMode === mode
-                                        ? 'bg-gradient-to-r from-[#2075f8] to-[#1a64d4] text-white'
+                                        ? 'bg-gradient-to-r from-[#044F88] to-[#00223A] text-white'
                                         : 'bg-white text-[#6f6f6f] hover:bg-gray-50',
                                 )}
                             >
@@ -267,10 +267,10 @@ export function AdminOTCalculator() {
                         </div>
                     ) : (
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                            <input type="date" className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#2075f8]/30 focus:border-[#2075f8] transition-all" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                            <input type="date" className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#044F88]/30 focus:border-[#044F88] transition-all" value={startDate} onChange={e => setStartDate(e.target.value)} />
                             <span className="text-gray-300 text-sm text-center hidden sm:block">→</span>
                             <span className="text-[#6f6f6f] text-xs text-center sm:hidden">ถึง</span>
-                            <input type="date" className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#2075f8]/30 focus:border-[#2075f8] transition-all" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                            <input type="date" className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#044F88]/30 focus:border-[#044F88] transition-all" value={endDate} onChange={e => setEndDate(e.target.value)} />
                         </div>
                     )}
                 </div>
@@ -292,7 +292,7 @@ export function AdminOTCalculator() {
                     value={totHrs}
                     suffix="ชั่วโมง"
                     icon={Clock}
-                    color="bg-gradient-to-br from-[#2075f8] to-[#1a64d4]"
+                    color="bg-gradient-to-br from-[#044F88] to-[#00223A]"
                     delay={0.2}
                     format={v => v.toFixed(1)}
                 />
@@ -309,7 +309,7 @@ export function AdminOTCalculator() {
                     value={avgHrs}
                     suffix="ชม./คน"
                     icon={TrendingUp}
-                    color="bg-gradient-to-br from-blue-500 to-cyan-500"
+                    color="bg-gradient-to-br from-[#044F88] to-[#00223A]"
                     delay={0.4}
                     format={v => v.toFixed(1)}
                 />
@@ -356,16 +356,16 @@ export function AdminOTCalculator() {
                                     {otData.map((d, i) => (
                                         <tr key={d.emp.id} className={cn(
                                             'ot-row group border-b border-gray-100 transition-colors duration-300',
-                                            'hover:bg-[#e8f1fe]/30'
+                                            'hover:bg-[#044F88]/30'
                                         )}>
-                                            <td className="pl-6 pr-4 py-4 font-mono text-sm text-[#2075f8] font-medium align-top">{String(i + 1).padStart(2, '0')}</td>
+                                            <td className="pl-6 pr-4 py-4 font-mono text-sm text-[#044F88] font-medium align-top">{String(i + 1).padStart(2, '0')}</td>
                                             <td className="px-4 py-4 align-top">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center text-white text-xs font-bold shrink-0">
                                                         {d.emp.name.charAt(0)}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="font-medium text-sm text-[#1d1d1d] group-hover:text-[#2075f8] transition-colors truncate">{d.emp.name}</p>
+                                                        <p className="font-medium text-sm text-[#1d1d1d] group-hover:text-[#044F88] transition-colors truncate">{d.emp.name}</p>
                                                         <p className="text-xs text-[#6f6f6f] truncate lg:hidden">{d.emp.department}</p>
                                                     </div>
                                                 </div>
@@ -406,13 +406,13 @@ export function AdminOTCalculator() {
                         {/* ── Mobile List ── */}
                         <div className="sm:hidden divide-y divide-gray-100">
                             {otData.map((d, i) => (
-                                <div key={d.emp.id} className="ot-row p-4 flex items-center gap-3 hover:bg-[#e8f1fe]/30 transition-colors duration-300 group">
-                                    <span className="font-mono text-xs text-[#2075f8] font-medium w-5 shrink-0 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                <div key={d.emp.id} className="ot-row p-4 flex items-center gap-3 hover:bg-[#044F88]/30 transition-colors duration-300 group">
+                                    <span className="font-mono text-xs text-[#044F88] font-medium w-5 shrink-0 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center text-white text-xs font-bold shrink-0">
                                         {d.emp.name.charAt(0)}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="font-medium text-sm text-[#1d1d1d] group-hover:text-[#2075f8] transition-colors truncate">{d.emp.name}</p>
+                                        <p className="font-medium text-sm text-[#1d1d1d] group-hover:text-[#044F88] transition-colors truncate">{d.emp.name}</p>
                                         <p className="text-xs text-[#6f6f6f] truncate">{d.emp.department} · {d.hrs.toFixed(1)} ชม. · อัตรา {d.rVal}{d.rType === 'multiplier' ? '×' : '฿/ชม.'}</p>
                                     </div>
                                     <p className="font-semibold text-sm text-emerald-600 tabular-nums shrink-0">฿{fmt(d.pay)}</p>

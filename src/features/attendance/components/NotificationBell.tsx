@@ -69,7 +69,7 @@ export function NotificationBell({ token }: Props) {
         title="การแจ้งเตือน"
       >
         {unreadCount > 0 ? (
-          <BellRing className="w-5 h-5 text-blue-600 animate-bounce" />
+          <BellRing className="w-5 h-5 text-[#044F88] animate-bounce" />
         ) : (
           <Bell className="w-5 h-5 text-gray-500" />
         )}

@@ -74,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearToken();
         localStorage.removeItem(USER_KEY);
         localStorage.removeItem('attendance_employee');
+        window.location.href = '/';
     };
 
     // Update permissions for the currently logged-in user (local state only)

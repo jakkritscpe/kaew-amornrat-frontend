@@ -154,7 +154,7 @@ function AdminModal({ editTarget, onClose, onSaved }: AdminModalProps) {
                             ยกเลิก
                         </button>
                         <button type="submit" disabled={saving}
-                            className="flex-1 h-10 rounded-xl bg-[#2075f8] hover:bg-[#1a64d4] text-white text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                            className="flex-1 h-10 rounded-xl bg-[#044F88] hover:bg-[#00223A] text-white text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                             {saving ? 'กำลังบันทึก...' : isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มบัญชี'}
                         </button>
@@ -165,7 +165,7 @@ function AdminModal({ editTarget, onClose, onSaved }: AdminModalProps) {
     );
 }
 
-const inputCls = 'w-full h-10 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#2075f8]/25 focus:border-[#2075f8] focus:bg-white transition-colors';
+const inputCls = 'w-full h-10 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#044F88]/25 focus:border-[#044F88] focus:bg-white transition-colors';
 
 function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
     return (
@@ -315,7 +315,7 @@ export function SettingsPage() {
                             className={cn(
                                 'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200',
                                 activeTab === t.id
-                                    ? 'bg-[#2075f8] text-white shadow-sm'
+                                    ? 'bg-[#044F88] text-white shadow-sm'
                                     : 'text-[#6f6f6f] hover:bg-gray-50'
                             )}
                         >
@@ -332,7 +332,7 @@ export function SettingsPage() {
             {activeTab === 'rbac' && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
-                        <div className="p-2 bg-blue-50 rounded-xl text-[#2075f8]">
+                        <div className="p-2 bg-[#044F88]/5 rounded-xl text-[#044F88]">
                             <Shield className="w-5 h-5" />
                         </div>
                         <div>
@@ -343,7 +343,7 @@ export function SettingsPage() {
                     <div className="p-6">
                         {loadingRbac ? (
                             <div className="flex items-center justify-center py-14 gap-3 text-[#6f6f6f]">
-                                <Loader2 className="w-5 h-5 animate-spin text-[#2075f8]" />
+                                <Loader2 className="w-5 h-5 animate-spin text-[#044F88]" />
                                 <span className="text-sm">กำลังโหลด...</span>
                             </div>
                         ) : rbacAdmins.length === 0 ? (
@@ -358,7 +358,7 @@ export function SettingsPage() {
                                     <div key={admin.id} className="border border-gray-200 rounded-2xl overflow-hidden">
                                         <div className="bg-gray-50/70 px-5 py-4 border-b border-gray-200 flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-xl bg-[#2075f8] flex items-center justify-center text-white font-bold text-sm">
+                                                <div className="w-9 h-9 rounded-xl bg-[#044F88] flex items-center justify-center text-white font-bold text-sm">
                                                     {admin.name.charAt(0)}
                                                 </div>
                                                 <div>
@@ -384,7 +384,7 @@ export function SettingsPage() {
                                                         return (
                                                             <div key={group.id} className="col-span-1 sm:col-span-2 lg:col-span-3 bg-gray-50/60 rounded-xl border border-gray-100 p-4 space-y-3">
                                                                 <label className="flex items-center gap-2.5 cursor-pointer">
-                                                                    <input type="checkbox" className="w-4 h-4 rounded text-[#2075f8] cursor-pointer"
+                                                                    <input type="checkbox" className="w-4 h-4 rounded text-[#044F88] cursor-pointer"
                                                                         checked={isAll || isPartial}
                                                                         ref={el => { if (el) el.indeterminate = isPartial; }}
                                                                         onChange={() => handleTogglePermission(admin.id, group.id, true, childIds)}
@@ -397,9 +397,9 @@ export function SettingsPage() {
                                                                         return (
                                                                             <label key={menu.id} className={cn(
                                                                                 'flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all text-sm',
-                                                                                has ? 'border-[#2075f8]/30 bg-[#eef4ff] text-[#1a5ce0]' : 'border-gray-100 bg-white text-[#6f6f6f] hover:border-blue-100'
+                                                                                has ? 'border-[#044F88]/30 bg-[#044F88]/10 text-[#044F88]' : 'border-gray-100 bg-white text-[#6f6f6f] hover:border-[#044F88]/10'
                                                                             )}>
-                                                                                <input type="checkbox" className="w-3.5 h-3.5 rounded text-[#2075f8] cursor-pointer"
+                                                                                <input type="checkbox" className="w-3.5 h-3.5 rounded text-[#044F88] cursor-pointer"
                                                                                     checked={has}
                                                                                     onChange={() => handleTogglePermission(admin.id, menu.id)}
                                                                                 />
@@ -415,9 +415,9 @@ export function SettingsPage() {
                                                     return (
                                                         <label key={group.id} className={cn(
                                                             'flex items-center gap-2.5 p-3 rounded-xl border-2 cursor-pointer transition-all text-sm',
-                                                            has ? 'border-[#2075f8] bg-[#eef4ff] text-[#1a5ce0]' : 'border-gray-100 text-[#6f6f6f] hover:border-blue-100'
+                                                            has ? 'border-[#044F88] bg-[#044F88]/10 text-[#044F88]' : 'border-gray-100 text-[#6f6f6f] hover:border-[#044F88]/10'
                                                         )}>
-                                                            <input type="checkbox" className="w-4 h-4 rounded text-[#2075f8] cursor-pointer"
+                                                            <input type="checkbox" className="w-4 h-4 rounded text-[#044F88] cursor-pointer"
                                                                 checked={has}
                                                                 onChange={() => handleTogglePermission(admin.id, group.id)}
                                                             />
@@ -452,7 +452,7 @@ export function SettingsPage() {
                         </div>
                         <button
                             onClick={() => setModalTarget('new')}
-                            className="flex items-center gap-2 bg-[#2075f8] hover:bg-[#1a64d4] text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-colors"
+                            className="flex items-center gap-2 bg-[#044F88] hover:bg-[#00223A] text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-colors"
                         >
                             <Plus className="w-4 h-4" /> เพิ่ม Admin
                         </button>
@@ -460,7 +460,7 @@ export function SettingsPage() {
                     <div className="p-6">
                         {loadingAccounts ? (
                             <div className="flex items-center justify-center py-14 gap-3 text-[#6f6f6f]">
-                                <Loader2 className="w-5 h-5 animate-spin text-[#2075f8]" />
+                                <Loader2 className="w-5 h-5 animate-spin text-[#044F88]" />
                                 <span className="text-sm">กำลังโหลด...</span>
                             </div>
                         ) : adminAccounts.length === 0 ? (
@@ -470,7 +470,7 @@ export function SettingsPage() {
                                 </div>
                                 <p className="font-semibold text-[#1d1d1d]">ยังไม่มีบัญชีผู้ดูแล</p>
                                 <button onClick={() => setModalTarget('new')}
-                                    className="text-sm text-[#2075f8] font-semibold hover:underline">
+                                    className="text-sm text-[#044F88] font-semibold hover:underline">
                                     + เพิ่มบัญชีแรก
                                 </button>
                             </div>
@@ -479,7 +479,7 @@ export function SettingsPage() {
                                 {adminAccounts.map(acc => (
                                     <div key={acc.id} className="flex items-center justify-between gap-4 bg-[#f8fafc] rounded-2xl border border-gray-100 px-4 py-3.5">
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2075f8] to-[#6366f1] flex items-center justify-center text-white font-bold text-sm shrink-0">
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#044F88] to-[#6366f1] flex items-center justify-center text-white font-bold text-sm shrink-0">
                                                 {acc.name.charAt(0)}
                                             </div>
                                             <div className="min-w-0">
@@ -490,7 +490,7 @@ export function SettingsPage() {
                                                         'text-[10px] font-bold px-2 py-0.5 rounded-full uppercase',
                                                         acc.role === 'manager'
                                                             ? 'bg-purple-50 text-purple-700'
-                                                            : 'bg-blue-50 text-[#2075f8]'
+                                                            : 'bg-[#044F88]/5 text-[#044F88]'
                                                     )}>
                                                         {acc.role}
                                                     </span>
@@ -503,7 +503,7 @@ export function SettingsPage() {
                                         <div className="flex items-center gap-2 shrink-0">
                                             <button
                                                 onClick={() => setModalTarget(acc)}
-                                                className="p-2 rounded-xl text-[#6f6f6f] hover:bg-blue-50 hover:text-[#2075f8] transition-colors"
+                                                className="p-2 rounded-xl text-[#6f6f6f] hover:bg-[#044F88]/5 hover:text-[#044F88] transition-colors"
                                                 title="แก้ไข"
                                             >
                                                 <Pencil className="w-4 h-4" />
@@ -542,7 +542,7 @@ export function SettingsPage() {
                         <div className="space-y-1.5">
                             <label className="text-sm font-bold text-[#1d1d1d]">รูปแบบการคิดค่า OT</label>
                             <select
-                                className="w-full h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2075f8]/25 focus:border-[#2075f8] focus:bg-white"
+                                className="w-full h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#044F88]/25 focus:border-[#044F88] focus:bg-white"
                                 value={companySettings?.defaultOtRateType || 'multiplier'}
                                 onChange={e => updateCompanySettings?.({ defaultOtRateType: e.target.value as 'multiplier' | 'fixed' })}
                             >
@@ -555,7 +555,7 @@ export function SettingsPage() {
                             <div className="relative">
                                 <input
                                     type="number" step="0.1" min="0"
-                                    className="w-full h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-[#2075f8]/25 focus:border-[#2075f8] focus:bg-white"
+                                    className="w-full h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-[#044F88]/25 focus:border-[#044F88] focus:bg-white"
                                     value={companySettings?.defaultOtRateValue || 1.5}
                                     onChange={e => updateCompanySettings?.({ defaultOtRateValue: parseFloat(e.target.value) || 0 })}
                                 />

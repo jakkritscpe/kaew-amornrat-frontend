@@ -1,4 +1,4 @@
-import { MapPin, Clock, Send } from 'lucide-react';
+import { MapPin, Clock, Phone, Mail, Send, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,29 +18,59 @@ export function Contact() {
                             <div className="relative z-10">
                                 <h2 className="text-3xl font-bold mb-8">ติดต่อเรา</h2>
 
-                                <div className="space-y-8">
+                                <div className="space-y-6">
+                                    <a href="tel:0854288897" className="flex items-start gap-4 group">
+                                        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                                            <Phone className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-lg mb-1">โทรศัพท์</h4>
+                                            <p className="text-white/70 group-hover:text-white transition-colors">085-428-8897</p>
+                                        </div>
+                                    </a>
+
+                                    <a href="mailto:noratep7@hotmail.com" className="flex items-start gap-4 group">
+                                        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                                            <Mail className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-lg mb-1">อีเมล</h4>
+                                            <p className="text-white/70 group-hover:text-white transition-colors">noratep7@hotmail.com</p>
+                                        </div>
+                                    </a>
+
+                                    <a href="https://line.me/R/ti/p/@231yswce" target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 group">
+                                        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                                            <MessageCircle className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-lg mb-1">LINE</h4>
+                                            <p className="text-white/70 group-hover:text-white transition-colors">@231yswce</p>
+                                        </div>
+                                    </a>
+
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                                            <MapPin className="w-6 h-6" />
+                                            <MapPin className="w-5 h-5" />
                                         </div>
                                         <div>
                                             <h4 className="font-semibold text-lg mb-1">พื้นที่ให้บริการ</h4>
-                                            <p className="text-white/70 leading-relaxed">กรุงเทพมหานคร และปริมณฑล</p>
+                                            <p className="text-white/70">กรุงเทพมหานคร และปริมณฑล</p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                                            <Clock className="w-6 h-6" />
+                                            <Clock className="w-5 h-5" />
                                         </div>
                                         <div>
                                             <h4 className="font-semibold text-lg mb-1">เวลาทำการ</h4>
-                                            <p className="text-white/70 leading-relaxed">บริการ 24 ชั่วโมง</p>
+                                            <p className="text-white/70">บริการ 24 ชั่วโมง</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-16 pt-8 border-t border-white/10">
+                                <div className="mt-12 pt-8 border-t border-white/10">
                                     <p className="text-lg font-medium text-white/50 mb-2">หจก.แก้วอมรรัตน์</p>
                                     <p className="text-sm text-white/50">บริการไอทีครบวงจร มืออาชีพ มาถึงที่</p>
                                 </div>

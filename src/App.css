@@ -7,13 +7,13 @@
 
 /* Custom selection color */
 ::selection {
-  background-color: rgba(32, 117, 248, 0.2);
+  background-color: rgba(4, 79, 136, 0.2);
   color: #1d1d1d;
 }
 
 /* Focus styles */
 *:focus-visible {
-  outline: 2px solid #2075f8;
+  outline: 2px solid #044F88;
   outline-offset: 2px;
 }
 
@@ -136,7 +136,7 @@ button:active:not(:disabled) {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #2075f8 0%, #1a64d4 100%);
+  background: linear-gradient(135deg, #044F88 0%, #00223A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

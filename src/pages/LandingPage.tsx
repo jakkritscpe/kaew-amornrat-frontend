@@ -3,6 +3,7 @@ import { Hero } from '../features/landing/components/Hero';
 import { Services } from '../features/landing/components/Services';
 import { Contact } from '../features/landing/components/Contact';
 import { Footer } from '../features/landing/components/Footer';
+import { FloatingDock } from '../features/landing/components/FloatingDock';
 
 export function LandingPage() {
     return (
@@ -14,6 +15,7 @@ export function LandingPage() {
                 <Contact />
             </main>
             <Footer />
+            <FloatingDock />
         </div>
     );
 }

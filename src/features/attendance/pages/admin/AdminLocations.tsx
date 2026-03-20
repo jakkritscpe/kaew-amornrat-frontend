@@ -32,8 +32,8 @@ const pickerIcon = new L.DivIcon({
     className: '',
     html: `<div style="
         width:26px;height:26px;border-radius:50%;
-        background:#2075f8;border:4px solid white;
-        box-shadow:0 0 0 3px rgba(32,117,248,0.25),0 3px 12px rgba(0,0,0,0.3);
+        background:#044F88;border:4px solid white;
+        box-shadow:0 0 0 3px rgba(4,79,136,0.25),0 3px 12px rgba(0,0,0,0.3);
         cursor:grab
     "></div>`,
     iconSize: [26, 26],
@@ -108,8 +108,8 @@ function LocationPicker({
                 center={[lat, lng]}
                 radius={radius > 0 ? radius : 1}
                 pathOptions={{
-                    color: '#2075f8',
-                    fillColor: '#2075f8',
+                    color: '#044F88',
+                    fillColor: '#044F88',
                     fillOpacity: 0.12,
                     weight: 2,
                     dashArray: '6 4',
@@ -255,7 +255,7 @@ export function AdminLocations() {
                 </div>
                 <Button
                     onClick={openModal}
-                    className="w-full sm:w-auto bg-gradient-to-r from-[#2075f8] to-[#1a64d4] hover:from-[#1a64d4] hover:to-[#1655b5] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0"
+                    className="w-full sm:w-auto bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0"
                 >
                     <Plus className="w-4 h-4 mr-2" /> เพิ่มสถานที่
                 </Button>
@@ -281,7 +281,7 @@ export function AdminLocations() {
                             <span className="text-3xl font-bold text-[#1d1d1d] tabular-nums">{locations.length}</span>
                             <p className="text-sm text-gray-400 mt-1">จุด</p>
                         </div>
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-indigo-500 to-blue-500 group-hover:scale-110 transition-transform duration-500">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-[#044F88] to-[#00223A] group-hover:scale-110 transition-transform duration-500">
                             <MapIcon className="w-6 h-6 text-white" />
                         </div>
                     </div>
@@ -294,13 +294,13 @@ export function AdminLocations() {
                 {/* Left: Location list */}
                 <div className="dashboard-section bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden col-span-1 h-[400px] lg:h-auto order-2 lg:order-1 relative">
                     <div className="p-5 border-b border-gray-100 flex-shrink-0 bg-white z-10">
-                        <div className="relative w-full group focus-within:ring-4 focus-within:ring-[#2075f8]/20 rounded-lg transition-all">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-focus-within:text-[#2075f8] transition-colors" />
+                        <div className="relative w-full group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-lg transition-all">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-focus-within:text-[#044F88] transition-colors" />
                             <Input
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 placeholder="ค้นหาสถานที่..."
-                                className="pl-9 bg-white border-gray-200 focus:border-[#2075f8] focus-visible:ring-0 transition-all rounded-lg h-10"
+                                className="pl-9 bg-white border-gray-200 focus:border-[#044F88] focus-visible:ring-0 transition-all rounded-lg h-10"
                                 autoComplete="off"
                                 spellCheck={false}
                             />
@@ -309,13 +309,13 @@ export function AdminLocations() {
 
                     <div className="overflow-y-auto flex-1 p-3 space-y-2 bg-gray-50/30">
                         {filtered.map(loc => (
-                            <div key={loc.id} className="loc-card p-4 rounded-xl bg-white hover:bg-[#e8f1fe]/30 cursor-pointer transition-colors duration-300 border border-gray-100 hover:border-blue-200 shadow-sm group">
+                            <div key={loc.id} className="loc-card p-4 rounded-xl bg-white hover:bg-[#044F88]/30 cursor-pointer transition-colors duration-300 border border-gray-100 hover:border-[#044F88]/20 shadow-sm group">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-blue-50/80 flex items-center justify-center shrink-0 group-hover:bg-[#2075f8] transition-colors duration-300">
-                                        <MapPin className="w-5 h-5 text-[#2075f8] group-hover:text-white transition-colors duration-300" />
+                                    <div className="w-10 h-10 rounded-full bg-[#044F88]/5 flex items-center justify-center shrink-0 group-hover:bg-[#044F88] transition-colors duration-300">
+                                        <MapPin className="w-5 h-5 text-[#044F88] group-hover:text-white transition-colors duration-300" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="font-bold text-[#1d1d1d] text-sm leading-tight group-hover:text-[#2075f8] transition-colors">{loc.name}</p>
+                                        <p className="font-bold text-[#1d1d1d] text-sm leading-tight group-hover:text-[#044F88] transition-colors">{loc.name}</p>
                                         <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-[#6f6f6f]">
                                             <span className="bg-gray-100 px-2 py-0.5 rounded-md">Lat: {loc.lat}</span>
                                             <span className="bg-gray-100 px-2 py-0.5 rounded-md">Lng: {loc.lng}</span>
@@ -362,7 +362,7 @@ export function AdminLocations() {
                                     <Circle
                                         center={[loc.lat, loc.lng]}
                                         radius={loc.radiusMeters}
-                                        pathOptions={{ color: '#2075f8', fillColor: '#2075f8', fillOpacity: 0.15, weight: 2 }}
+                                        pathOptions={{ color: '#044F88', fillColor: '#044F88', fillOpacity: 0.15, weight: 2 }}
                                     />
                                 </Fragment>
                             ))}
@@ -410,7 +410,7 @@ export function AdminLocations() {
                                 {/* Hint chip */}
                                 <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[500] pointer-events-none">
                                     <div className="bg-white/90 backdrop-blur-sm border border-gray-200 text-xs text-[#1d1d1d] font-medium px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap">
-                                        <Crosshair className="w-3 h-3 text-[#2075f8] shrink-0" />
+                                        <Crosshair className="w-3 h-3 text-[#044F88] shrink-0" />
                                         คลิกหรือลากหมุดเพื่อเลือกพิกัด
                                     </div>
                                 </div>
@@ -451,7 +451,7 @@ export function AdminLocations() {
                                             required
                                             autoFocus
                                             placeholder="เช่น สำนักงานใหญ่"
-                                            className="h-11 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white text-[#1d1d1d]"
+                                            className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]"
                                         />
                                     </div>
 
@@ -461,7 +461,7 @@ export function AdminLocations() {
                                             <label className="text-sm font-semibold text-[#1d1d1d]">
                                                 รัศมีขอบเขต <span className="text-red-500">*</span>
                                             </label>
-                                            <span className="text-sm font-bold text-[#2075f8] tabular-nums bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-100">
+                                            <span className="text-sm font-bold text-[#044F88] tabular-nums bg-[#044F88]/5 px-2.5 py-0.5 rounded-lg border border-[#044F88]/10">
                                                 {form.radiusMeters} ม.
                                             </span>
                                         </div>
@@ -472,13 +472,13 @@ export function AdminLocations() {
                                             step={50}
                                             value={form.radiusMeters}
                                             onChange={e => setForm({ ...form, radiusMeters: parseInt(e.target.value, 10) })}
-                                            className="w-full h-2 rounded-full accent-[#2075f8] cursor-pointer"
+                                            className="w-full h-2 rounded-full accent-[#044F88] cursor-pointer"
                                         />
                                         <div className="flex justify-between text-[10px] text-gray-400 mt-1 font-medium select-none">
                                             <span>50 ม.</span>
                                             <span>2,000 ม.</span>
                                         </div>
-                                        <p className="text-xs text-blue-700 bg-blue-50 border border-blue-100 px-3 py-2 rounded-xl mt-3 font-medium leading-relaxed">
+                                        <p className="text-xs text-[#00223A] bg-[#044F88]/5 border border-[#044F88]/10 px-3 py-2 rounded-xl mt-3 font-medium leading-relaxed">
                                             💡 แนะนำ 200–500 ม. เพื่อรองรับความคลาดเคลื่อนของ GPS
                                         </p>
                                     </div>
@@ -500,7 +500,7 @@ export function AdminLocations() {
                                                         if (!isNaN(v)) setForm(f => ({ ...f, lat: v }));
                                                     }}
                                                     required
-                                                    className="h-10 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white tabular-nums text-sm font-mono"
+                                                    className="h-10 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-sm font-mono"
                                                 />
                                             </div>
                                             <div>
@@ -514,7 +514,7 @@ export function AdminLocations() {
                                                         if (!isNaN(v)) setForm(f => ({ ...f, lng: v }));
                                                     }}
                                                     required
-                                                    className="h-10 rounded-xl border-gray-200 focus:border-[#2075f8] bg-white tabular-nums text-sm font-mono"
+                                                    className="h-10 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-sm font-mono"
                                                 />
                                             </div>
                                         </div>
@@ -526,11 +526,11 @@ export function AdminLocations() {
                                         variant="outline"
                                         onClick={handleGetCurrentLocation}
                                         disabled={gettingLocation || isSubmitting}
-                                        className="w-full h-10 rounded-xl border-gray-200 text-[#1d1d1d] hover:bg-blue-50 hover:border-blue-300 hover:text-[#2075f8] transition-all font-medium text-sm disabled:opacity-60"
+                                        className="w-full h-10 rounded-xl border-gray-200 text-[#1d1d1d] hover:bg-[#044F88]/5 hover:border-[#044F88]/30 hover:text-[#044F88] transition-all font-medium text-sm disabled:opacity-60"
                                     >
                                         {gettingLocation
                                             ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> กำลังหาตำแหน่ง...</>
-                                            : <><Navigation className="w-4 h-4 mr-2 text-[#2075f8]" /> ใช้ตำแหน่งปัจจุบัน</>
+                                            : <><Navigation className="w-4 h-4 mr-2 text-[#044F88]" /> ใช้ตำแหน่งปัจจุบัน</>
                                         }
                                     </Button>
                                 </div>
@@ -549,7 +549,7 @@ export function AdminLocations() {
                                     <Button
                                         type="submit"
                                         disabled={isSubmitting || !form.name.trim()}
-                                        className="flex-1 rounded-xl h-11 bg-gradient-to-r from-[#2075f8] to-[#1a64d4] hover:from-[#1a64d4] hover:to-[#1655b5] text-white shadow-sm font-semibold text-sm disabled:opacity-60"
+                                        className="flex-1 rounded-xl h-11 bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm font-semibold text-sm disabled:opacity-60"
                                     >
                                         {isSubmitting
                                             ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> กำลังบันทึก...</>

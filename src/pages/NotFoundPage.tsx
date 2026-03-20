@@ -14,10 +14,10 @@ export function NotFoundPage() {
 
     return (
         <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-6 text-center">
-            <div className="w-24 h-24 rounded-3xl bg-[#eef4ff] flex items-center justify-center mb-6 shadow-sm">
-                <span className="text-5xl font-black text-[#2075f8] leading-none">4</span>
-                <span className="text-5xl font-black text-[#2075f8] leading-none">0</span>
-                <span className="text-5xl font-black text-[#2075f8] leading-none">4</span>
+            <div className="w-24 h-24 rounded-3xl bg-[#044F88]/10 flex items-center justify-center mb-6 shadow-sm">
+                <span className="text-5xl font-black text-[#044F88] leading-none">4</span>
+                <span className="text-5xl font-black text-[#044F88] leading-none">0</span>
+                <span className="text-5xl font-black text-[#044F88] leading-none">4</span>
             </div>
             <h1 className="text-2xl font-bold text-[#1d1d1d] mb-2">ไม่พบหน้าที่ต้องการ</h1>
             <p className="text-[#6f6f6f] text-sm mb-8 max-w-xs">
@@ -33,7 +33,7 @@ export function NotFoundPage() {
                 </button>
                 <Link
                     to={homeHref}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2075f8] text-white text-sm font-semibold hover:bg-[#1a64d4] transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#044F88] text-white text-sm font-semibold hover:bg-[#00223A] transition-colors"
                 >
                     <Home className="w-4 h-4" />
                     หน้าหลัก

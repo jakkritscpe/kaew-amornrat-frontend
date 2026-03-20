@@ -46,8 +46,8 @@ export function AdminAttendanceLogs() {
 
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-slate-50/50">
-                    <div className="relative w-full sm:flex-1 sm:max-w-md group focus-within:ring-4 focus-within:ring-blue-500/20 rounded-md transition-all">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none group-focus-within:text-blue-500 transition-colors" />
+                    <div className="relative w-full sm:flex-1 sm:max-w-md group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-md transition-all">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none group-focus-within:text-[#044F88] transition-colors" />
                         <Input
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
@@ -123,7 +123,7 @@ export function AdminAttendanceLogs() {
                                     <div className="mt-3 flex justify-end">
                                         <Link
                                             to={`/admin/attendance/logs/${log.id}`}
-                                            className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-md border border-blue-200 transition-colors"
+                                            className="inline-flex items-center gap-1 text-xs font-medium text-[#044F88] hover:text-[#00223A] hover:bg-[#044F88]/5 px-3 py-1.5 rounded-md border border-[#044F88]/20 transition-colors"
                                         >
                                             ดูรายละเอียด <ChevronRight className="w-3.5 h-3.5" />
                                         </Link>
@@ -200,7 +200,7 @@ export function AdminAttendanceLogs() {
                                             <td className="px-4 py-4 text-right">
                                                 <Link
                                                     to={`/admin/attendance/logs/${log.id}`}
-                                                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2.5 py-1.5 rounded-md transition-colors whitespace-nowrap"
+                                                    className="inline-flex items-center gap-1 text-xs font-medium text-[#044F88] hover:text-[#00223A] hover:bg-[#044F88]/5 px-2.5 py-1.5 rounded-md transition-colors whitespace-nowrap"
                                                 >
                                                     รายละเอียด <ChevronRight className="w-3.5 h-3.5" />
                                                 </Link>

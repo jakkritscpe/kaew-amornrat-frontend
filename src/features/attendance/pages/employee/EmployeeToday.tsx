@@ -72,7 +72,7 @@ export function EmployeeToday() {
 
     if (loadingLog) {
         return (
-            <div className="flex flex-col items-center justify-center h-full bg-[#2075f8] py-24">
+            <div className="flex flex-col items-center justify-center h-full bg-[#044F88] py-24">
                 <Loader2 className="w-8 h-8 text-white animate-spin" />
             </div>
         );
@@ -83,8 +83,8 @@ export function EmployeeToday() {
         <div className="flex flex-col min-h-full bg-[#f1f5f9]">
 
             {/* ── Blue hero with clock ── */}
-            <div className="bg-[#2075f8] px-5 pt-3 pb-14">
-                <p className="text-blue-200 text-sm">
+            <div className="bg-[#044F88] px-5 pt-3 pb-14">
+                <p className="text-[#044F88]/80 text-sm">
                     <span className="text-white font-semibold capitalize">
                         {format(currentTime, 'EEEE', { locale: th })}
                     </span>
@@ -97,7 +97,7 @@ export function EmployeeToday() {
                     <span className="text-[72px] font-black text-white leading-none tabular-nums tracking-tighter">
                         {format(currentTime, 'HH:mm')}
                     </span>
-                    <span className="text-2xl font-bold text-blue-200 tabular-nums mb-3 leading-none">
+                    <span className="text-2xl font-bold text-white/50 tabular-nums mb-3 leading-none">
                         :{format(currentTime, 'ss')}
                     </span>
                 </div>
@@ -106,7 +106,7 @@ export function EmployeeToday() {
                 <div className={cn(
                     'inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold',
                     checkingLoc
-                        ? 'bg-white/20 text-blue-100'
+                        ? 'bg-white/20 text-[#044F88]/80'
                         : geoError
                             ? 'bg-red-400/25 text-red-100'
                             : 'bg-emerald-400/25 text-emerald-100'
@@ -155,7 +155,7 @@ export function EmployeeToday() {
                             'transition-all duration-150 active:scale-[0.97] touch-manipulation',
                             'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100',
                             !isCheckedIn
-                                ? 'bg-[#2075f8] hover:bg-[#1a64d4] shadow-blue-200'
+                                ? 'bg-[#044F88] hover:bg-[#00223A] shadow-[#044F88]/20'
                                 : 'bg-orange-500 hover:bg-orange-600 shadow-orange-200'
                         )}
                     >
@@ -171,7 +171,7 @@ export function EmployeeToday() {
                 {/* Location coords */}
                 {!checkingLoc && !geoError && currentLoc && (
                     <div className="flex items-center gap-2 px-4 py-2.5 bg-[#f8fafc] rounded-xl border border-gray-100 text-xs">
-                        <MapPin className="w-3.5 h-3.5 text-[#2075f8] shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-[#044F88] shrink-0" />
                         <span className="text-[#6f6f6f]">ตำแหน่ง</span>
                         <span className="font-mono text-[#1d1d1d] font-medium ml-auto">
                             {currentLoc.lat.toFixed(5)}, {currentLoc.lng.toFixed(5)}
@@ -184,7 +184,7 @@ export function EmployeeToday() {
                     <div className="pt-1">
                         <p className="text-[11px] font-bold text-[#6f6f6f] uppercase tracking-widest mb-3 px-1">สรุปวันนี้</p>
                         <div className="grid grid-cols-2 gap-3">
-                            <StatCard label="เวลาเข้างาน"   value={formatTime(todayLog.checkInTime)}                  icon={Clock4}  iconBg="bg-blue-50"    iconColor="text-[#2075f8]" />
+                            <StatCard label="เวลาเข้างาน"   value={formatTime(todayLog.checkInTime)}                  icon={Clock4}  iconBg="bg-[#044F88]/5"    iconColor="text-[#044F88]" />
                             <StatCard label="เวลาออกงาน"    value={formatTime(todayLog.checkOutTime)}                 icon={LogOut}  iconBg="bg-orange-50"  iconColor="text-orange-500" />
                             <StatCard label="ชั่วโมงทำงาน"  value={`${(todayLog.workHours ?? 0).toFixed(1)} ชม.`}   icon={Timer}   iconBg="bg-emerald-50" iconColor="text-emerald-600" />
                             <StatCard label="OT วันนี้"     value={`${(todayLog.otHours ?? 0).toFixed(1)} ชม.`}     icon={Zap}     iconBg="bg-purple-50"  iconColor="text-purple-600" />
@@ -214,12 +214,12 @@ export function EmployeeToday() {
                     {/* Header */}
                     <div className={cn(
                         'flex items-center justify-between px-5 py-4',
-                        !isCheckedIn ? 'bg-blue-50' : 'bg-orange-50'
+                        !isCheckedIn ? 'bg-[#044F88]/5' : 'bg-orange-50'
                     )}>
                         <div className="flex items-center gap-3">
                             <div className={cn(
                                 'w-11 h-11 rounded-2xl flex items-center justify-center',
-                                !isCheckedIn ? 'bg-[#2075f8]' : 'bg-orange-500'
+                                !isCheckedIn ? 'bg-[#044F88]' : 'bg-orange-500'
                             )}>
                                 {!isCheckedIn
                                     ? <LogIn className="w-5 h-5 text-white" />
@@ -247,7 +247,7 @@ export function EmployeeToday() {
                         {/* Time */}
                         <div className="flex items-center justify-between bg-[#f8fafc] rounded-2xl px-4 py-3">
                             <div className="flex items-center gap-2.5">
-                                <Clock4 className={cn('w-4 h-4', !isCheckedIn ? 'text-[#2075f8]' : 'text-orange-500')} />
+                                <Clock4 className={cn('w-4 h-4', !isCheckedIn ? 'text-[#044F88]' : 'text-orange-500')} />
                                 <span className="text-sm text-[#6f6f6f] font-medium">เวลา</span>
                             </div>
                             <div className="text-right">
@@ -292,7 +292,7 @@ export function EmployeeToday() {
                                 'flex items-center justify-center gap-2 shadow-lg',
                                 'transition-all active:scale-[0.97]',
                                 !isCheckedIn
-                                    ? 'bg-[#2075f8] hover:bg-[#1a64d4] shadow-blue-200'
+                                    ? 'bg-[#044F88] hover:bg-[#00223A] shadow-[#044F88]/20'
                                     : 'bg-orange-500 hover:bg-orange-600 shadow-orange-200'
                             )}
                         >

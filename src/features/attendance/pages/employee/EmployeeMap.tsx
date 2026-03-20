@@ -17,7 +17,7 @@ L.Icon.Default.mergeOptions({
 
 const userIcon = new L.DivIcon({
     className: '',
-    html: `<div style="width:18px;height:18px;border-radius:50%;background:#2075f8;border:3px solid white;box-shadow:0 0 0 4px rgba(32,117,248,0.25),0 2px 8px rgba(0,0,0,0.25)"></div>`,
+    html: `<div style="width:18px;height:18px;border-radius:50%;background:#044F88;border:3px solid white;box-shadow:0 0 0 4px rgba(32,117,248,0.25),0 2px 8px rgba(0,0,0,0.25)"></div>`,
     iconSize: [18, 18],
     iconAnchor: [9, 9],
 });
@@ -41,13 +41,13 @@ export function EmployeeMap() {
     if (!currentLoc && !geoError) {
         return (
             <div className="flex flex-col min-h-full bg-[#f1f5f9]">
-                <div className="bg-[#2075f8] px-5 pt-3 pb-14">
-                    <p className="text-blue-200 text-xs font-semibold uppercase tracking-widest">แผนที่การทำงาน</p>
+                <div className="bg-[#044F88] px-5 pt-3 pb-14">
+                    <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">แผนที่การทำงาน</p>
                     <h2 className="text-xl font-black text-white mt-0.5">Work Zone</h2>
                 </div>
                 <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] flex flex-col items-center justify-center gap-4 relative z-10">
-                    <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center">
-                        <Loader2 className="w-7 h-7 text-[#2075f8] animate-spin" />
+                    <div className="w-14 h-14 rounded-2xl bg-[#044F88]/5 flex items-center justify-center">
+                        <Loader2 className="w-7 h-7 text-[#044F88] animate-spin" />
                     </div>
                     <div className="text-center">
                         <p className="font-bold text-[#1d1d1d]">กำลังค้นหาตำแหน่ง</p>
@@ -61,8 +61,8 @@ export function EmployeeMap() {
     if (geoError) {
         return (
             <div className="flex flex-col min-h-full bg-[#f1f5f9]">
-                <div className="bg-[#2075f8] px-5 pt-3 pb-14">
-                    <p className="text-blue-200 text-xs font-semibold uppercase tracking-widest">แผนที่การทำงาน</p>
+                <div className="bg-[#044F88] px-5 pt-3 pb-14">
+                    <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">แผนที่การทำงาน</p>
                     <h2 className="text-xl font-black text-white mt-0.5">Work Zone</h2>
                 </div>
                 <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] flex flex-col items-center justify-center gap-4 px-6 relative z-10">
@@ -85,8 +85,8 @@ export function EmployeeMap() {
     return (
         <div className="flex flex-col h-full bg-[#f1f5f9]">
             {/* Blue header strip */}
-            <div className="bg-[#2075f8] px-5 pt-3 pb-5 shrink-0">
-                <p className="text-blue-200 text-xs font-semibold uppercase tracking-widest">แผนที่การทำงาน</p>
+            <div className="bg-[#044F88] px-5 pt-3 pb-5 shrink-0">
+                <p className="text-[#044F88]/80 text-xs font-semibold uppercase tracking-widest">แผนที่การทำงาน</p>
                 <div className="flex items-center justify-between mt-0.5">
                     <h2 className="text-xl font-black text-white">Work Zone</h2>
                     <div className="flex items-center gap-1.5 bg-emerald-400/25 text-emerald-100 px-2.5 py-1 rounded-full text-xs font-semibold">
@@ -122,7 +122,7 @@ export function EmployeeMap() {
                             <Circle
                                 center={[loc.lat, loc.lng]}
                                 radius={loc.radiusMeters}
-                                pathOptions={{ color: '#2075f8', fillColor: '#2075f8', fillOpacity: 0.08, weight: 2, dashArray: '6 4' }}
+                                pathOptions={{ color: '#044F88', fillColor: '#044F88', fillOpacity: 0.08, weight: 2, dashArray: '6 4' }}
                             />
                         </React.Fragment>
                     ))}
@@ -134,13 +134,13 @@ export function EmployeeMap() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 text-xs text-[#6f6f6f]">
                         <span className="flex items-center gap-1.5">
-                            <Navigation2 className="w-3.5 h-3.5 text-[#2075f8]" /> คุณอยู่ที่นี่
+                            <Navigation2 className="w-3.5 h-3.5 text-[#044F88]" /> คุณอยู่ที่นี่
                         </span>
                         <span className="flex items-center gap-1.5">
                             <MapPin className="w-3.5 h-3.5 text-gray-500" /> จุดทำงาน
                         </span>
                         <span className="flex items-center gap-1.5">
-                            <span className={cn('w-4 h-4 rounded-full border-2 border-dashed border-[#2075f8] bg-blue-50 inline-block')} />
+                            <span className={cn('w-4 h-4 rounded-full border-2 border-dashed border-[#044F88]/60 bg-[#044F88]/5 inline-block')} />
                             Geofence
                         </span>
                     </div>

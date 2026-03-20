@@ -1,25 +1,32 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Globe, Lock, Mail, ArrowRight } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Lock, Mail, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 export function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [touched, setTouched] = useState({ email: false, password: false });
     const { loginWithCredentials, isLoading } = useAuth();
     const navigate = useNavigate();
+    const emailRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        emailRef.current?.focus();
+    }, []);
+
+    const emailError = touched.email && !email ? 'กรุณากรอกอีเมล' : '';
+    const passwordError = touched.password && !password ? 'กรุณากรอกรหัสผ่าน' : '';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setTouched({ email: true, password: true });
         setError('');
 
-        if (!email || !password) {
-            setError('กรุณากรอกข้อมูลให้ครบถ้วน');
-            return;
-        }
+        if (!email || !password) return;
 
         try {
             await loginWithCredentials!(email, password);
@@ -30,79 +37,130 @@ export function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center items-center p-4">
-            <div className="w-full max-w-md">
-                <div className="bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm border border-gray-100">
-                    {/* Logo and Header */}
-                    <div className="flex flex-col items-center mb-8">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2075f8] to-[#1a64d4] flex items-center justify-center shadow-xl shadow-blue-500/20 mb-5">
-                            <Globe className="w-8 h-8 text-white" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-[#1d1d1d] text-center">หจก.แก้วอมรรัตน์</h1>
-                        <p className="text-[#2075f8] font-bold mt-1 text-[13px] tracking-[0.15em] text-center">IT SERVICES & SOLUTIONS</p>
-                        <p className="text-[#6f6f6f] mt-4 text-sm font-medium text-center">เข้าสู่ระบบเพื่อจัดการข้อมูล</p>
+        <div className="min-h-screen bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center p-4">
+            <div className="w-full max-w-sm">
+                <div className="bg-white rounded-2xl shadow-2xl p-8">
+                    {/* Header */}
+                    <div className="flex flex-col items-center mb-6">
+                        <Link to="/">
+                            <img
+                                src="/logo.svg"
+                                alt="หจก.แก้วอมรรัตน์"
+                                className="h-28 w-auto object-contain mb-4 cursor-pointer"
+                            />
+                        </Link>
+                        <p className="text-gray-500 text-sm">ระบบจัดการสำหรับผู้ดูแล</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-
-                        {error && (
-                            <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm text-center">
-                                {error}
-                            </div>
+                    {/* Global error */}
+                    <div
+                        className={cn(
+                            'overflow-hidden transition-all duration-300 ease-out',
+                            error ? 'max-h-20 opacity-100 mb-5' : 'max-h-0 opacity-0 mb-0'
                         )}
+                        role="alert"
+                        aria-live="assertive"
+                    >
+                        <div className="flex items-center gap-2.5 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm">
+                            <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+                            {error}
+                        </div>
+                    </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-[#1d1d1d]">อีเมล</label>
+                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                        {/* Email */}
+                        <div className="space-y-1.5">
+                            <label htmlFor="admin-email" className="block text-sm font-medium text-gray-700">
+                                อีเมล
+                            </label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <Input
+                                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 pointer-events-none" aria-hidden="true" />
+                                <input
+                                    ref={emailRef}
+                                    id="admin-email"
                                     type="email"
-                                    placeholder="admin@repair-hub.local"
+                                    autoComplete="email"
+                                    inputMode="email"
+                                    placeholder="you@company.com"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white"
+                                    onChange={(e) => { setEmail(e.target.value); setError(''); }}
+                                    onBlur={() => setTouched(p => ({ ...p, email: true }))}
+                                    aria-invalid={!!emailError}
+                                    aria-describedby={emailError ? 'email-error' : undefined}
+                                    className={cn(
+                                        'w-full pl-11 pr-4 py-3 rounded-xl border bg-gray-50 text-sm transition-colors placeholder:text-gray-400',
+                                        'focus:outline-none focus:ring-2 focus:ring-[#044F88]/30 focus:border-[#044F88] focus:bg-white',
+                                        emailError ? 'border-red-300' : 'border-gray-200'
+                                    )}
                                 />
                             </div>
+                            {emailError && (
+                                <p id="email-error" className="text-xs text-red-500 mt-1">{emailError}</p>
+                            )}
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-[#1d1d1d]">รหัสผ่าน</label>
+                        {/* Password */}
+                        <div className="space-y-1.5">
+                            <label htmlFor="admin-password" className="block text-sm font-medium text-gray-700">
+                                รหัสผ่าน
+                            </label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <Input
-                                    type="password"
+                                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 pointer-events-none" aria-hidden="true" />
+                                <input
+                                    id="admin-password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    autoComplete="current-password"
                                     placeholder="••••••••"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white"
+                                    onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                                    onBlur={() => setTouched(p => ({ ...p, password: true }))}
+                                    aria-invalid={!!passwordError}
+                                    aria-describedby={passwordError ? 'password-error' : undefined}
+                                    className={cn(
+                                        'w-full pl-11 pr-11 py-3 rounded-xl border bg-gray-50 text-sm transition-colors placeholder:text-gray-400',
+                                        'focus:outline-none focus:ring-2 focus:ring-[#044F88]/30 focus:border-[#044F88] focus:bg-white',
+                                        passwordError ? 'border-red-300' : 'border-gray-200'
+                                    )}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 transition-colors"
+                                    aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                                    tabIndex={-1}
+                                >
+                                    {showPassword
+                                        ? <EyeOff className="w-[18px] h-[18px]" />
+                                        : <Eye className="w-[18px] h-[18px]" />
+                                    }
+                                </button>
                             </div>
+                            {passwordError && (
+                                <p id="password-error" className="text-xs text-red-500 mt-1">{passwordError}</p>
+                            )}
                         </div>
 
-                        <Button
+                        {/* Submit */}
+                        <button
                             type="submit"
-                            className="w-full h-12 bg-[#2075f8] hover:bg-[#1a64d4] text-white text-base rounded-xl mt-4"
                             disabled={isLoading}
+                            className="w-full bg-[#044F88] hover:bg-[#00223A] active:scale-[0.98] disabled:bg-[#044F88]/60 disabled:pointer-events-none text-white font-semibold py-3 rounded-xl transition-all"
                         >
                             {isLoading ? (
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                <span className="flex items-center justify-center gap-2">
+                                    <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                                     กำลังเข้าสู่ระบบ...
-                                </div>
+                                </span>
                             ) : (
-                                <div className="flex items-center gap-2">
-                                    เข้าสู่ระบบ
-                                    <ArrowRight className="w-4 h-4 ml-2" />
-                                </div>
+                                'เข้าสู่ระบบ'
                             )}
-                        </Button>
+                        </button>
                     </form>
-                </div>
 
-                {/* Footer info */}
-                <p className="text-center text-[#6f6f6f] text-sm mt-8">
-                    ทดสอบระบบ: <span className="font-bold text-[#1d1d1d]">admin@repair-hub.local</span> / <span className="font-bold text-[#1d1d1d]">admin1234</span>
-                </p>
+                    <p className="text-center text-xs text-gray-400 mt-6">
+                        &copy; {new Date().getFullYear()} หจก.แก้วอมรรัตน์
+                    </p>
+                </div>
             </div>
         </div>
     );

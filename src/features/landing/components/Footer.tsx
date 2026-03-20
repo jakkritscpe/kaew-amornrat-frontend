@@ -1,4 +1,4 @@
-import { Globe, Phone, Mail, Facebook, MessageCircle } from 'lucide-react';
+import { Phone, Mail, Facebook, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Footer() {
@@ -9,25 +9,26 @@ export function Footer() {
 
                     {/* Brand Setup */}
                     <div className="lg:col-span-1">
-                        <div className="flex items-center gap-2 mb-6 text-white">
-                            <Globe className="w-8 h-8" />
+                        <div className="flex items-center gap-3 mb-6">
+                            <img src="/logo.svg" alt="หจก.แก้วอมรรัตน์" className="h-10 w-auto object-contain brightness-0 invert" />
                             <div>
-                                <span className="font-bold text-xl block leading-tight">หจก.แก้วอมรรัตน์</span>
-                                <span className="text-xs text-white/60 tracking-wider">IT SERVICES & SOLUTIONS</span>
+                                <span className="font-bold text-xl text-white block leading-tight">หจก.แก้วอมรรัตน์</span>
+                                <span className="text-xs text-white/60 tracking-wider font-bold">IT SERVICES & SOLUTIONS</span>
                             </div>
                         </div>
                         <p className="text-white/70 text-sm leading-relaxed mb-8">
-                            บริการซ่อมและติดตั้งระบบไอทีแบบ Onsite โดยทีมช่างมืออาชีพ
-                            พร้อมให้บริการทั่วกรุงเทพและปริมณฑล
+                            บริการอุปกรณ์ไอที ครบวงจร รับติดตั้ง ซ่อมบำรุง ดูแลระบบ
+                            ทั้งในและนอกสถานที่ คอมพิวเตอร์ กล้องวงจรปิด เซิร์ฟเวอร์
+                            เน็ตเวิร์ค แลน ไวไฟ แนส คีย์การ์ด ไฟฟ้า ไฟเบอร์ ออฟติก
                         </p>
                         <div className="flex gap-4">
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors border border-white/10">
+                            <a href="https://www.facebook.com/NorFreelance" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors border border-white/10">
                                 <Facebook className="w-5 h-5" />
                             </a>
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors border border-white/10">
+                            <a href="https://line.me/R/ti/p/@231yswce" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors border border-white/10">
                                 <MessageCircle className="w-5 h-5" />
                             </a>
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors border border-white/10">
+                            <a href="tel:0854288897" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors border border-white/10">
                                 <Phone className="w-5 h-5" />
                             </a>
                         </div>
@@ -47,12 +48,12 @@ export function Footer() {
                     <div>
                         <h4 className="text-white font-bold text-lg mb-6">บริการของเรา</h4>
                         <ul className="space-y-4">
-                            <li><a href="#" className="text-white/70 hover:text-white transition-colors">Computer</a></li>
-                            <li><a href="#" className="text-white/70 hover:text-white transition-colors">CCTV</a></li>
-                            <li><a href="#" className="text-white/70 hover:text-white transition-colors">Server</a></li>
-                            <li><a href="#" className="text-white/70 hover:text-white transition-colors">Network</a></li>
-                            <li><a href="#" className="text-white/70 hover:text-white transition-colors">Firewall</a></li>
-                            <li><a href="#" className="text-white/70 hover:text-white transition-colors">NAS & Backup</a></li>
+                            <li><a href="#services" className="text-white/70 hover:text-white transition-colors">Computer</a></li>
+                            <li><a href="#services" className="text-white/70 hover:text-white transition-colors">CCTV</a></li>
+                            <li><a href="#services" className="text-white/70 hover:text-white transition-colors">Server</a></li>
+                            <li><a href="#services" className="text-white/70 hover:text-white transition-colors">Network</a></li>
+                            <li><a href="#services" className="text-white/70 hover:text-white transition-colors">Firewall</a></li>
+                            <li><a href="#services" className="text-white/70 hover:text-white transition-colors">NAS & Backup</a></li>
                         </ul>
                     </div>
 
@@ -60,19 +61,31 @@ export function Footer() {
                     <div>
                         <h4 className="text-white font-bold text-lg mb-6">ติดต่อเรา</h4>
                         <ul className="space-y-4 mb-8 text-white/70">
-                            <li className="flex items-center gap-3">
-                                <Phone className="w-4 h-4 text-[#044F88]" />
-                                0X-XXX-XXXX
+                            <li>
+                                <a href="tel:0854288897" className="flex items-center gap-3 hover:text-white transition-colors">
+                                    <Phone className="w-4 h-4 text-[#C2410C]" />
+                                    085-428-8897
+                                </a>
                             </li>
-                            <li className="flex items-center gap-3">
-                                <Mail className="w-4 h-4 text-[#044F88]" />
-                                contact@kaewamornrat.com
+                            <li>
+                                <a href="mailto:noratep7@hotmail.com" className="flex items-center gap-3 hover:text-white transition-colors">
+                                    <Mail className="w-4 h-4 text-[#C2410C]" />
+                                    noratep7@hotmail.com
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://line.me/R/ti/p/@231yswce" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-white transition-colors">
+                                    <MessageCircle className="w-4 h-4 text-[#C2410C]" />
+                                    LINE: @231yswce
+                                </a>
                             </li>
                         </ul>
-                        <Button className="w-full bg-[#C2410C] hover:bg-[#C2410C]/90 text-white gap-2">
-                            <Phone className="w-4 h-4" />
-                            ติดต่อเลย
-                        </Button>
+                        <a href="tel:0854288897">
+                            <Button className="w-full bg-[#C2410C] hover:bg-[#C2410C]/90 text-white gap-2">
+                                <Phone className="w-4 h-4" />
+                                โทรเลย
+                            </Button>
+                        </a>
                     </div>
 
                 </div>
