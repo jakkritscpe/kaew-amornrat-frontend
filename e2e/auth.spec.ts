@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { ADMIN, adminLogin } from './helpers';
 
+// Auth tests must NOT use saved session
+test.use({ storageState: undefined });
+
 test.describe('Admin Authentication', () => {
   test('should login successfully with valid credentials', async ({ page }) => {
     await adminLogin(page);
@@ -19,6 +22,11 @@ test.describe('Admin Authentication', () => {
   });
 
   test('should redirect unauthenticated user to login', async ({ page }) => {
+    // Clear any stored auth
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+    });
     await page.goto('/admin/attendance/dashboard');
     await expect(page).toHaveURL(/\/login/);
   });

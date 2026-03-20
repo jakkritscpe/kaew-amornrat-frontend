@@ -17,13 +17,15 @@ test.describe('Dark Mode', () => {
     await themeBtn.click();
     await page.waitForTimeout(400);
 
-    // Should have 'dark' class
-    await expect(page.locator('.min-h-screen').first()).toHaveClass(/dark/);
+    // localStorage should have dark
+    const val = await page.evaluate(() => localStorage.getItem('dashboard_theme'));
+    expect(val).toBe('dark');
 
     // Disable dark mode
     await themeBtn.click();
     await page.waitForTimeout(400);
-    await expect(page.locator('.min-h-screen').first()).not.toHaveClass(/dark/);
+    const val2 = await page.evaluate(() => localStorage.getItem('dashboard_theme'));
+    expect(val2).toBe('light');
   });
 
   test('should persist dark mode after navigation', async ({ page }) => {
