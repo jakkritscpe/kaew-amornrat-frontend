@@ -7,6 +7,49 @@ import { th } from 'date-fns/locale';
 import { MapPin, LogIn, LogOut, Loader2, CheckCircle2, Clock4, Timer, Zap, AlertCircle, X } from 'lucide-react';
 import { formatTime, cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { EMPLOYEE_KEY } from '@/lib/api-client';
+
+type ShiftUrgency = 'early' | 'warning' | 'late' | 'veryLate';
+
+function getShiftUrgency(shiftStartTime: string | undefined, now: Date): ShiftUrgency {
+    if (!shiftStartTime) return 'early';
+    const [h, m] = shiftStartTime.split(':').map(Number);
+    const shiftMinutes = h * 60 + m;
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const diff = nowMinutes - shiftMinutes;
+    if (diff < 0) return 'early';       // ก่อนเวลากะ
+    if (diff < 15) return 'warning';     // เลยกะ < 15 นาที (ใกล้สาย)
+    if (diff < 60) return 'late';        // เลยกะ 15-60 นาที (สาย)
+    return 'veryLate';                   // เลยกะ > 60 นาที (สายมาก)
+}
+
+const URGENCY_STYLE = {
+    early: {
+        btn: 'bg-emerald-500 hover:bg-emerald-600 shadow-[0_0_24px_rgba(16,185,129,0.45)] hover:shadow-[0_0_32px_rgba(16,185,129,0.6)]',
+        confirm: 'bg-emerald-500 hover:bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.4)]',
+        pulse: false,
+    },
+    warning: {
+        btn: 'bg-amber-500 hover:bg-amber-600 shadow-[0_0_24px_rgba(245,158,11,0.45)] hover:shadow-[0_0_32px_rgba(245,158,11,0.6)]',
+        confirm: 'bg-amber-500 hover:bg-amber-600 shadow-[0_0_20px_rgba(245,158,11,0.4)]',
+        pulse: false,
+    },
+    late: {
+        btn: 'bg-orange-500 hover:bg-orange-600 shadow-[0_0_24px_rgba(249,115,22,0.45)] hover:shadow-[0_0_32px_rgba(249,115,22,0.6)]',
+        confirm: 'bg-orange-500 hover:bg-orange-600 shadow-[0_0_20px_rgba(249,115,22,0.4)]',
+        pulse: false,
+    },
+    veryLate: {
+        btn: 'bg-red-500 hover:bg-red-600 shadow-[0_0_24px_rgba(239,68,68,0.5)] hover:shadow-[0_0_36px_rgba(239,68,68,0.65)] animate-pulse',
+        confirm: 'bg-red-500 hover:bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.4)]',
+        pulse: true,
+    },
+} as const;
+
+const CHECKOUT_STYLE = {
+    btn: 'bg-[#044F88] hover:bg-[#00223A] shadow-[0_0_24px_rgba(4,79,136,0.4)] hover:shadow-[0_0_32px_rgba(4,79,136,0.55)]',
+    confirm: 'bg-[#044F88] hover:bg-[#00223A] shadow-[0_0_20px_rgba(4,79,136,0.4)]',
+};
 
 export function EmployeeToday() {
     const { t } = useTranslation();
@@ -71,6 +114,12 @@ export function EmployeeToday() {
 
     const isCheckedIn = !!todayLog?.checkInTime;
     const isCheckedOut = !!todayLog?.checkOutTime;
+
+    // Shift-aware button color
+    const empRaw = localStorage.getItem(EMPLOYEE_KEY);
+    const shiftStart = empRaw ? JSON.parse(empRaw)?.shiftStartTime : undefined;
+    const urgency = isCheckedIn ? null : getShiftUrgency(shiftStart, currentTime);
+    const btnStyle = isCheckedIn ? CHECKOUT_STYLE : URGENCY_STYLE[urgency ?? 'early'];
 
     if (loadingLog) {
         return (
@@ -153,12 +202,10 @@ export function EmployeeToday() {
                         onClick={openConfirm}
                         className={cn(
                             'w-full py-5 rounded-2xl font-bold text-lg text-white',
-                            'flex items-center justify-center gap-3 shadow-lg',
+                            'flex items-center justify-center gap-3',
                             'transition-all duration-150 active:scale-[0.97] touch-manipulation',
                             'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100',
-                            !isCheckedIn
-                                ? 'bg-[#044F88] hover:bg-[#00223A] shadow-[#044F88]/20'
-                                : 'bg-orange-500 hover:bg-orange-600 shadow-orange-200'
+                            btnStyle.btn
                         )}
                     >
                         {actionLoading
@@ -291,11 +338,9 @@ export function EmployeeToday() {
                             onClick={handleAction}
                             className={cn(
                                 'flex-2 basis-[60%] py-4 rounded-2xl font-bold text-base text-white',
-                                'flex items-center justify-center gap-2 shadow-lg',
+                                'flex items-center justify-center gap-2',
                                 'transition-all active:scale-[0.97]',
-                                !isCheckedIn
-                                    ? 'bg-[#044F88] hover:bg-[#00223A] shadow-[#044F88]/20'
-                                    : 'bg-orange-500 hover:bg-orange-600 shadow-orange-200'
+                                btnStyle.confirm
                             )}
                         >
                             {!isCheckedIn
