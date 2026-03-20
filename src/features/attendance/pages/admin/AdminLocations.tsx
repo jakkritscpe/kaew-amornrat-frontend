@@ -16,6 +16,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -125,6 +126,7 @@ function LocationPicker({
 
 export function AdminLocations() {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const { locations, addLocation } = useAttendance();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -252,8 +254,8 @@ export function AdminLocations() {
             {/* ── Page header ── */}
             <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">{t('admin.locations.title')}</h1>
-                    <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.locations.subtitle')}</p>
+                    <h1 className={cn('text-2xl font-bold tracking-tight', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.locations.title')}</h1>
+                    <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.locations.subtitle')}</p>
                 </div>
                 <Button
                     onClick={openModal}
@@ -270,18 +272,19 @@ export function AdminLocations() {
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
                     className={cn(
-                        'relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100',
-                        'hover:shadow-xl hover:shadow-gray-200/50 transition-shadow duration-300',
-                        'cursor-pointer overflow-hidden group',
+                        'relative rounded-2xl p-6 border',
+                        dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100',
+                        dark ? 'hover:shadow-none' : 'hover:shadow-xl hover:shadow-gray-200/50',
+                        'transition-shadow duration-300 cursor-pointer overflow-hidden group',
                     )}
                     style={{ transformStyle: 'preserve-3d' }}
                 >
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    <div className={cn('absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none', dark && 'hidden')} />
                     <div className="flex items-start justify-between relative z-10">
                         <div>
-                            <p className="text-sm text-[#6f6f6f] mb-1">{t('admin.locations.totalLocations')}</p>
-                            <span className="text-3xl font-bold text-[#1d1d1d] tabular-nums">{locations.length}</span>
-                            <p className="text-sm text-gray-400 mt-1">{t('common.point')}</p>
+                            <p className={cn('text-sm mb-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.locations.totalLocations')}</p>
+                            <span className={cn('text-3xl font-bold tabular-nums', dark ? 'text-white' : 'text-[#1d1d1d]')}>{locations.length}</span>
+                            <p className={cn('text-sm mt-1', dark ? 'text-white/30' : 'text-gray-400')}>{t('common.point')}</p>
                         </div>
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-[#044F88] to-[#00223A] group-hover:scale-110 transition-transform duration-500">
                             <MapIcon className="w-6 h-6 text-white" />
@@ -294,33 +297,33 @@ export function AdminLocations() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-[600px]">
 
                 {/* Left: Location list */}
-                <div className="dashboard-section bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden col-span-1 h-[400px] lg:h-auto order-2 lg:order-1 relative">
-                    <div className="p-5 border-b border-gray-100 flex-shrink-0 bg-white z-10">
+                <div className={cn('dashboard-section rounded-2xl border flex flex-col overflow-hidden col-span-1 h-[400px] lg:h-auto order-2 lg:order-1 relative', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                    <div className={cn('p-5 border-b flex-shrink-0 z-10', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-white')}>
                         <div className="relative w-full group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-lg transition-all">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-focus-within:text-[#044F88] transition-colors" />
+                            <Search className={cn('absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none group-focus-within:text-[#044F88] transition-colors', dark ? 'text-white/30' : 'text-gray-400')} />
                             <Input
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 placeholder={t('admin.locations.searchPlaceholder')}
-                                className="pl-9 bg-white border-gray-200 focus:border-[#044F88] focus-visible:ring-0 transition-all rounded-lg h-10"
+                                className={cn('pl-9 focus:border-[#044F88] focus-visible:ring-0 transition-all rounded-lg h-10', dark ? 'bg-white/[0.06] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-gray-200')}
                                 autoComplete="off"
                                 spellCheck={false}
                             />
                         </div>
                     </div>
 
-                    <div className="overflow-y-auto flex-1 p-3 space-y-2 bg-gray-50/30">
+                    <div className={cn('overflow-y-auto flex-1 p-3 space-y-2', dark ? 'bg-white/[0.02]' : 'bg-gray-50/30')}>
                         {filtered.map(loc => (
-                            <div key={loc.id} className="loc-card p-4 rounded-xl bg-white hover:bg-[#044F88]/30 cursor-pointer transition-colors duration-300 border border-gray-100 hover:border-[#044F88]/20 shadow-sm group">
+                            <div key={loc.id} className={cn('loc-card p-4 rounded-xl cursor-pointer transition-colors duration-300 border group', dark ? 'bg-white/[0.06] border-white/10 hover:bg-[#044F88]/20 hover:border-[#044F88]/20 shadow-none' : 'bg-white hover:bg-[#044F88]/30 border-gray-100 hover:border-[#044F88]/20 shadow-sm')}>
                                 <div className="flex items-start gap-3">
                                     <div className="w-10 h-10 rounded-full bg-[#044F88]/5 flex items-center justify-center shrink-0 group-hover:bg-[#044F88] transition-colors duration-300">
                                         <MapPin className="w-5 h-5 text-[#044F88] group-hover:text-white transition-colors duration-300" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="font-bold text-[#1d1d1d] text-sm leading-tight group-hover:text-[#044F88] transition-colors">{loc.name}</p>
-                                        <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-[#6f6f6f]">
-                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">Lat: {loc.lat}</span>
-                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">Lng: {loc.lng}</span>
+                                        <p className={cn('font-bold text-sm leading-tight group-hover:text-[#044F88] transition-colors', dark ? 'text-white' : 'text-[#1d1d1d]')}>{loc.name}</p>
+                                        <div className={cn('mt-2 flex flex-wrap gap-2 text-[10px] font-mono', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>
+                                            <span className={cn('px-2 py-0.5 rounded-md', dark ? 'bg-white/[0.06]' : 'bg-gray-100')}>Lat: {loc.lat}</span>
+                                            <span className={cn('px-2 py-0.5 rounded-md', dark ? 'bg-white/[0.06]' : 'bg-gray-100')}>Lng: {loc.lng}</span>
                                         </div>
                                         <div className="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 tracking-wide uppercase">
                                             {t('admin.locations.radius')} {loc.radiusMeters} {t('admin.locations.meters')}
@@ -330,8 +333,8 @@ export function AdminLocations() {
                             </div>
                         ))}
                         {filtered.length === 0 && (
-                            <div className="py-16 text-center text-[#6f6f6f] text-sm flex flex-col items-center">
-                                <MapPin className="w-10 h-10 text-gray-200 mb-3" />
+                            <div className={cn('py-16 text-center text-sm flex flex-col items-center', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>
+                                <MapPin className={cn('w-10 h-10 mb-3', dark ? 'text-white/10' : 'text-gray-200')} />
                                 {t('admin.locations.notFound')}
                             </div>
                         )}
@@ -339,9 +342,9 @@ export function AdminLocations() {
                 </div>
 
                 {/* Right: Overview map */}
-                <div className="dashboard-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden lg:col-span-2 relative z-0 h-[300px] sm:h-[400px] lg:h-auto order-1 lg:order-2 p-1.5">
-                    <div className="w-full h-full rounded-xl overflow-hidden border border-gray-100 relative">
-                        <div className="absolute inset-0 bg-gray-100 animate-pulse -z-10" />
+                <div className={cn('dashboard-section rounded-2xl border overflow-hidden lg:col-span-2 relative z-0 h-[300px] sm:h-[400px] lg:h-auto order-1 lg:order-2 p-1.5', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                    <div className={cn('w-full h-full rounded-xl overflow-hidden border relative', dark ? 'border-white/10' : 'border-gray-100')}>
+                        <div className={cn('absolute inset-0 animate-pulse -z-10', dark ? 'bg-white/[0.03]' : 'bg-gray-100')} />
                         <MapContainer
                             center={[13.78, 100.52]}
                             zoom={11}
@@ -383,20 +386,20 @@ export function AdminLocations() {
                     onClick={closeModal}
                 >
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[92svh] overflow-hidden animate-in zoom-in-95 duration-200"
+                        className={cn('rounded-3xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[92svh] overflow-hidden animate-in zoom-in-95 duration-200', dark ? 'bg-[#1e293b]' : 'bg-white')}
                         onClick={e => e.stopPropagation()}
                     >
                         {/* ── Header ── */}
-                        <div className="flex items-center justify-between px-6 sm:px-8 py-5 border-b border-gray-100 shrink-0">
+                        <div className={cn('flex items-center justify-between px-6 sm:px-8 py-5 border-b shrink-0', dark ? 'border-white/10' : 'border-gray-100')}>
                             <div>
-                                <h2 className="text-xl font-bold text-[#1d1d1d]">{t('admin.locations.addTitle')}</h2>
-                                <p className="text-sm text-[#6f6f6f] mt-0.5">{t('admin.locations.addSubtitle')}</p>
+                                <h2 className={cn('text-xl font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.locations.addTitle')}</h2>
+                                <p className={cn('text-sm mt-0.5', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.locations.addSubtitle')}</p>
                             </div>
                             <button
                                 type="button"
                                 onClick={closeModal}
                                 disabled={isSubmitting}
-                                className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-40"
+                                className={cn('w-9 h-9 rounded-full flex items-center justify-center transition-colors disabled:opacity-40', dark ? 'text-white/40 hover:bg-white/[0.06] hover:text-white/70' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700')}
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -408,7 +411,7 @@ export function AdminLocations() {
                             className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden"
                         >
                             {/* Map — top on mobile, right on desktop */}
-                            <div className="order-1 md:order-2 md:flex-1 h-[260px] sm:h-[300px] md:h-auto relative border-b md:border-b-0 md:border-l border-gray-100 shrink-0 md:shrink">
+                            <div className={cn('order-1 md:order-2 md:flex-1 h-[260px] sm:h-[300px] md:h-auto relative border-b md:border-b-0 md:border-l shrink-0 md:shrink', dark ? 'border-white/10' : 'border-gray-100')}>
                                 {/* Hint chip */}
                                 <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[500] pointer-events-none">
                                     <div className="bg-white/90 backdrop-blur-sm border border-gray-200 text-xs text-[#1d1d1d] font-medium px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap">
@@ -444,7 +447,7 @@ export function AdminLocations() {
 
                                     {/* Name */}
                                     <div>
-                                        <label className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                        <label className="text-sm font-semibold block mb-2">
                                             {t('admin.locations.nameLabel')} <span className="text-red-500">*</span>
                                         </label>
                                         <Input
@@ -487,7 +490,7 @@ export function AdminLocations() {
 
                                     {/* Coordinates — synced with map picker */}
                                     <div>
-                                        <label className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                        <label className="text-sm font-semibold block mb-2">
                                             {t('admin.locations.gpsCoords')}
                                         </label>
                                         <div className="grid grid-cols-2 gap-3">
@@ -538,7 +541,7 @@ export function AdminLocations() {
                                 </div>
 
                                 {/* Footer buttons */}
-                                <div className="px-6 pb-6 pt-3 border-t border-gray-100 flex gap-3 shrink-0">
+                                <div className={cn('px-6 pb-6 pt-3 border-t flex gap-3 shrink-0', dark ? 'border-white/10' : 'border-gray-100')}>
                                     <Button
                                         type="button"
                                         variant="outline"

@@ -9,8 +9,9 @@ import {
     Timer, TrendingUp, AlertCircle, CheckCircle2, Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { formatTime, formatDate } from '@/lib/utils';
+import { cn, formatTime, formatDate } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
 
 // Fix Leaflet default icon broken by bundlers — same as EmployeeMap.tsx
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,6 +81,7 @@ const STATUS_CONFIG_STYLES = {
 
 export function AdminAttendanceLogDetail() {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { logs, employees, locations } = useAttendance();
@@ -108,13 +110,13 @@ export function AdminAttendanceLogDetail() {
     // ── Not found ──────────────────────────────────────────────────────────
     if (!log) {
         return (
-            <div className="p-6 bg-slate-50 min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center gap-4">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
-                    <AlertCircle className="w-8 h-8 text-slate-400" />
+            <div className="p-6 min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center gap-4">
+                <div className={cn('w-16 h-16 rounded-full flex items-center justify-center', dark ? 'bg-white/[0.06]' : 'bg-slate-100')}>
+                    <AlertCircle className={cn('w-8 h-8', dark ? 'text-white/30' : 'text-slate-400')} />
                 </div>
                 <div className="text-center">
-                    <p className="text-lg font-semibold text-slate-700">{t('admin.logDetail.notFound')}</p>
-                    <p className="text-sm text-slate-400 mt-1">{t('admin.logDetail.recordId')}: {id}</p>
+                    <p className={cn('text-lg font-semibold', dark ? 'text-white/70' : 'text-slate-700')}>{t('admin.logDetail.notFound')}</p>
+                    <p className={cn('text-sm mt-1', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logDetail.recordId')}: {id}</p>
                 </div>
                 <Button variant="outline" onClick={() => navigate('/admin/attendance/logs')}>
                     <ArrowLeft className="w-4 h-4 mr-2" /> {t('admin.logDetail.backToList')}
@@ -135,29 +137,29 @@ export function AdminAttendanceLogDetail() {
         : '??';
 
     return (
-        <div className="bg-slate-50 min-h-[calc(100vh-4rem)]">
+        <div className="min-h-[calc(100vh-4rem)]">
 
             {/* ── Top nav bar ────────────────────────────────────────────── */}
-            <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+            <div className={cn('border-b sticky top-0 z-10', dark ? 'bg-white/[0.06] border-white/10' : 'bg-white border-slate-200')}>
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
                     <button
                         onClick={() => navigate(-1)}
-                        className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors rounded-md px-2 py-1 -ml-2 hover:bg-slate-100"
+                        className={cn('flex items-center gap-1.5 text-sm transition-colors rounded-md px-2 py-1 -ml-2', dark ? 'text-white/50 hover:text-white hover:bg-white/[0.06]' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100')}
                     >
                         <ArrowLeft className="w-4 h-4" />
                         {t('admin.logDetail.attendanceLogs')}
                     </button>
-                    <span className="text-slate-300">/</span>
-                    <span className="text-sm text-slate-700 font-medium truncate">{emp?.name ?? '—'}</span>
-                    <span className="text-slate-300 hidden sm:inline">/</span>
-                    <span className="text-sm text-slate-500 hidden sm:inline">{formatDate(log.date)}</span>
+                    <span className={dark ? 'text-white/20' : 'text-slate-300'}>/</span>
+                    <span className={cn('text-sm font-medium truncate', dark ? 'text-white/70' : 'text-slate-700')}>{emp?.name ?? '—'}</span>
+                    <span className={cn('hidden sm:inline', dark ? 'text-white/20' : 'text-slate-300')}>/</span>
+                    <span className={cn('text-sm hidden sm:inline', dark ? 'text-white/40' : 'text-slate-500')}>{formatDate(log.date)}</span>
                 </div>
             </div>
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
                 {/* ── Hero card ──────────────────────────────────────────── */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6">
+                <div className={cn('rounded-xl border p-5 sm:p-6', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-slate-200 shadow-sm')}>
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         {/* Avatar + employee info */}
                         <div className="flex items-center gap-4">
@@ -169,16 +171,16 @@ export function AdminAttendanceLogDetail() {
                             </div>
                             <div>
                                 <div className="flex items-center gap-2 flex-wrap">
-                                    <h1 className="text-xl font-bold text-slate-900 leading-tight">
+                                    <h1 className={cn('text-xl font-bold leading-tight', dark ? 'text-white' : 'text-slate-900')}>
                                         {emp?.name ?? t('admin.dashboard.unknownName')}
                                     </h1>
                                     {emp?.nickname && (
-                                        <span className="text-slate-400 font-normal text-base">({emp.nickname})</span>
+                                        <span className={cn('font-normal text-base', dark ? 'text-white/40' : 'text-slate-400')}>({emp.nickname})</span>
                                     )}
                                 </div>
-                                <p className="text-sm text-slate-500 mt-0.5">
+                                <p className={cn('text-sm mt-0.5', dark ? 'text-white/50' : 'text-slate-500')}>
                                     {emp?.department ?? '—'}
-                                    {emp?.position && <span className="text-slate-400"> · {emp.position}</span>}
+                                    {emp?.position && <span className={dark ? 'text-white/30' : 'text-slate-400'}> · {emp.position}</span>}
                                 </p>
                             </div>
                         </div>
@@ -191,20 +193,20 @@ export function AdminAttendanceLogDetail() {
                     </div>
 
                     {/* Date + location row */}
-                    <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-3 text-sm text-slate-600">
+                    <div className={cn('mt-4 pt-4 border-t flex flex-col sm:flex-row gap-3 text-sm', dark ? 'border-white/10 text-white/60' : 'border-slate-100 text-slate-600')}>
                         <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+                            <Calendar className={cn('w-4 h-4 shrink-0', dark ? 'text-white/30' : 'text-slate-400')} />
                             <span className="font-medium">{formatFullDate(log.date)}</span>
                         </div>
                         {loc && (
                             <div className="flex items-center gap-2 sm:ml-4">
-                                <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+                                <MapPin className={cn('w-4 h-4 shrink-0', dark ? 'text-white/30' : 'text-slate-400')} />
                                 <span>{loc.name}</span>
                             </div>
                         )}
                         {emp && (
                             <div className="flex items-center gap-2 sm:ml-4">
-                                <Clock className="w-4 h-4 text-slate-400 shrink-0" />
+                                <Clock className={cn('w-4 h-4 shrink-0', dark ? 'text-white/30' : 'text-slate-400')} />
                                 <span>{t('admin.logDetail.shift')} {emp.shiftStartTime} – {emp.shiftEndTime}</span>
                             </div>
                         )}
@@ -214,14 +216,14 @@ export function AdminAttendanceLogDetail() {
                 {/* ── Stats row ──────────────────────────────────────────── */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* Check-in */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5">
+                    <div className={cn('rounded-xl border p-4 sm:p-5', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-slate-200 shadow-sm')}>
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                            <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', dark ? 'bg-emerald-500/10' : 'bg-emerald-50')}>
                                 <Clock className="w-4 h-4 text-emerald-600" />
                             </div>
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('admin.logDetail.checkInTime')}</span>
+                            <span className={cn('text-xs font-semibold uppercase tracking-wider', dark ? 'text-white/50' : 'text-slate-500')}>{t('admin.logDetail.checkInTime')}</span>
                         </div>
-                        <p className="text-2xl font-bold text-slate-900 tabular-nums">{formatTime(log.checkInTime)}</p>
+                        <p className={cn('text-2xl font-bold tabular-nums', dark ? 'text-white' : 'text-slate-900')}>{formatTime(log.checkInTime)}</p>
                         {log.status === 'late' && lateMinutes > 0 ? (
                             <p className="text-xs text-orange-600 font-medium mt-1 flex items-center gap-1">
                                 <Timer className="w-3 h-3" /> {t('admin.logDetail.lateMinutes').replace('{n}', String(lateMinutes))}
@@ -231,19 +233,19 @@ export function AdminAttendanceLogDetail() {
                                 <CheckCircle2 className="w-3 h-3" /> {t('admin.logDetail.onTime')}
                             </p>
                         ) : (
-                            <p className="text-xs text-slate-400 mt-1">{t('admin.logDetail.noData')}</p>
+                            <p className={cn('text-xs mt-1', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logDetail.noData')}</p>
                         )}
                     </div>
 
                     {/* Check-out */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5">
+                    <div className={cn('rounded-xl border p-4 sm:p-5', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-slate-200 shadow-sm')}>
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                                <Clock className="w-4 h-4 text-slate-500" />
+                            <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', dark ? 'bg-white/[0.06]' : 'bg-slate-100')}>
+                                <Clock className={cn('w-4 h-4', dark ? 'text-white/50' : 'text-slate-500')} />
                             </div>
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('admin.logDetail.checkOutTime')}</span>
+                            <span className={cn('text-xs font-semibold uppercase tracking-wider', dark ? 'text-white/50' : 'text-slate-500')}>{t('admin.logDetail.checkOutTime')}</span>
                         </div>
-                        <p className="text-2xl font-bold text-slate-900 tabular-nums">{formatTime(log.checkOutTime)}</p>
+                        <p className={cn('text-2xl font-bold tabular-nums', dark ? 'text-white' : 'text-slate-900')}>{formatTime(log.checkOutTime)}</p>
                         {!log.checkOutTime && (
                             <p className="text-xs text-amber-600 font-medium mt-1 flex items-center gap-1">
                                 <Info className="w-3 h-3" /> {t('admin.logDetail.notCheckedOut')}
@@ -252,43 +254,43 @@ export function AdminAttendanceLogDetail() {
                     </div>
 
                     {/* Work hours */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5">
+                    <div className={cn('rounded-xl border p-4 sm:p-5', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-slate-200 shadow-sm')}>
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-[#044F88]/5 flex items-center justify-center">
+                            <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', dark ? 'bg-[#044F88]/10' : 'bg-[#044F88]/5')}>
                                 <User className="w-4 h-4 text-[#044F88]" />
                             </div>
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('admin.logDetail.workHours')}</span>
+                            <span className={cn('text-xs font-semibold uppercase tracking-wider', dark ? 'text-white/50' : 'text-slate-500')}>{t('admin.logDetail.workHours')}</span>
                         </div>
-                        <p className="text-2xl font-bold text-slate-900 tabular-nums">
+                        <p className={cn('text-2xl font-bold tabular-nums', dark ? 'text-white' : 'text-slate-900')}>
                             {log.workHours > 0 ? log.workHours.toFixed(2) : '—'}
                         </p>
-                        <p className="text-xs text-slate-400 mt-1">{t('admin.logDetail.hours')}</p>
+                        <p className={cn('text-xs mt-1', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logDetail.hours')}</p>
                     </div>
 
                     {/* OT */}
-                    <div className={`bg-white rounded-xl border shadow-sm p-4 sm:p-5 ${log.otHours > 0 ? 'border-purple-200 bg-purple-50/30' : 'border-slate-200'}`}>
+                    <div className={cn('rounded-xl border p-4 sm:p-5', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : (log.otHours > 0 ? 'bg-purple-50/30 border-purple-200' : 'bg-white border-slate-200'), dark ? '' : 'shadow-sm')}>
                         <div className="flex items-center gap-2 mb-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${log.otHours > 0 ? 'bg-purple-100' : 'bg-slate-100'}`}>
-                                <TrendingUp className={`w-4 h-4 ${log.otHours > 0 ? 'text-purple-600' : 'text-slate-400'}`} />
+                            <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', log.otHours > 0 ? (dark ? 'bg-purple-500/10' : 'bg-purple-100') : (dark ? 'bg-white/[0.06]' : 'bg-slate-100'))}>
+                                <TrendingUp className={cn('w-4 h-4', log.otHours > 0 ? 'text-purple-600' : (dark ? 'text-white/30' : 'text-slate-400'))} />
                             </div>
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('admin.logDetail.overtime')}</span>
+                            <span className={cn('text-xs font-semibold uppercase tracking-wider', dark ? 'text-white/50' : 'text-slate-500')}>{t('admin.logDetail.overtime')}</span>
                         </div>
-                        <p className={`text-2xl font-bold tabular-nums ${log.otHours > 0 ? 'text-purple-700' : 'text-slate-400'}`}>
+                        <p className={cn('text-2xl font-bold tabular-nums', log.otHours > 0 ? 'text-purple-700' : (dark ? 'text-white/30' : 'text-slate-400'))}>
                             {log.otHours > 0 ? `+${log.otHours.toFixed(2)}` : '—'}
                         </p>
-                        <p className="text-xs text-slate-400 mt-1">{log.otHours > 0 ? t('admin.logDetail.otHours') : t('admin.logDetail.noOt')}</p>
+                        <p className={cn('text-xs mt-1', dark ? 'text-white/30' : 'text-slate-400')}>{log.otHours > 0 ? t('admin.logDetail.otHours') : t('admin.logDetail.noOt')}</p>
                     </div>
                 </div>
 
                 {/* ── Map section ────────────────────────────────────────── */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div className={cn('rounded-xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-slate-200 shadow-sm')}>
+                    <div className={cn('px-5 py-4 border-b flex items-center justify-between', dark ? 'border-white/10' : 'border-slate-100')}>
                         <div>
-                            <h2 className="text-sm font-semibold text-slate-800">{t('admin.logDetail.mapTitle')}</h2>
-                            <p className="text-xs text-slate-400 mt-0.5">{t('admin.logDetail.mapSubtitle')}</p>
+                            <h2 className={cn('text-sm font-semibold', dark ? 'text-white/80' : 'text-slate-800')}>{t('admin.logDetail.mapTitle')}</h2>
+                            <p className={cn('text-xs mt-0.5', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logDetail.mapSubtitle')}</p>
                         </div>
                         {/* Legend */}
-                        <div className="hidden sm:flex items-center gap-4 text-xs text-slate-500">
+                        <div className={cn('hidden sm:flex items-center gap-4 text-xs', dark ? 'text-white/50' : 'text-slate-500')}>
                             <span className="flex items-center gap-1.5">
                                 <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block shadow-sm" />
                                 {t('admin.logDetail.checkInTime')}
@@ -307,13 +309,13 @@ export function AdminAttendanceLogDetail() {
                     </div>
 
                     {mapPositions.length === 0 ? (
-                        <div className="h-[360px] flex flex-col items-center justify-center gap-3 bg-slate-50">
-                            <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
-                                <MapPin className="w-7 h-7 text-slate-300" />
+                        <div className={cn('h-[360px] flex flex-col items-center justify-center gap-3', dark ? 'bg-white/[0.03]' : 'bg-slate-50')}>
+                            <div className={cn('w-14 h-14 rounded-full flex items-center justify-center', dark ? 'bg-white/[0.06]' : 'bg-slate-100')}>
+                                <MapPin className={cn('w-7 h-7', dark ? 'text-white/20' : 'text-slate-300')} />
                             </div>
                             <div className="text-center">
-                                <p className="text-slate-500 font-medium text-sm">{t('admin.logDetail.noGpsData')}</p>
-                                <p className="text-xs text-slate-400 mt-1">{t('admin.logDetail.noGpsPositions')}</p>
+                                <p className={cn('font-medium text-sm', dark ? 'text-white/50' : 'text-slate-500')}>{t('admin.logDetail.noGpsData')}</p>
+                                <p className={cn('text-xs mt-1', dark ? 'text-white/30' : 'text-slate-400')}>{t('admin.logDetail.noGpsPositions')}</p>
                             </div>
                         </div>
                     ) : (
@@ -379,7 +381,7 @@ export function AdminAttendanceLogDetail() {
                     )}
 
                     {/* Mobile legend */}
-                    <div className="sm:hidden px-5 py-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
+                    <div className={cn('sm:hidden px-5 py-3 border-t flex items-center gap-4 text-xs', dark ? 'border-white/10 text-white/50' : 'border-slate-100 text-slate-500')}>
                         <span className="flex items-center gap-1.5">
                             <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" /> {t('admin.logDetail.checkInTime')}
                         </span>
@@ -397,56 +399,56 @@ export function AdminAttendanceLogDetail() {
                 {/* ── GPS detail cards ───────────────────────────────────── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Check-in GPS */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                    <div className={cn('rounded-xl border p-5', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-slate-200 shadow-sm')}>
                         <div className="flex items-center gap-2 mb-4">
                             <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
-                            <h3 className="text-sm font-semibold text-slate-700">{t('admin.logDetail.gpsCheckIn')}</h3>
+                            <h3 className={cn('text-sm font-semibold', dark ? 'text-white/70' : 'text-slate-700')}>{t('admin.logDetail.gpsCheckIn')}</h3>
                         </div>
                         {log.checkInLat != null && log.checkInLng != null ? (
                             <div className="space-y-2">
-                                <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                                    <span className="text-xs text-slate-500">Latitude</span>
-                                    <span className="font-mono text-sm text-slate-800">{log.checkInLat.toFixed(6)}</span>
+                                <div className={cn('flex justify-between items-center py-2 border-b', dark ? 'border-white/5' : 'border-slate-50')}>
+                                    <span className={cn('text-xs', dark ? 'text-white/40' : 'text-slate-500')}>Latitude</span>
+                                    <span className={cn('font-mono text-sm', dark ? 'text-white/80' : 'text-slate-800')}>{log.checkInLat.toFixed(6)}</span>
                                 </div>
-                                <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                                    <span className="text-xs text-slate-500">Longitude</span>
-                                    <span className="font-mono text-sm text-slate-800">{log.checkInLng.toFixed(6)}</span>
+                                <div className={cn('flex justify-between items-center py-2 border-b', dark ? 'border-white/5' : 'border-slate-50')}>
+                                    <span className={cn('text-xs', dark ? 'text-white/40' : 'text-slate-500')}>Longitude</span>
+                                    <span className={cn('font-mono text-sm', dark ? 'text-white/80' : 'text-slate-800')}>{log.checkInLng.toFixed(6)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2">
-                                    <span className="text-xs text-slate-500">{t('admin.logDetail.time')}</span>
+                                    <span className={cn('text-xs', dark ? 'text-white/40' : 'text-slate-500')}>{t('admin.logDetail.time')}</span>
                                     <span className="text-sm font-medium text-emerald-700">{formatTime(log.checkInTime)}</span>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-2 text-sm text-slate-400">
+                            <div className={cn('flex items-center gap-2 text-sm', dark ? 'text-white/30' : 'text-slate-400')}>
                                 <AlertCircle className="w-4 h-4" /> {t('admin.logDetail.noGpsData')}
                             </div>
                         )}
                     </div>
 
                     {/* Check-out GPS */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                    <div className={cn('rounded-xl border p-5', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-slate-200 shadow-sm')}>
                         <div className="flex items-center gap-2 mb-4">
                             <span className="w-3 h-3 rounded-full bg-red-500 shrink-0" />
-                            <h3 className="text-sm font-semibold text-slate-700">{t('admin.logDetail.gpsCheckOut')}</h3>
+                            <h3 className={cn('text-sm font-semibold', dark ? 'text-white/70' : 'text-slate-700')}>{t('admin.logDetail.gpsCheckOut')}</h3>
                         </div>
                         {log.checkOutLat != null && log.checkOutLng != null ? (
                             <div className="space-y-2">
-                                <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                                    <span className="text-xs text-slate-500">Latitude</span>
-                                    <span className="font-mono text-sm text-slate-800">{log.checkOutLat.toFixed(6)}</span>
+                                <div className={cn('flex justify-between items-center py-2 border-b', dark ? 'border-white/5' : 'border-slate-50')}>
+                                    <span className={cn('text-xs', dark ? 'text-white/40' : 'text-slate-500')}>Latitude</span>
+                                    <span className={cn('font-mono text-sm', dark ? 'text-white/80' : 'text-slate-800')}>{log.checkOutLat.toFixed(6)}</span>
                                 </div>
-                                <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                                    <span className="text-xs text-slate-500">Longitude</span>
-                                    <span className="font-mono text-sm text-slate-800">{log.checkOutLng.toFixed(6)}</span>
+                                <div className={cn('flex justify-between items-center py-2 border-b', dark ? 'border-white/5' : 'border-slate-50')}>
+                                    <span className={cn('text-xs', dark ? 'text-white/40' : 'text-slate-500')}>Longitude</span>
+                                    <span className={cn('font-mono text-sm', dark ? 'text-white/80' : 'text-slate-800')}>{log.checkOutLng.toFixed(6)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2">
-                                    <span className="text-xs text-slate-500">{t('admin.logDetail.time')}</span>
-                                    <span className="text-sm font-medium text-slate-700">{formatTime(log.checkOutTime)}</span>
+                                    <span className={cn('text-xs', dark ? 'text-white/40' : 'text-slate-500')}>{t('admin.logDetail.time')}</span>
+                                    <span className={cn('text-sm font-medium', dark ? 'text-white/70' : 'text-slate-700')}>{formatTime(log.checkOutTime)}</span>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-2 text-sm text-slate-400">
+                            <div className={cn('flex items-center gap-2 text-sm', dark ? 'text-white/30' : 'text-slate-400')}>
                                 <AlertCircle className="w-4 h-4" />
                                 {log.checkOutTime ? t('admin.logDetail.noGpsData') : t('admin.logDetail.notCheckedOutYet')}
                             </div>

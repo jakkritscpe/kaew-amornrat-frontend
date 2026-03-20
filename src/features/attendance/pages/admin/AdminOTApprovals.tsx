@@ -6,6 +6,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,6 +14,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function AdminOTApprovals() {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const { otRequests, employees, updateOTStatus } = useAttendance();
 
     const FILTER_LABELS: Record<string, string> = {
@@ -69,16 +71,16 @@ export function AdminOTApprovals() {
             {/* ── Page header ── */}
             <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1d1d1d] tracking-tight">{t('admin.otApprovals.title')}</h1>
-                    <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.otApprovals.subtitle')}</p>
+                    <h1 className={cn('text-2xl font-bold tracking-tight', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.otApprovals.title')}</h1>
+                    <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.otApprovals.subtitle')}</p>
                 </div>
             </div>
 
             {/* ── Main Content Container ── */}
-            <div className="dashboard-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative min-h-[500px]">
+            <div className={cn('dashboard-section rounded-2xl overflow-hidden relative min-h-[500px]', dark ? 'bg-white/[0.06] border border-white/10 shadow-none' : 'bg-white shadow-sm border border-gray-100')}>
                 {/* ── Filter Tabs ── */}
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3 overflow-x-auto hide-scrollbar bg-white relative z-10">
-                    <Filter className="w-4 h-4 text-gray-400 shrink-0 mr-1" />
+                <div className={cn('px-6 py-4 border-b flex items-center gap-3 overflow-x-auto hide-scrollbar relative z-10', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-white')}>
+                    <Filter className={cn('w-4 h-4 shrink-0 mr-1', dark ? 'text-white/30' : 'text-gray-400')} />
                     {(['pending', 'approved', 'rejected', 'all'] as const).map(f => (
                         <button
                             key={f}
@@ -87,12 +89,14 @@ export function AdminOTApprovals() {
                                 'px-4 py-2 text-sm font-semibold rounded-xl transition-all whitespace-nowrap',
                                 filter === f
                                     ? 'bg-[#044F88] text-white shadow-md shadow-[#044F88]/20'
-                                    : 'bg-gray-50 text-[#6f6f6f] hover:bg-gray-100 border border-gray-100 hover:text-[#1d1d1d]'
+                                    : dark
+                                        ? 'bg-white/[0.06] text-white/50 hover:bg-white/[0.1] border border-white/10 hover:text-white/70'
+                                        : 'bg-gray-50 text-[#6f6f6f] hover:bg-gray-100 border border-gray-100 hover:text-[#1d1d1d]'
                             )}
                         >
                             {FILTER_LABELS[f]}
                             {f === 'pending' && filter !== 'pending' && otRequests.filter(r => r.status === 'pending').length > 0 && (
-                                <span className="ml-2 px-1.5 py-0.5 rounded-md bg-white border border-gray-200 text-amber-600 text-[10px] font-bold">
+                                <span className={cn('ml-2 px-1.5 py-0.5 rounded-md text-amber-600 text-[10px] font-bold', dark ? 'bg-white/10 border border-white/10' : 'bg-white border border-gray-200')}>
                                     {otRequests.filter(r => r.status === 'pending').length}
                                 </span>
                             )}
@@ -106,20 +110,20 @@ export function AdminOTApprovals() {
                 </div>
 
                 {/* ── List View (Mobile) / Table View (Desktop) ── */}
-                <div className="bg-gray-50/30">
+                <div className={dark ? 'bg-white/[0.03]' : 'bg-gray-50/30'}>
 
                     {/* Mobile View: Cards */}
-                    <div className="md:hidden divide-y divide-gray-100/50 p-3 space-y-3">
+                    <div className={cn('md:hidden divide-y p-3 space-y-3', dark ? 'divide-white/5' : 'divide-gray-100/50')}>
                         {filtered.length === 0 ? (
-                            <div className="py-16 text-center text-[#6f6f6f] text-sm flex flex-col items-center">
-                                <FileText className="w-12 h-12 text-gray-200 mb-4" />
-                                <p className="font-semibold text-lg text-[#1d1d1d]">{t('admin.otApprovals.noRequests')}</p>
+                            <div className={cn('py-16 text-center text-sm flex flex-col items-center', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>
+                                <FileText className={cn('w-12 h-12 mb-4', dark ? 'text-white/10' : 'text-gray-200')} />
+                                <p className={cn('font-semibold text-lg', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.otApprovals.noRequests')}</p>
                             </div>
                         ) : (
                             filtered.map(req => {
                                 const emp = employees.find(e => e.id === req.employeeId);
                                 return (
-                                    <div key={req.id} className="ot-row bg-white rounded-2xl p-5 border border-gray-100 shadow-sm relative overflow-hidden group">
+                                    <div key={req.id} className={cn('ot-row rounded-2xl p-5 border relative overflow-hidden group', dark ? 'bg-white/[0.06] border-white/10' : 'bg-white border-gray-100 shadow-sm')}>
                                         <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-transparent to-transparent group-hover:from-[#044F88] group-hover:to-[#00223A] transition-colors duration-300" />
 
                                         <div className="flex justify-between items-start mb-4">
@@ -132,10 +136,10 @@ export function AdminOTApprovals() {
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <p className="font-bold text-[#1d1d1d] leading-tight group-hover:text-[#044F88] transition-colors">
+                                                    <p className={cn('font-bold leading-tight group-hover:text-[#044F88] transition-colors', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                         {emp?.name}
                                                     </p>
-                                                    <p className="text-xs text-[#6f6f6f] mt-0.5 flex items-center gap-1">
+                                                    <p className={cn('text-xs mt-0.5 flex items-center gap-1', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>
                                                         {emp?.department} {emp?.nickname && `(${emp.nickname})`}
                                                     </p>
                                                 </div>
@@ -154,20 +158,20 @@ export function AdminOTApprovals() {
                                             )}
                                         </div>
 
-                                        <div className="bg-gray-50 rounded-xl p-3.5 mb-4 grid grid-cols-2 gap-3 border border-gray-100/50">
+                                        <div className={cn('rounded-xl p-3.5 mb-4 grid grid-cols-2 gap-3 border', dark ? 'bg-white/[0.03] border-white/5' : 'bg-gray-50 border-gray-100/50')}>
                                             <div className="flex items-start gap-2">
                                                 <Clock className="w-4 h-4 text-[#044F88] shrink-0 mt-0.5" />
                                                 <div>
-                                                    <p className="text-[10px] font-bold text-[#6f6f6f] uppercase tracking-wider mb-0.5">{t('admin.otApprovals.dateAndTime')}</p>
-                                                    <p className="font-semibold text-sm text-[#1d1d1d] tabular-nums leading-tight">{req.date}</p>
-                                                    <p className="text-xs text-[#6f6f6f] font-medium mt-0.5">{req.startTime} - {req.endTime} น.</p>
+                                                    <p className={cn('text-[10px] font-bold uppercase tracking-wider mb-0.5', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.otApprovals.dateAndTime')}</p>
+                                                    <p className={cn('font-semibold text-sm tabular-nums leading-tight', dark ? 'text-white' : 'text-[#1d1d1d]')}>{req.date}</p>
+                                                    <p className={cn('text-xs font-medium mt-0.5', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{req.startTime} - {req.endTime} น.</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-2">
                                                 <AlignLeft className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                                                 <div className="min-w-0">
-                                                    <p className="text-[10px] font-bold text-[#6f6f6f] uppercase tracking-wider mb-0.5">{t('admin.otApprovals.reason')}</p>
-                                                    <p className="text-xs text-[#1d1d1d] leading-relaxed line-clamp-2">{req.reason}</p>
+                                                    <p className={cn('text-[10px] font-bold uppercase tracking-wider mb-0.5', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.otApprovals.reason')}</p>
+                                                    <p className={cn('text-xs leading-relaxed line-clamp-2', dark ? 'text-white/70' : 'text-[#1d1d1d]')}>{req.reason}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -186,7 +190,7 @@ export function AdminOTApprovals() {
                                                     size="sm"
                                                     variant="outline"
                                                     onClick={() => updateOTStatus(req.id, 'rejected')}
-                                                    className="flex-1 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 h-10 rounded-xl font-semibold bg-white"
+                                                    className={cn('flex-1 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 h-10 rounded-xl font-semibold', dark ? 'bg-white/[0.06]' : 'bg-white')}
                                                 >
                                                     {/* Changed X to Ban/Cancel equivalent */}
                                                     <Ban className="w-4 h-4 mr-2" /> {t('admin.otApprovals.reject')}
@@ -202,7 +206,7 @@ export function AdminOTApprovals() {
                     {/* Desktop View: Table (Matches RequestsTable logic) */}
                     <div className="hidden md:block overflow-x-auto min-h-[400px]">
                         <table className="w-full text-sm text-left whitespace-nowrap">
-                            <thead className="bg-gray-50/50 text-[#6f6f6f] text-xs uppercase tracking-wider font-semibold border-b border-gray-200">
+                            <thead className={cn('text-xs uppercase tracking-wider font-semibold border-b', dark ? 'bg-white/[0.03] text-white/40 border-white/10' : 'bg-gray-50/50 text-[#6f6f6f] border-gray-200')}>
                                 <tr>
                                     <th className="px-6 py-4">{t('admin.otApprovals.employee')}</th>
                                     <th className="px-6 py-4">{t('admin.otApprovals.dateAndTimeRange')}</th>
@@ -210,16 +214,16 @@ export function AdminOTApprovals() {
                                     <th className="px-6 py-4 text-center">{t('admin.otApprovals.actionOrStatus')}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 bg-white">
+                            <tbody className={cn('divide-y', dark ? 'divide-white/10 bg-transparent' : 'divide-gray-100 bg-white')}>
                                 {filtered.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="px-6 py-24 text-center">
                                             <div className="flex flex-col items-center justify-center">
-                                                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
-                                                    <FileText className="w-8 h-8 text-gray-300" />
+                                                <div className={cn('w-16 h-16 rounded-2xl flex items-center justify-center mb-4 border', dark ? 'bg-white/[0.06] border-white/10' : 'bg-gray-50 border-gray-100')}>
+                                                    <FileText className={cn('w-8 h-8', dark ? 'text-white/20' : 'text-gray-300')} />
                                                 </div>
-                                                <p className="text-[#1d1d1d] font-semibold text-lg mb-1">{t('admin.otApprovals.noRequests')}</p>
-                                                <p className="text-[#6f6f6f] text-sm">{t('admin.otApprovals.noRequestsHint')}</p>
+                                                <p className={cn('font-semibold text-lg mb-1', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.otApprovals.noRequests')}</p>
+                                                <p className={cn('text-sm', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.otApprovals.noRequestsHint')}</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -227,7 +231,7 @@ export function AdminOTApprovals() {
                                     filtered.map(req => {
                                         const emp = employees.find(e => e.id === req.employeeId);
                                         return (
-                                            <tr key={req.id} className="ot-row hover:bg-[#044F88]/30 transition-colors duration-300 group">
+                                            <tr key={req.id} className={cn('ot-row transition-colors duration-300 group', dark ? 'hover:bg-white/[0.04]' : 'hover:bg-[#044F88]/30')}>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-4">
                                                         {emp?.avatarUrl ? (
@@ -242,21 +246,21 @@ export function AdminOTApprovals() {
                                                             </div>
                                                         )}
                                                         <div>
-                                                            <p className="font-semibold text-[#1d1d1d] group-hover:text-[#044F88] transition-colors">{emp?.name || t('admin.otApprovals.unknownName')}</p>
-                                                            {emp?.nickname && <p className="text-xs text-[#6f6f6f]">({emp.nickname})</p>}
-                                                            <p className="text-xs text-[#6f6f6f] mt-0.5">{emp?.department}</p>
+                                                            <p className={cn('font-semibold group-hover:text-[#044F88] transition-colors', dark ? 'text-white' : 'text-[#1d1d1d]')}>{emp?.name || t('admin.otApprovals.unknownName')}</p>
+                                                            {emp?.nickname && <p className={cn('text-xs', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>({emp.nickname})</p>}
+                                                            <p className={cn('text-xs mt-0.5', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{emp?.department}</p>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <p className="font-semibold text-[#1d1d1d] tabular-nums mb-0.5">{req.date}</p>
-                                                    <p className="text-xs font-medium text-[#6f6f6f] tabular-nums flex items-center gap-1.5">
+                                                    <p className={cn('font-semibold tabular-nums mb-0.5', dark ? 'text-white' : 'text-[#1d1d1d]')}>{req.date}</p>
+                                                    <p className={cn('text-xs font-medium tabular-nums flex items-center gap-1.5', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>
                                                         <ClockIcon className="w-3.5 h-3.5 text-[#044F88]" />
                                                         {req.startTime} - {req.endTime} น.
                                                     </p>
                                                 </td>
                                                 <td className="px-6 py-4 max-w-[300px] whitespace-normal">
-                                                    <p className="text-sm text-[#1d1d1d] leading-relaxed line-clamp-2">{req.reason}</p>
+                                                    <p className={cn('text-sm leading-relaxed line-clamp-2', dark ? 'text-white/70' : 'text-[#1d1d1d]')}>{req.reason}</p>
                                                 </td>
                                                 <td className="px-6 py-4 text-center align-middle">
                                                     {req.status === 'pending' ? (
@@ -272,7 +276,7 @@ export function AdminOTApprovals() {
                                                                 size="sm"
                                                                 variant="outline"
                                                                 onClick={() => updateOTStatus(req.id, 'rejected')}
-                                                                className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 rounded-lg h-9 px-4 shadow-sm bg-white"
+                                                                className={cn('text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 rounded-lg h-9 px-4 shadow-sm', dark ? 'bg-white/[0.06]' : 'bg-white')}
                                                             >
                                                                 <Ban className="w-3.5 h-3.5 mr-1.5" /> {t('admin.otApprovals.reject')}
                                                             </Button>

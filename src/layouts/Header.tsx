@@ -1,15 +1,18 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { Menu } from 'lucide-react';
+import { Menu, Sun, Moon } from 'lucide-react';
 import { NotificationBell } from '../features/attendance/components/NotificationBell';
 import { TOKEN_KEY } from '../lib/api-client';
+import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   title: string;
   onMenuClick: () => void;
+  dark?: boolean;
+  onToggleTheme?: () => void;
 }
 
-export default function Header({ title, onMenuClick }: HeaderProps) {
+export default function Header({ title, onMenuClick, dark, onToggleTheme }: HeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
   const token = localStorage.getItem(TOKEN_KEY);
 
@@ -26,22 +29,38 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
   return (
     <header
       ref={headerRef}
-      className="h-16 bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30 px-4 lg:px-6 flex items-center justify-between gap-4"
+      className={cn(
+        'h-16 backdrop-blur-md border-b sticky top-0 z-30 px-4 lg:px-6 flex items-center justify-between gap-4 transition-colors',
+        dark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-100'
+      )}
     >
-      {/* Left: Hamburger + Title */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onMenuClick}
-          className="lg:hidden flex-shrink-0 p-2 -ml-1 rounded-xl hover:bg-gray-100 transition-colors focus-visible:ring-2 focus-visible:ring-[#044F88]/80"
-          aria-label="เปิดเมนู"
+          className={cn(
+            'lg:hidden flex-shrink-0 p-2 -ml-1 rounded-xl transition-colors',
+            dark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+          )}
+          aria-label="Menu"
         >
-          <Menu className="w-5 h-5 text-gray-600" aria-hidden="true" />
+          <Menu className={cn('w-5 h-5', dark ? 'text-white/70' : 'text-gray-600')} />
         </button>
-        <h1 className="text-lg font-bold text-[#1d1d1d] truncate">{title}</h1>
+        <h1 className={cn('text-lg font-bold truncate', dark ? 'text-white' : 'text-[#1d1d1d]')}>{title}</h1>
       </div>
 
-      {/* Right: Actions */}
       <div className="flex items-center gap-2 shrink-0">
+        {onToggleTheme && (
+          <button
+            onClick={onToggleTheme}
+            className={cn(
+              'p-2 rounded-xl transition-all duration-200',
+              dark ? 'bg-white/10 text-amber-400 hover:bg-white/15' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+            )}
+            title={dark ? 'Light mode' : 'Dark mode'}
+          >
+            {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+        )}
         <NotificationBell token={token} />
       </div>
     </header>
