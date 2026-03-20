@@ -105,7 +105,7 @@ export function EmployeeOTRequest() {
             </div>
 
             {/* ── Content ── */}
-            <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 sm:px-6 pt-5 pb-6 relative z-10 overflow-hidden">
+            <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 sm:px-6 pt-5 pb-6 relative z-10 overflow-x-hidden">
 
                 {/* Desktop: 2 columns / Mobile: single column */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -125,7 +125,7 @@ export function EmployeeOTRequest() {
                                     onChange={e => setDate(e.target.value)}
                                     max={today}
                                     required
-                                    className="h-11 rounded-xl border-gray-200 bg-[#f8fafc] text-sm font-medium focus:bg-white"
+                                    className="h-11 w-full rounded-xl border-gray-200 bg-[#f8fafc] text-sm font-medium focus:bg-white"
                                 />
                             </div>
 
@@ -134,12 +134,12 @@ export function EmployeeOTRequest() {
                                 <label className="flex items-center gap-1.5 text-xs font-bold text-[#1d1d1d] uppercase tracking-wider">
                                     <Clock className="w-3.5 h-3.5 text-[#044F88]" /> {t('employee.otRequest.timeRange')}
                                 </label>
-                                <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                                <div className="grid grid-cols-[1fr_24px_1fr] gap-1 items-center">
                                     <Input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} required
-                                        className="h-11 rounded-xl border-gray-200 bg-[#f8fafc] text-sm font-medium text-center focus:bg-white" />
-                                    <span className="text-[#6f6f6f] font-medium">–</span>
+                                        className="h-11 min-w-0 rounded-xl border-gray-200 bg-[#f8fafc] text-sm font-medium text-center focus:bg-white" />
+                                    <span className="text-[#6f6f6f] font-medium text-center">–</span>
                                     <Input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} required
-                                        className="h-11 rounded-xl border-gray-200 bg-[#f8fafc] text-sm font-medium text-center focus:bg-white" />
+                                        className="h-11 min-w-0 rounded-xl border-gray-200 bg-[#f8fafc] text-sm font-medium text-center focus:bg-white" />
                                 </div>
                                 {dur && (
                                     <p className="text-xs text-[#044F88] font-semibold flex items-center gap-1 px-1">
