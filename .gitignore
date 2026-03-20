@@ -34,3 +34,6 @@ dist-ssr/
 .vite
 *-lock.json
 *-lock.yaml
+e2e/.auth/
+test-results/
+playwright-report/
