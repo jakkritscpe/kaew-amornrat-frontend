@@ -79,7 +79,7 @@ export function AdminOTApprovals() {
             {/* ── Main Content Container ── */}
             <div className={cn('dashboard-section rounded-2xl overflow-hidden relative min-h-[500px]', dark ? 'bg-white/[0.06] border border-white/10 shadow-none' : 'bg-white shadow-sm border border-gray-100')}>
                 {/* ── Filter Tabs ── */}
-                <div className={cn('px-6 py-4 border-b flex items-center gap-3 overflow-x-auto hide-scrollbar relative z-10', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-white')}>
+                <div data-tour="ot-filter-tabs" className={cn('px-6 py-4 border-b flex items-center gap-3 overflow-x-auto hide-scrollbar relative z-10', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-white')}>
                     <Filter className={cn('w-4 h-4 shrink-0 mr-1', dark ? 'text-white/30' : 'text-gray-400')} />
                     {(['pending', 'approved', 'rejected', 'all'] as const).map(f => (
                         <button
@@ -110,7 +110,7 @@ export function AdminOTApprovals() {
                 </div>
 
                 {/* ── List View (Mobile) / Table View (Desktop) ── */}
-                <div className={dark ? 'bg-white/[0.03]' : 'bg-gray-50/30'}>
+                <div data-tour="ot-request-list" className={dark ? 'bg-white/[0.03]' : 'bg-gray-50/30'}>
 
                     {/* Mobile View: Cards */}
                     <div className={cn('md:hidden divide-y p-3 space-y-3', dark ? 'divide-white/5' : 'divide-gray-100/50')}>

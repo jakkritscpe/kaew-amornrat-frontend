@@ -258,6 +258,7 @@ export function AdminLocations() {
                     <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.locations.subtitle')}</p>
                 </div>
                 <Button
+                    data-tour="add-location"
                     onClick={openModal}
                     className="w-full sm:w-auto bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0"
                 >
@@ -297,7 +298,7 @@ export function AdminLocations() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-[600px]">
 
                 {/* Left: Location list */}
-                <div className={cn('dashboard-section rounded-2xl border flex flex-col overflow-hidden col-span-1 h-[400px] lg:h-auto order-2 lg:order-1 relative', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                <div data-tour="location-list" className={cn('dashboard-section rounded-2xl border flex flex-col overflow-hidden col-span-1 h-[400px] lg:h-auto order-2 lg:order-1 relative', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
                     <div className={cn('p-5 border-b flex-shrink-0 z-10', dark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-white')}>
                         <div className="relative w-full group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-lg transition-all">
                             <Search className={cn('absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none group-focus-within:text-[#044F88] transition-colors', dark ? 'text-white/30' : 'text-gray-400')} />
@@ -342,7 +343,7 @@ export function AdminLocations() {
                 </div>
 
                 {/* Right: Overview map */}
-                <div className={cn('dashboard-section rounded-2xl border overflow-hidden lg:col-span-2 relative z-0 h-[300px] sm:h-[400px] lg:h-auto order-1 lg:order-2 p-1.5', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                <div data-tour="location-map" className={cn('dashboard-section rounded-2xl border overflow-hidden lg:col-span-2 relative z-0 h-[300px] sm:h-[400px] lg:h-auto order-1 lg:order-2 p-1.5', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
                     <div className={cn('w-full h-full rounded-xl overflow-hidden border relative', dark ? 'border-white/10' : 'border-gray-100')}>
                         <div className={cn('absolute inset-0 animate-pulse -z-10', dark ? 'bg-white/[0.03]' : 'bg-gray-100')} />
                         <MapContainer

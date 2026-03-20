@@ -151,7 +151,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                 setIsCollapsed(!isCollapsed);
               }
             }}
-            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
+            className={cn('lg:hidden p-1.5 rounded-lg transition-colors', dark ? 'text-white/50 hover:bg-white/10' : 'text-gray-400 hover:bg-gray-100')}
             aria-label={t('nav.closeMenu')}
           >
             <X className="w-4 h-4" aria-hidden="true" />
@@ -164,7 +164,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
             setIsCollapsed(!isCollapsed);
             if (!isCollapsed) setOpenSubmenus({});
           }}
-          className="hidden lg:flex absolute -right-3 top-[72px] w-6 h-6 bg-white rounded-full shadow-md border border-gray-200 items-center justify-center hover:bg-gray-50 transition-colors z-10"
+          className={cn('hidden lg:flex absolute -right-3 top-[72px] w-6 h-6 rounded-full shadow-md border items-center justify-center transition-colors z-10', dark ? 'bg-[#1e293b] border-white/20 hover:bg-white/10' : 'bg-white border-gray-200 hover:bg-gray-50')}
           aria-label={isCollapsed ? t('nav.expandMenu') : t('nav.collapseMenu')}
         >
           {isCollapsed
@@ -204,8 +204,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                       'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group w-full text-left relative',
                       isCollapsed ? 'justify-center' : 'justify-between',
                       isActive && !isOpen
-                        ? 'bg-[#f0f5ff] text-[#044F88] font-medium'
-                        : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#044F88]'
+                        ? dark ? 'bg-white/10 text-white font-medium' : 'bg-[#f0f5ff] text-[#044F88] font-medium'
+                        : dark ? 'text-white/50 hover:bg-white/[0.06] hover:text-white' : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#044F88]'
                     )}
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
@@ -251,7 +251,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                                 'sub-item relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium group',
                                 isSubActive
                                   ? 'bg-[#044F88] text-white shadow-sm shadow-[#044F88]/20'
-                                  : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#044F88]'
+                                  : dark ? 'text-white/50 hover:bg-white/[0.06] hover:text-white' : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#044F88]'
                               )}
                             >
                               <SubIcon className={cn('w-4 h-4 shrink-0', !isSubActive && 'group-hover:scale-110')} aria-hidden="true" />
@@ -278,7 +278,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                   isCollapsed && 'justify-center',
                   isActive
                     ? 'bg-[#044F88] text-white shadow-md shadow-[#044F88]/20 font-medium'
-                    : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#044F88]'
+                    : dark ? 'text-white/50 hover:bg-white/[0.06] hover:text-white' : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#044F88]'
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >

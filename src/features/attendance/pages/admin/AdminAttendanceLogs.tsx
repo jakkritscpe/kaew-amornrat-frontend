@@ -79,14 +79,14 @@ export function AdminAttendanceLogs() {
                     <h1 className={cn('text-2xl font-bold tracking-tight', dark ? 'text-white' : 'text-slate-900')}>{t('admin.logs.title')}</h1>
                     <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-slate-500')}>{t('admin.logs.subtitle')}</p>
                 </div>
-                <Button variant="outline" className={cn(dark ? 'bg-white/[0.06] border-white/10 text-white/70 hover:bg-white/[0.1]' : 'bg-white border-slate-200')} onClick={exportCSV} disabled={!filteredLogs.length}>
+                <Button data-tour="logs-export" variant="outline" className={cn(dark ? 'bg-white/[0.06] border-white/10 text-white/70 hover:bg-white/[0.1]' : 'bg-white border-slate-200')} onClick={exportCSV} disabled={!filteredLogs.length}>
                     <Download className={cn('w-4 h-4 mr-2', dark ? 'text-white/50' : 'text-slate-500')} />
                     {t('admin.logs.exportCsv')}
                 </Button>
             </div>
 
-            <div className={cn('rounded-xl overflow-hidden', dark ? 'bg-white/[0.06] border border-white/10 shadow-none' : 'bg-white shadow-sm border border-slate-200')}>
-                <div className={cn('p-4 border-b flex flex-col sm:flex-row gap-4 items-stretch sm:items-center', dark ? 'border-white/10 bg-white/[0.03]' : 'border-slate-100 bg-slate-50/50')}>
+            <div data-tour="logs-table" className={cn('rounded-xl overflow-hidden', dark ? 'bg-white/[0.06] border border-white/10 shadow-none' : 'bg-white shadow-sm border border-slate-200')}>
+                <div data-tour="logs-filter" className={cn('p-4 border-b flex flex-col sm:flex-row gap-4 items-stretch sm:items-center', dark ? 'border-white/10 bg-white/[0.03]' : 'border-slate-100 bg-slate-50/50')}>
                     <div className="relative w-full sm:flex-1 sm:max-w-md group focus-within:ring-4 focus-within:ring-[#044F88]/20 rounded-md transition-all">
                         <Search className={cn('absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none group-focus-within:text-[#044F88] transition-colors', dark ? 'text-white/30' : 'text-slate-400')} />
                         <Input

@@ -224,7 +224,7 @@ export function AdminOTCalculator() {
     return (
         <div ref={containerRef} className="space-y-6">
             {/* ═══════════ PERIOD SELECTOR ═══════════ */}
-            <div className={cn('ot-section rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+            <div data-tour="ot-period-selector" className={cn('ot-section rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
                 <div className={cn('p-5 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3', dark ? 'border-white/10' : 'border-gray-100')}>
                     <div>
                         <h3 className={cn('font-semibold text-lg', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.otCalculator.selectPeriod')}</h3>
@@ -279,7 +279,7 @@ export function AdminOTCalculator() {
             </div>
 
             {/* ═══════════ STATS GRID (same as Dashboard) ═══════════ */}
-            <div className="ot-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
+            <div data-tour="ot-stat-cards" className="ot-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ perspective: '1000px' }}>
                 <StatCard
                     title={t('admin.otCalculator.totalOtPay')}
                     value={totPay}
@@ -318,7 +318,7 @@ export function AdminOTCalculator() {
             </div>
 
             {/* ═══════════ TABLE CARD (same as RequestsTable) ═══════════ */}
-            <div className={cn('ot-section rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+            <div data-tour="ot-detail-table" className={cn('ot-section rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
                 {/* Card Header */}
                 <div className={cn('p-6 border-b flex items-center justify-between', dark ? 'border-white/10' : 'border-gray-100')}>
                     <div>
@@ -327,7 +327,7 @@ export function AdminOTCalculator() {
                             {t('admin.otCalculator.totalItems')} {otData.length} {t('common.items')} · {periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} – ${dateRange.end}`}
                         </p>
                     </div>
-                    <Button onClick={exportCSV} variant="outline" className="gap-2">
+                    <Button data-tour="ot-export-csv" onClick={exportCSV} variant="outline" className="gap-2">
                         <Download className="w-4 h-4" />
                         <span className="hidden sm:inline">{t('common.exportCsv')}</span>
                     </Button>

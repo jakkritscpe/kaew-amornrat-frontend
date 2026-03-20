@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { Menu, Sun, Moon } from 'lucide-react';
+import { Menu, Sun, Moon, HelpCircle } from 'lucide-react';
 import { NotificationBell } from '../features/attendance/components/NotificationBell';
 import { TOKEN_KEY } from '../lib/api-client';
 import { cn } from '@/lib/utils';
@@ -10,9 +10,10 @@ interface HeaderProps {
   onMenuClick: () => void;
   dark?: boolean;
   onToggleTheme?: () => void;
+  onHelpClick?: () => void;
 }
 
-export default function Header({ title, onMenuClick, dark, onToggleTheme }: HeaderProps) {
+export default function Header({ title, onMenuClick, dark, onToggleTheme, onHelpClick }: HeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
   const token = localStorage.getItem(TOKEN_KEY);
 
@@ -49,9 +50,23 @@ export default function Header({ title, onMenuClick, dark, onToggleTheme }: Head
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
+        {onHelpClick && (
+          <button
+            onClick={onHelpClick}
+            data-tour="help-btn"
+            className={cn(
+              'p-2 rounded-xl transition-all duration-200',
+              dark ? 'bg-white/10 text-white/50 hover:bg-white/15 hover:text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
+            )}
+            title="Help"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
+        )}
         {onToggleTheme && (
           <button
             onClick={onToggleTheme}
+            data-tour="theme-toggle"
             className={cn(
               'p-2 rounded-xl transition-all duration-200',
               dark ? 'bg-white/10 text-amber-400 hover:bg-white/15' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
