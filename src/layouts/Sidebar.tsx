@@ -29,6 +29,8 @@ interface SidebarProps {
   setIsCollapsed: (value: boolean) => void;
   isMobileOpen: boolean;
   onMobileClose: () => void;
+  dark?: boolean;
+  onToggleTheme?: () => void;
 }
 
 type MenuItem = {
@@ -38,7 +40,7 @@ type MenuItem = {
   subItems?: { id: string; label: string; icon: React.ElementType }[];
 };
 
-export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onMobileClose }: SidebarProps) {
+export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onMobileClose, dark }: SidebarProps) {
   const { t } = useTranslation();
 
   const menuItems: MenuItem[] = [
@@ -112,7 +114,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
       <aside
         className={cn(
           // Base: fixed, full height, white, transition position
-          'fixed left-0 top-0 h-full z-50 bg-white border-r border-gray-200/60 shadow-xl',
+          'fixed left-0 top-0 h-full z-50 border-r shadow-xl transition-colors',
+          dark ? 'bg-[#1e293b] border-white/10' : 'bg-white border-gray-200/60',
           'flex flex-col transition-transform duration-300 ease-out',
           // Width: collapsed on desktop
           isCollapsed ? 'w-20' : 'w-[260px]',
@@ -125,12 +128,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
         aria-label={t('nav.navbar')}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 shrink-0">
+        <div className={cn('h-16 flex items-center justify-between px-4 border-b shrink-0', dark ? 'border-white/10' : 'border-gray-100')}>
           <Link to="/" className="flex items-center gap-3 overflow-hidden">
             <img src="/logo.svg" alt={t('common.companyName')} className="w-9 h-9 shrink-0 object-contain" />
             {!isCollapsed && (
               <div className="flex flex-col">
-                <span className="font-bold text-[15px] text-[#00223A] whitespace-nowrap leading-tight">
+                <span className={cn('font-bold text-[15px] whitespace-nowrap leading-tight', dark ? 'text-white' : 'text-[#00223A]')}>
                   {t('common.companyName')}
                 </span>
                 <span className="text-[10px] font-bold text-[#044F88] tracking-widest leading-none mt-0.5">
@@ -295,7 +298,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
         <div
           ref={profileRef}
           className={cn(
-            'shrink-0 border-t border-gray-100 p-3',
+            'shrink-0 border-t p-3', dark ? 'border-white/10' : 'border-gray-100',
           )}
         >
           <div className={cn('flex items-center gap-3', isCollapsed && 'justify-center')}>
@@ -307,10 +310,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
             {!isCollapsed && (
               <>
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-sm text-[#1d1d1d] truncate">{user?.name || t('nav.admin')}</p>
-                  <p className="text-xs text-[#6f6f6f]">{t('nav.adminRole')}</p>
+                  <p className={cn('font-semibold text-sm truncate', dark ? 'text-white' : 'text-[#1d1d1d]')}>{user?.name || t('nav.admin')}</p>
+                  <p className={cn('text-xs', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('nav.adminRole')}</p>
                 </div>
-                <LanguageSwitcher className="bg-gray-100 shrink-0" />
+                <LanguageSwitcher className={cn('shrink-0', dark ? 'bg-white/10' : 'bg-gray-100')} />
               </>
             )}
           </div>

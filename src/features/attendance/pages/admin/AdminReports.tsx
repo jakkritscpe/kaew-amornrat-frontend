@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
 import type { AttendanceLog, Employee } from '../../types';
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -141,6 +142,7 @@ function useModeCfgLabels(mode: ReportMode, t: (key: string) => string) {
 
 export function AdminReports() {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const { employees, otRequests } = useAttendance();
     const now = new Date();
 
@@ -287,19 +289,19 @@ export function AdminReports() {
             {/* ── Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-[#1d1d1d]">{t('admin.reports.title')}</h1>
-                    <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.reports.subtitle')}</p>
+                    <h1 className={cn('text-2xl font-bold tracking-tight', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.reports.title')}</h1>
+                    <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.reports.subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     {/* ── Mode toggle ── */}
-                    <div className="flex rounded-lg bg-slate-100 p-0.5">
+                    <div className={cn('flex rounded-lg p-0.5', dark ? 'bg-white/[0.06]' : 'bg-slate-100')}>
                         <button
                             onClick={() => setMode('late')}
                             className={cn(
                                 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all',
                                 mode === 'late'
-                                    ? 'bg-white text-amber-600 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
+                                    ? (dark ? 'bg-white/10 text-amber-400 shadow-sm' : 'bg-white text-amber-600 shadow-sm')
+                                    : (dark ? 'text-white/40 hover:text-white/60' : 'text-slate-500 hover:text-slate-700')
                             )}
                         >
                             <AlertTriangle className="w-3.5 h-3.5" />
@@ -310,8 +312,8 @@ export function AdminReports() {
                             className={cn(
                                 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all',
                                 mode === 'ontime'
-                                    ? 'bg-white text-emerald-600 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
+                                    ? (dark ? 'bg-white/10 text-emerald-400 shadow-sm' : 'bg-white text-emerald-600 shadow-sm')
+                                    : (dark ? 'text-white/40 hover:text-white/60' : 'text-slate-500 hover:text-slate-700')
                             )}
                         >
                             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -324,7 +326,7 @@ export function AdminReports() {
                         <Button variant="outline" size="icon" onClick={prevMonth} className="h-9 w-9">
                             <ChevronLeft className="w-4 h-4" />
                         </Button>
-                        <div className="text-sm font-semibold text-[#1d1d1d] min-w-[150px] text-center">
+                        <div className={cn('text-sm font-semibold min-w-[150px] text-center', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                             {THAI_MONTHS[viewMonth]} {viewYear + 543}
                         </div>
                         <Button variant="outline" size="icon" onClick={nextMonth} disabled={isCurrentMonth} className="h-9 w-9">
@@ -355,9 +357,9 @@ export function AdminReports() {
             </div>
 
             {/* ── Monthly report table ── */}
-            <Card className="border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 className="font-semibold text-[#1d1d1d] flex items-center gap-2">
+            <Card className={cn('overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'border-slate-200 shadow-sm')}>
+                <div className={cn('px-5 py-4 border-b flex items-center justify-between', dark ? 'border-white/10' : 'border-slate-100')}>
+                    <h3 className={cn('font-semibold flex items-center gap-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                         <cfg.iconMonthly className={cn('w-5 h-5', cfg.iconMonthlyColor)} />
                         {cfg.monthlyTitle} — {THAI_MONTHS[viewMonth]} {viewYear + 543}
                     </h3>
@@ -384,7 +386,7 @@ export function AdminReports() {
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-50 text-[#6f6f6f]">
+                                <tr className={dark ? 'bg-white/[0.03] text-white/40' : 'bg-slate-50 text-[#6f6f6f]'}>
                                     <th className="text-left px-5 py-3 font-semibold w-12">#</th>
                                     <th className="text-left px-5 py-3 font-semibold">{t('admin.reports.employeeName')}</th>
                                     <th className="text-left px-5 py-3 font-semibold">{t('admin.reports.department')}</th>
@@ -394,10 +396,10 @@ export function AdminReports() {
                             </thead>
                             <tbody>
                                 {monthlyStats.ranking.map((r, i) => (
-                                    <tr key={r.empId} className="border-t border-slate-50 hover:bg-slate-50/50">
-                                        <td className="px-5 py-3 text-[#6f6f6f]">{i + 1}</td>
-                                        <td className="px-5 py-3 font-medium text-[#1d1d1d]">{r.name}</td>
-                                        <td className="px-5 py-3 text-[#6f6f6f]">{r.department}</td>
+                                    <tr key={r.empId} className={cn('border-t', dark ? 'border-white/5 hover:bg-white/[0.04]' : 'border-slate-50 hover:bg-slate-50/50')}>
+                                        <td className={cn('px-5 py-3', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{i + 1}</td>
+                                        <td className={cn('px-5 py-3 font-medium', dark ? 'text-white' : 'text-[#1d1d1d]')}>{r.name}</td>
+                                        <td className={cn('px-5 py-3', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{r.department}</td>
                                         <td className="px-5 py-3 text-center">
                                             <span className={cn(
                                                 'inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-xs font-bold',
@@ -408,7 +410,7 @@ export function AdminReports() {
                                                 {r.count}
                                             </span>
                                         </td>
-                                        <td className="px-5 py-3 text-[#6f6f6f] text-xs hidden md:table-cell">
+                                        <td className={cn('px-5 py-3 text-xs hidden md:table-cell', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>
                                             <div className="flex flex-wrap gap-1">
                                                 {r.dates.map(d => (
                                                     <span key={d} className={cn('px-2 py-0.5 rounded font-medium', cfg.dateBadge)}>
@@ -428,9 +430,9 @@ export function AdminReports() {
             {/* ── Yearly chart + ranking ── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Bar chart */}
-                <Card className="border-slate-200 shadow-sm overflow-hidden">
-                    <div className="px-5 py-4 border-b border-slate-100">
-                        <h3 className="font-semibold text-[#1d1d1d] flex items-center gap-2">
+                <Card className={cn('overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'border-slate-200 shadow-sm')}>
+                    <div className={cn('px-5 py-4 border-b', dark ? 'border-white/10' : 'border-slate-100')}>
+                        <h3 className={cn('font-semibold flex items-center gap-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                             <cfg.iconChart className="w-5 h-5 text-[#044F88]" />
                             {cfg.yearlyChartTitle} — {viewYear + 543}
                         </h3>
@@ -482,9 +484,9 @@ export function AdminReports() {
                 </Card>
 
                 {/* Yearly ranking */}
-                <Card className="border-slate-200 shadow-sm overflow-hidden">
-                    <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-                        <h3 className="font-semibold text-[#1d1d1d] flex items-center gap-2">
+                <Card className={cn('overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'border-slate-200 shadow-sm')}>
+                    <div className={cn('px-5 py-4 border-b flex items-center justify-between', dark ? 'border-white/10' : 'border-slate-100')}>
+                        <h3 className={cn('font-semibold flex items-center gap-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                             <cfg.iconRank className={cn('w-5 h-5', cfg.iconRankColor)} />
                             {cfg.yearlyRankTitle} {viewYear + 543}
                         </h3>
@@ -508,11 +510,11 @@ export function AdminReports() {
                             <p className="text-sm text-[#6f6f6f]">{cfg.emptyYearly}</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-slate-50 max-h-[360px] overflow-y-auto">
+                        <div className={cn('divide-y max-h-[360px] overflow-y-auto', dark ? 'divide-white/5' : 'divide-slate-50')}>
                             {yearlyRanking.map((r, i) => {
                                 const barW = Math.max((r.count / yearlyRanking[0].count) * 100, 10);
                                 return (
-                                    <div key={r.empId} className="px-5 py-3 flex items-center gap-4 hover:bg-slate-50/50">
+                                    <div key={r.empId} className={cn('px-5 py-3 flex items-center gap-4', dark ? 'hover:bg-white/[0.04]' : 'hover:bg-slate-50/50')}>
                                         <span className={cn(
                                             'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
                                             cfg.rankColors[Math.min(i, 3)]
@@ -521,10 +523,10 @@ export function AdminReports() {
                                         </span>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-baseline gap-2">
-                                                <span className="text-sm font-medium text-[#1d1d1d] truncate">{r.name}</span>
-                                                <span className="text-[10px] text-[#6f6f6f] shrink-0">{r.department}</span>
+                                                <span className={cn('text-sm font-medium truncate', dark ? 'text-white' : 'text-[#1d1d1d]')}>{r.name}</span>
+                                                <span className={cn('text-[10px] shrink-0', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{r.department}</span>
                                             </div>
-                                            <div className="mt-1.5 w-full bg-slate-100 rounded-full h-1.5">
+                                            <div className={cn('mt-1.5 w-full rounded-full h-1.5', dark ? 'bg-white/10' : 'bg-slate-100')}>
                                                 <div className={cn('h-1.5 rounded-full transition-all', cfg.progressBar)}
                                                     style={{ width: `${barW}%` }} />
                                             </div>
@@ -541,9 +543,9 @@ export function AdminReports() {
             </div>
 
             {/* ── Department breakdown ── */}
-            <Card className="border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100">
-                    <h3 className="font-semibold text-[#1d1d1d] flex items-center gap-2">
+            <Card className={cn('overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'border-slate-200 shadow-sm')}>
+                <div className={cn('px-5 py-4 border-b', dark ? 'border-white/10' : 'border-slate-100')}>
+                    <h3 className={cn('font-semibold flex items-center gap-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                         <BarChart3 className="w-5 h-5 text-indigo-500" />
                         {t('admin.reports.deptBreakdown')}
                     </h3>
@@ -556,8 +558,8 @@ export function AdminReports() {
                         return (
                             <div key={dept}>
                                 <div className="flex justify-between text-sm mb-1.5">
-                                    <span className="font-medium text-[#1d1d1d]">{dept}</span>
-                                    <span className="text-[#6f6f6f]">
+                                    <span className={cn('font-medium', dark ? 'text-white' : 'text-[#1d1d1d]')}>{dept}</span>
+                                    <span className={dark ? 'text-white/40' : 'text-[#6f6f6f]'}>
                                         {empCount} {t('common.person')}
                                         {deptFiltered > 0 && (
                                             <span className={cn('ml-2', cfg.totalColor)}>
@@ -566,7 +568,7 @@ export function AdminReports() {
                                         )}
                                     </span>
                                 </div>
-                                <div className="w-full bg-slate-100 rounded-full h-2">
+                                <div className={cn('w-full rounded-full h-2', dark ? 'bg-white/10' : 'bg-slate-100')}>
                                     <div className="bg-indigo-500 h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
                                 </div>
                             </div>
@@ -583,16 +585,17 @@ export function AdminReports() {
 function SummaryCard({ icon: Icon, label, value, unit, color }: {
     icon: React.ElementType; label: string; value: string; unit?: string; color: string;
 }) {
+    const { dark } = useAdminTheme();
     return (
-        <Card className="border-slate-200 shadow-sm p-4 flex items-center gap-4">
+        <Card className={cn('p-4 flex items-center gap-4', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'border-slate-200 shadow-sm')}>
             <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center shrink-0', color)}>
                 <Icon className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
-                <p className="text-[11px] font-semibold text-[#6f6f6f] uppercase tracking-wider">{label}</p>
+                <p className={cn('text-[11px] font-semibold uppercase tracking-wider', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{label}</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                    <span className="text-xl font-black text-[#1d1d1d]">{value}</span>
-                    {unit && <span className="text-xs text-[#6f6f6f]">{unit}</span>}
+                    <span className={cn('text-xl font-black', dark ? 'text-white' : 'text-[#1d1d1d]')}>{value}</span>
+                    {unit && <span className={cn('text-xs', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{unit}</span>}
                 </div>
             </div>
         </Card>

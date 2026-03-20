@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -42,6 +43,7 @@ interface StatCardProps {
 }
 
 function StatCard({ title, value, suffix, icon: Icon, color, delay, format }: StatCardProps) {
+    const { dark } = useAdminTheme();
     const cardRef = useRef<HTMLDivElement>(null);
     const [displayValue, setDisplayValue] = useState(0);
 
@@ -94,22 +96,23 @@ function StatCard({ title, value, suffix, icon: Icon, color, delay, format }: St
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             className={cn(
-                'relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100',
-                'hover:shadow-xl hover:shadow-gray-200/50 transition-shadow duration-300',
-                'cursor-pointer overflow-hidden group'
+                'relative rounded-2xl p-6 border',
+                dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100',
+                dark ? 'hover:shadow-none' : 'hover:shadow-xl hover:shadow-gray-200/50',
+                'transition-shadow duration-300 cursor-pointer overflow-hidden group'
             )}
             style={{ transformStyle: 'preserve-3d' }}
         >
             {/* Glossy sheen effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className={cn('absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none', dark && 'hidden')} />
 
             <div className="flex items-start justify-between relative z-10">
                 <div>
-                    <p className="text-sm text-[#6f6f6f] mb-1">{title}</p>
-                    <span className="text-3xl font-bold text-[#1d1d1d] tabular-nums">
+                    <p className={cn('text-sm mb-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{title}</p>
+                    <span className={cn('text-3xl font-bold tabular-nums', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                         {formatted}
                     </span>
-                    <p className="text-sm text-gray-400 mt-1">{suffix}</p>
+                    <p className={cn('text-sm mt-1', dark ? 'text-white/30' : 'text-gray-400')}>{suffix}</p>
                 </div>
                 <div className={cn('stat-icon w-12 h-12 rounded-xl flex items-center justify-center', color)}>
                     <Icon className="w-6 h-6 text-white" />
@@ -124,6 +127,7 @@ function StatCard({ title, value, suffix, icon: Icon, color, delay, format }: St
 // ═══════════════════════════════════════════
 export function AdminOTCalculator() {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const { employees, logs, companySettings } = useAttendance();
     const containerRef = useRef<HTMLDivElement>(null);
     const MONTHS_FULL = Array.from({ length: 12 }, (_, i) => t(`months.full.${i}`));
@@ -220,14 +224,14 @@ export function AdminOTCalculator() {
     return (
         <div ref={containerRef} className="space-y-6">
             {/* ═══════════ PERIOD SELECTOR ═══════════ */}
-            <div className="ot-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className={cn('ot-section rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
+                <div className={cn('p-5 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3', dark ? 'border-white/10' : 'border-gray-100')}>
                     <div>
-                        <h3 className="font-semibold text-lg text-[#1d1d1d]">{t('admin.otCalculator.selectPeriod')}</h3>
-                        <p className="text-sm text-[#6f6f6f]">{t('admin.otCalculator.selectPeriodDesc')}</p>
+                        <h3 className={cn('font-semibold text-lg', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.otCalculator.selectPeriod')}</h3>
+                        <p className={cn('text-sm', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.otCalculator.selectPeriodDesc')}</p>
                     </div>
                     {/* Mode Tabs */}
-                    <div className="flex items-center gap-0 border border-gray-200 rounded-lg overflow-hidden bg-white self-start sm:self-auto">
+                    <div className={cn('flex items-center gap-0 border rounded-lg overflow-hidden self-start sm:self-auto', dark ? 'border-white/10 bg-white/[0.06]' : 'border-gray-200 bg-white')}>
                         {(['monthly', 'custom'] as PeriodMode[]).map(mode => (
                             <button key={mode} type="button"
                                 onClick={() => setPeriodMode(mode)}
@@ -235,7 +239,7 @@ export function AdminOTCalculator() {
                                     'px-4 py-2.5 sm:py-2 text-sm font-medium transition-colors min-w-[5.5rem] sm:min-w-0',
                                     periodMode === mode
                                         ? 'bg-gradient-to-r from-[#044F88] to-[#00223A] text-white'
-                                        : 'bg-white text-[#6f6f6f] hover:bg-gray-50',
+                                        : dark ? 'bg-transparent text-white/50 hover:bg-white/[0.04]' : 'bg-white text-[#6f6f6f] hover:bg-gray-50',
                                 )}
                             >
                                 {mode === 'monthly' ? t('admin.otCalculator.monthly') : t('admin.otCalculator.custom')}
@@ -247,19 +251,19 @@ export function AdminOTCalculator() {
                 <div className="p-5">
                     {periodMode === 'monthly' ? (
                         <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <button onClick={() => navMonth(-1)} className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-[#6f6f6f] hover:text-[#1d1d1d] hover:border-gray-400 hover:bg-gray-50 active:scale-95 transition-all">
+                            <button onClick={() => navMonth(-1)} className={cn('w-10 h-10 sm:w-9 sm:h-9 shrink-0 rounded-lg border flex items-center justify-center active:scale-95 transition-all', dark ? 'border-white/10 bg-white/[0.06] text-white/50 hover:text-white hover:bg-white/[0.1]' : 'border-gray-200 bg-white text-[#6f6f6f] hover:text-[#1d1d1d] hover:border-gray-400 hover:bg-gray-50')}>
                                 <ChevronLeft className="w-4 h-4" />
                             </button>
-                            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 h-10 sm:h-9 flex-1 sm:flex-initial">
-                                <select className="appearance-none bg-transparent text-sm font-semibold text-[#1d1d1d] pr-1 cursor-pointer focus:outline-none flex-1 sm:flex-initial" value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}>
+                            <div className={cn('flex items-center gap-2 border rounded-lg px-3 h-10 sm:h-9 flex-1 sm:flex-initial', dark ? 'bg-white/[0.06] border-white/10' : 'bg-white border-gray-200')}>
+                                <select className={cn('appearance-none bg-transparent text-sm font-semibold pr-1 cursor-pointer focus:outline-none flex-1 sm:flex-initial', dark ? 'text-white' : 'text-[#1d1d1d]')} value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}>
                                     {MONTHS_FULL.map((m, i) => <option key={i} value={i}>{m}</option>)}
                                 </select>
-                                <span className="text-gray-300">|</span>
-                                <select className="appearance-none bg-transparent text-sm font-semibold text-[#1d1d1d] cursor-pointer focus:outline-none" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+                                <span className={dark ? 'text-white/20' : 'text-gray-300'}>|</span>
+                                <select className={cn('appearance-none bg-transparent text-sm font-semibold cursor-pointer focus:outline-none', dark ? 'text-white' : 'text-[#1d1d1d]')} value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
                                     {yearOpts.map(y => <option key={y} value={y}>{y + 543}</option>)}
                                 </select>
                             </div>
-                            <button onClick={() => navMonth(1)} className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-[#6f6f6f] hover:text-[#1d1d1d] hover:border-gray-400 hover:bg-gray-50 active:scale-95 transition-all">
+                            <button onClick={() => navMonth(1)} className={cn('w-10 h-10 sm:w-9 sm:h-9 shrink-0 rounded-lg border flex items-center justify-center active:scale-95 transition-all', dark ? 'border-white/10 bg-white/[0.06] text-white/50 hover:text-white hover:bg-white/[0.1]' : 'border-gray-200 bg-white text-[#6f6f6f] hover:text-[#1d1d1d] hover:border-gray-400 hover:bg-gray-50')}>
                                 <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
@@ -314,12 +318,12 @@ export function AdminOTCalculator() {
             </div>
 
             {/* ═══════════ TABLE CARD (same as RequestsTable) ═══════════ */}
-            <div className="ot-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className={cn('ot-section rounded-2xl border overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white shadow-sm border-gray-100')}>
                 {/* Card Header */}
-                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                <div className={cn('p-6 border-b flex items-center justify-between', dark ? 'border-white/10' : 'border-gray-100')}>
                     <div>
-                        <h3 className="font-semibold text-lg text-[#1d1d1d]">{t('admin.otCalculator.detailTitle')}</h3>
-                        <p className="text-sm text-[#6f6f6f]">
+                        <h3 className={cn('font-semibold text-lg', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.otCalculator.detailTitle')}</h3>
+                        <p className={cn('text-sm', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>
                             {t('admin.otCalculator.totalItems')} {otData.length} {t('common.items')} · {periodMode === 'monthly' ? `${MONTHS_FULL[selectedMonth]} ${selectedYear + 543}` : `${dateRange.start} – ${dateRange.end}`}
                         </p>
                     </div>
@@ -331,9 +335,9 @@ export function AdminOTCalculator() {
 
                 {otData.length === 0 ? (
                     <div className="py-20 text-center">
-                        <CalendarRange className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-                        <p className="text-[#1d1d1d] font-medium">{t('admin.otCalculator.noOtData')}</p>
-                        <p className="text-sm text-[#6f6f6f] mt-1">{t('admin.otCalculator.noOtHint')}</p>
+                        <CalendarRange className={cn('w-10 h-10 mx-auto mb-4', dark ? 'text-white/20' : 'text-gray-300')} />
+                        <p className={cn('font-medium', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.otCalculator.noOtData')}</p>
+                        <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.otCalculator.noOtHint')}</p>
                     </div>
                 ) : (
                     <>
@@ -341,20 +345,20 @@ export function AdminOTCalculator() {
                         <div className="hidden sm:block overflow-x-auto">
                             <table className="w-full border-collapse text-sm">
                                 <thead>
-                                    <tr className="bg-gray-50/50 border-b border-gray-200">
-                                        <th className="w-[60px] text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider pl-6 pr-4 py-4">#</th>
-                                        <th className="text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4">{t('admin.otCalculator.employee')}</th>
-                                        <th className="w-[160px] text-left text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell">{t('admin.otCalculator.department')}</th>
-                                        <th className="w-[120px] text-right text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4">{t('admin.otCalculator.otHours')}</th>
-                                        <th className="w-[120px] text-center text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell">{t('admin.otCalculator.rate')}</th>
-                                        <th className="w-[140px] text-right text-xs text-[#6f6f6f] font-semibold uppercase tracking-wider pl-4 pr-6 py-4">{t('admin.otCalculator.otPay')}</th>
+                                    <tr className={cn('border-b', dark ? 'bg-white/[0.03] border-white/10' : 'bg-gray-50/50 border-gray-200')}>
+                                        <th className={cn('w-[60px] text-left text-xs font-semibold uppercase tracking-wider pl-6 pr-4 py-4', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>#</th>
+                                        <th className={cn('text-left text-xs font-semibold uppercase tracking-wider px-4 py-4', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.otCalculator.employee')}</th>
+                                        <th className={cn('w-[160px] text-left text-xs font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.otCalculator.department')}</th>
+                                        <th className={cn('w-[120px] text-right text-xs font-semibold uppercase tracking-wider px-4 py-4', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.otCalculator.otHours')}</th>
+                                        <th className={cn('w-[120px] text-center text-xs font-semibold uppercase tracking-wider px-4 py-4 hidden lg:table-cell', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.otCalculator.rate')}</th>
+                                        <th className={cn('w-[140px] text-right text-xs font-semibold uppercase tracking-wider pl-4 pr-6 py-4', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('admin.otCalculator.otPay')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {otData.map((d, i) => (
                                         <tr key={d.emp.id} className={cn(
-                                            'ot-row group border-b border-gray-100 transition-colors duration-300',
-                                            'hover:bg-[#044F88]/30'
+                                            'ot-row group border-b transition-colors duration-300',
+                                            dark ? 'border-white/10 hover:bg-white/[0.04]' : 'border-gray-100 hover:bg-[#044F88]/30'
                                         )}>
                                             <td className="pl-6 pr-4 py-4 font-mono text-sm text-[#044F88] font-medium align-top">{String(i + 1).padStart(2, '0')}</td>
                                             <td className="px-4 py-4 align-top">
@@ -363,18 +367,18 @@ export function AdminOTCalculator() {
                                                         {d.emp.name.charAt(0)}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="font-medium text-sm text-[#1d1d1d] group-hover:text-[#044F88] transition-colors truncate">{d.emp.name}</p>
-                                                        <p className="text-xs text-[#6f6f6f] truncate lg:hidden">{d.emp.department}</p>
+                                                        <p className={cn('font-medium text-sm group-hover:text-[#044F88] transition-colors truncate', dark ? 'text-white' : 'text-[#1d1d1d]')}>{d.emp.name}</p>
+                                                        <p className={cn('text-xs truncate lg:hidden', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{d.emp.department}</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-4 text-sm text-[#6f6f6f] align-top hidden lg:table-cell">{d.emp.department}</td>
+                                            <td className={cn('px-4 py-4 text-sm align-top hidden lg:table-cell', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{d.emp.department}</td>
                                             <td className="px-4 py-4 text-right align-top">
-                                                <span className="font-semibold text-sm text-[#1d1d1d] tabular-nums">{d.hrs.toFixed(1)}</span>
-                                                <span className="text-xs text-[#6f6f6f] ml-1">{t('common.hours')}</span>
+                                                <span className={cn('font-semibold text-sm tabular-nums', dark ? 'text-white' : 'text-[#1d1d1d]')}>{d.hrs.toFixed(1)}</span>
+                                                <span className={cn('text-xs ml-1', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{t('common.hours')}</span>
                                             </td>
                                             <td className="px-4 py-4 text-center align-top hidden lg:table-cell">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-[#6f6f6f]">
+                                                <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium', dark ? 'bg-white/[0.06] text-white/50' : 'bg-gray-100 text-[#6f6f6f]')}>
                                                     {d.rVal}{d.rType === 'multiplier' ? '×' : `฿/${t('common.hours')}`}
                                                 </span>
                                             </td>
@@ -385,12 +389,12 @@ export function AdminOTCalculator() {
                                     ))}
                                 </tbody>
                                 <tfoot>
-                                    <tr className="bg-gray-50/50 border-t border-gray-200">
+                                    <tr className={cn('border-t', dark ? 'bg-white/[0.03] border-white/10' : 'bg-gray-50/50 border-gray-200')}>
                                         <td className="pl-6 pr-4 py-4" colSpan={3}>
-                                            <span className="font-semibold text-sm text-[#1d1d1d]">{t('admin.otCalculator.grandTotal')}</span>
+                                            <span className={cn('font-semibold text-sm', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.otCalculator.grandTotal')}</span>
                                         </td>
                                         <td className="px-4 py-4 text-right">
-                                            <span className="font-semibold text-sm text-[#1d1d1d] tabular-nums">{totHrs.toFixed(1)} {t('common.hours')}</span>
+                                            <span className={cn('font-semibold text-sm tabular-nums', dark ? 'text-white' : 'text-[#1d1d1d]')}>{totHrs.toFixed(1)} {t('common.hours')}</span>
                                         </td>
                                         <td className="px-4 py-4 hidden lg:table-cell"></td>
                                         <td className="pl-4 pr-6 py-4 text-right">
@@ -402,23 +406,23 @@ export function AdminOTCalculator() {
                         </div>
 
                         {/* ── Mobile List ── */}
-                        <div className="sm:hidden divide-y divide-gray-100">
+                        <div className={cn('sm:hidden divide-y', dark ? 'divide-white/10' : 'divide-gray-100')}>
                             {otData.map((d, i) => (
-                                <div key={d.emp.id} className="ot-row p-4 flex items-center gap-3 hover:bg-[#044F88]/30 transition-colors duration-300 group">
+                                <div key={d.emp.id} className={cn('ot-row p-4 flex items-center gap-3 transition-colors duration-300 group', dark ? 'hover:bg-white/[0.04]' : 'hover:bg-[#044F88]/30')}>
                                     <span className="font-mono text-xs text-[#044F88] font-medium w-5 shrink-0 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
                                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center text-white text-xs font-bold shrink-0">
                                         {d.emp.name.charAt(0)}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="font-medium text-sm text-[#1d1d1d] group-hover:text-[#044F88] transition-colors truncate">{d.emp.name}</p>
-                                        <p className="text-xs text-[#6f6f6f] truncate">{d.emp.department} · {d.hrs.toFixed(1)} {t('common.hours')} · {t('admin.otCalculator.rate')} {d.rVal}{d.rType === 'multiplier' ? '×' : `฿/${t('common.hours')}`}</p>
+                                        <p className={cn('font-medium text-sm group-hover:text-[#044F88] transition-colors truncate', dark ? 'text-white' : 'text-[#1d1d1d]')}>{d.emp.name}</p>
+                                        <p className={cn('text-xs truncate', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>{d.emp.department} · {d.hrs.toFixed(1)} {t('common.hours')} · {t('admin.otCalculator.rate')} {d.rVal}{d.rType === 'multiplier' ? '×' : `฿/${t('common.hours')}`}</p>
                                     </div>
                                     <p className="font-semibold text-sm text-emerald-600 tabular-nums shrink-0">฿{fmt(d.pay)}</p>
                                 </div>
                             ))}
                             {/* Mobile Total */}
-                            <div className="p-4 flex items-center justify-between bg-gray-50/50">
-                                <span className="font-semibold text-sm text-[#1d1d1d]">{t('admin.otCalculator.grandTotal')}</span>
+                            <div className={cn('p-4 flex items-center justify-between', dark ? 'bg-white/[0.03]' : 'bg-gray-50/50')}>
+                                <span className={cn('font-semibold text-sm', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.otCalculator.grandTotal')}</span>
                                 <div className="text-right">
                                     <p className="font-bold text-base text-emerald-600 tabular-nums">฿{fmt(totPay)}</p>
                                     <p className="text-xs text-[#6f6f6f]">{totHrs.toFixed(1)} {t('common.hours')} · {pplWithOt} {t('common.person')}</p>
