@@ -36,6 +36,7 @@ interface AdminModalProps {
 
 function AdminModal({ editTarget, onClose, onSaved }: AdminModalProps) {
     const { t } = useTranslation();
+    const { dark } = useAdminTheme();
     const isEdit = !!editTarget;
     const [form, setForm] = useState<AdminFormData>(
         isEdit
