@@ -57,7 +57,7 @@ export function MagneticButton({ onClick, className, icon = <Plus className="w-4
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             className={cn(
-                "bg-[#2075f8] hover:bg-[#1a64d4] text-white rounded-xl px-4 py-2 h-10 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300",
+                "bg-[#044F88] hover:bg-[#00223A] text-white rounded-xl px-4 py-2 h-10 shadow-lg shadow-[#044F88]/25 hover:shadow-xl hover:shadow-[#044F88]/30 transition-all duration-300",
                 className
             )}
         >

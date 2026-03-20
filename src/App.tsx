@@ -4,8 +4,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './features/auth/contexts/AuthContext';
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
 import { useAuth } from './features/auth/hooks/useAuth';
-import { RepairRequestProvider } from './features/repair-requests/contexts/RepairRequestContext';
-import { JobsProvider } from './features/jobs/contexts/JobsContext';
 import { AttendanceProvider } from './features/attendance/contexts/AttendanceContext';
 
 // Static imports for layouts and auth (always needed)
@@ -15,13 +13,8 @@ import { LoginPage } from './features/auth/pages/LoginPage';
 
 // Lazy-loaded pages — each becomes its own chunk
 const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
-const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
-const RequestsPage = lazy(() => import('./pages/RequestsPage').then(m => ({ default: m.RequestsPage })));
-const TechniciansPage = lazy(() => import('./pages/TechniciansPage').then(m => ({ default: m.TechniciansPage })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
-const JobsPage = lazy(() => import('./features/jobs/components/JobsPage'));
-const DocumentPage = lazy(() => import('./features/jobs/pages/DocumentPage'));
 
 // Attendance admin pages
 const AdminAttendanceDashboard = lazy(() => import('./features/attendance/pages/admin/AdminAttendanceDashboard').then(m => ({ default: m.AdminAttendanceDashboard })));
@@ -44,17 +37,15 @@ const QRLoginPage = lazy(() => import('./features/auth/pages/QRLoginPage').then(
 
 function SmartAdminRedirect() {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/admin/dashboard" replace />;
-  if (user.role === 'super_admin') return <Navigate to="/admin/dashboard" replace />;
+  if (!user) return <Navigate to="/admin/attendance/dashboard" replace />;
+  if (user.role === 'super_admin') return <Navigate to="/admin/attendance/dashboard" replace />;
   const first = user.accessibleMenus?.[0];
-  return <Navigate to={first ? `/admin/${first}` : '/admin/dashboard'} replace />;
+  return <Navigate to={first ? `/admin/${first}` : '/admin/attendance/dashboard'} replace />;
 }
 
 function App() {
   return (
     <AuthProvider>
-      <RepairRequestProvider>
-        <JobsProvider>
           <AttendanceProvider>
             <Suspense fallback={null}>
               <Routes>
@@ -64,11 +55,6 @@ function App() {
                 <Route path="/admin" element={<ProtectedRoute />}>
                   <Route element={<MainLayout />}>
                     <Route index element={<SmartAdminRedirect />} />
-                    <Route path="dashboard" element={<DashboardPage />} />
-                    <Route path="requests" element={<RequestsPage />} />
-                    <Route path="jobs" element={<JobsPage />} />
-                    <Route path="jobs/:jobId/document" element={<DocumentPage />} />
-                    <Route path="technicians" element={<TechniciansPage />} />
                     <Route path="settings" element={<SettingsPage />} />
 
                     <Route path="attendance/dashboard" element={<AdminAttendanceDashboard />} />
@@ -100,8 +86,6 @@ function App() {
               </Routes>
             </Suspense>
           </AttendanceProvider>
-        </JobsProvider>
-      </RepairRequestProvider>
     </AuthProvider>
   );
 }

@@ -1,4 +1,4 @@
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { Card } from '@/components/ui/card';
 import { BarChart3, TrendingUp, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -31,18 +31,18 @@ export function AdminReports() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="p-6 border-slate-200 shadow-sm shadow-slate-100/50">
                     <h3 className="font-semibold text-slate-800 flex items-center mb-6">
-                        <TrendingUp className="w-5 h-5 mr-2 text-blue-500" />
+                        <TrendingUp className="w-5 h-5 mr-2 text-[#044F88]" />
                         อัตราการมาทำงานรายสัปดาห์
                     </h3>
                     <div className="flex items-end justify-between h-48 mt-4 gap-2">
                         {weeklyData.map((d, i) => (
                             <div key={i} className="flex flex-col items-center flex-1">
-                                <div className="w-full max-w-[40px] bg-blue-100 rounded-t-md relative h-full flex items-end">
+                                <div className="w-full max-w-[40px] bg-[#044F88]/10 rounded-t-md relative h-full flex items-end">
                                     <div
-                                        className="w-full bg-blue-600 rounded-t-md transition-all"
+                                        className="w-full bg-[#044F88] rounded-t-md transition-all"
                                         style={{ height: `${d.p}%` }}
                                     ></div>
-                                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-blue-600">{d.p}%</span>
+                                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#044F88]">{d.p}%</span>
                                 </div>
                                 <span className="text-xs font-medium text-slate-500 mt-2">{d.day}</span>
                             </div>

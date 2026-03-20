@@ -94,17 +94,17 @@ export function QRCheckInPage() {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-                <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />
+                <Loader2 className="w-10 h-10 text-[#044F88] animate-spin mb-4" />
                 <p className="text-gray-500 font-medium">กำลังค้นหาพิกัดของคุณ...</p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-white px-6">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-[#044F88]/5 to-white px-6">
             <div className="bg-white rounded-3xl shadow-xl w-full max-w-sm p-8 text-center relative overflow-hidden">
                 {/* Decorative Top Banner */}
-                <div className="absolute top-0 left-0 right-0 h-4 bg-blue-600"></div>
+                <div className="absolute top-0 left-0 right-0 h-4 bg-[#044F88]"></div>
 
                 {result ? (
                     <div className="pt-4">
@@ -120,11 +120,11 @@ export function QRCheckInPage() {
                     </div>
                 ) : (
                     <div className="pt-2">
-                        <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+                        <div className="w-20 h-20 rounded-full bg-[#044F88]/10 flex items-center justify-center mx-auto mb-4">
                             {employee?.avatarUrl ? (
                                 <img src={employee.avatarUrl} alt={employee.name} className="w-20 h-20 rounded-full object-cover" />
                             ) : (
-                                <span className="text-blue-600 font-bold text-2xl">
+                                <span className="text-[#044F88] font-bold text-2xl">
                                     {employee ? employee.name.charAt(0) : '?'}
                                 </span>
                             )}
@@ -137,7 +137,7 @@ export function QRCheckInPage() {
                             </>
                         ) : (
                             <div className="mb-6">
-                                <Loader2 className="w-6 h-6 text-blue-500 animate-spin mx-auto" />
+                                <Loader2 className="w-6 h-6 text-[#044F88] animate-spin mx-auto" />
                             </div>
                         )}
 
@@ -146,12 +146,12 @@ export function QRCheckInPage() {
                                 <p className="text-sm text-red-600 font-medium">{geoError}</p>
                             </div>
                         ) : (
-                            <div className="bg-blue-50/50 p-4 rounded-xl mb-6 flex items-center gap-3">
-                                <div className="p-2 bg-white rounded-full text-blue-500 shadow-sm shrink-0">
+                            <div className="bg-[#044F88]/5 p-4 rounded-xl mb-6 flex items-center gap-3">
+                                <div className="p-2 bg-white rounded-full text-[#044F88] shadow-sm shrink-0">
                                     <MapPin className="w-5 h-5" />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-xs text-blue-800 font-semibold mb-0.5">พิกัด GPS ตรวจสอบแล้ว</p>
+                                    <p className="text-xs text-[#00223A] font-semibold mb-0.5">พิกัด GPS ตรวจสอบแล้ว</p>
                                     <p className="text-[10px] text-gray-500 truncate w-40">Lat: {currentLoc?.lat.toFixed(4)}, Lng: {currentLoc?.lng.toFixed(4)}</p>
                                 </div>
                             </div>
@@ -159,7 +159,7 @@ export function QRCheckInPage() {
 
                         <Button
                             size="lg"
-                            className="w-full text-lg py-6 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 rounded-full disabled:opacity-50"
+                            className="w-full text-lg py-6 bg-[#044F88] hover:bg-[#00223A] shadow-lg shadow-[#044F88]/30 rounded-full disabled:opacity-50"
                             disabled={!!geoError || !employee || actionLoading}
                             onClick={handleCheckIn}
                         >

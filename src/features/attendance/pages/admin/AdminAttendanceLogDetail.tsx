@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -73,7 +73,7 @@ const STATUS_CONFIG = {
     present: { label: 'มาทำงาน', bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-600/20', dot: 'bg-emerald-500' },
     late:    { label: 'มาสาย',   bg: 'bg-orange-100',  text: 'text-orange-700',  ring: 'ring-orange-600/20',  dot: 'bg-orange-500'  },
     absent:  { label: 'ขาดงาน',  bg: 'bg-red-100',     text: 'text-red-700',     ring: 'ring-red-600/20',     dot: 'bg-red-500'     },
-    on_leave:{ label: 'ลางาน',   bg: 'bg-blue-100',    text: 'text-blue-700',    ring: 'ring-blue-600/20',    dot: 'bg-blue-500'    },
+    on_leave:{ label: 'ลางาน',   bg: 'bg-[#044F88]/10',    text: 'text-[#00223A]',    ring: 'ring-[#044F88]/20',    dot: 'bg-[#044F88]'    },
 } as const;
 
 export function AdminAttendanceLogDetail() {
@@ -150,7 +150,7 @@ export function AdminAttendanceLogDetail() {
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         {/* Avatar + employee info */}
                         <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-sm select-none">
+                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-sm select-none">
                                 {emp?.avatarUrl
                                     ? <img src={emp.avatarUrl} alt={emp.name} className="w-full h-full rounded-full object-cover" />
                                     : initials
@@ -243,8 +243,8 @@ export function AdminAttendanceLogDetail() {
                     {/* Work hours */}
                     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                <User className="w-4 h-4 text-blue-600" />
+                            <div className="w-8 h-8 rounded-lg bg-[#044F88]/5 flex items-center justify-center">
+                                <User className="w-4 h-4 text-[#044F88]" />
                             </div>
                             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">ชั่วโมงงาน</span>
                         </div>
@@ -288,7 +288,7 @@ export function AdminAttendanceLogDetail() {
                             </span>
                             {loc && (
                                 <span className="flex items-center gap-1.5">
-                                    <span className="w-4 h-3 rounded border-2 border-dashed border-blue-400 bg-blue-50 inline-block" />
+                                    <span className="w-4 h-3 rounded border-2 border-dashed border-[#044F88]/80 bg-[#044F88]/5 inline-block" />
                                     Geofence
                                 </span>
                             )}
@@ -325,8 +325,8 @@ export function AdminAttendanceLogDetail() {
                                         center={[loc.lat, loc.lng]}
                                         radius={loc.radiusMeters}
                                         pathOptions={{
-                                            color: '#3b82f6',
-                                            fillColor: '#3b82f6',
+                                            color: '#044F88',
+                                            fillColor: '#044F88',
                                             fillOpacity: 0.08,
                                             weight: 2,
                                             dashArray: '6 4',
@@ -377,7 +377,7 @@ export function AdminAttendanceLogDetail() {
                         </span>
                         {loc && (
                             <span className="flex items-center gap-1.5">
-                                <span className="w-4 h-3 rounded border-2 border-dashed border-blue-400 bg-blue-50 inline-block" /> Geofence
+                                <span className="w-4 h-3 rounded border-2 border-dashed border-[#044F88]/80 bg-[#044F88]/5 inline-block" /> Geofence
                             </span>
                         )}
                     </div>

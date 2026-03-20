@@ -32,7 +32,7 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onMenuClick}
-          className="lg:hidden flex-shrink-0 p-2 -ml-1 rounded-xl hover:bg-gray-100 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400"
+          className="lg:hidden flex-shrink-0 p-2 -ml-1 rounded-xl hover:bg-gray-100 transition-colors focus-visible:ring-2 focus-visible:ring-[#044F88]/80"
           aria-label="เปิดเมนู"
         >
           <Menu className="w-5 h-5 text-gray-600" aria-hidden="true" />

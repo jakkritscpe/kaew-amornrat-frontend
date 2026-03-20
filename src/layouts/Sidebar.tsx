@@ -7,11 +7,9 @@ import {
   ClipboardList,
   Users,
   Settings,
-  Globe,
   ChevronLeft,
   ChevronRight,
   LogOut,
-  FileText,
   X,
   Clock,
   MapPin,
@@ -39,10 +37,6 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { id: 'dashboard', label: 'แดชบอร์ด', icon: LayoutDashboard },
-  { id: 'requests', label: 'รายการแจ้งซ่อม', icon: ClipboardList },
-  { id: 'jobs', label: 'ระบบใบงาน', icon: FileText },
-  { id: 'technicians', label: 'ช่าง', icon: Users },
   {
     id: 'attendance',
     label: 'ระบบลงเวลา',
@@ -80,7 +74,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
 
   useEffect(() => {
     if (location.pathname.includes('/attendance')) {
-      setOpenSubmenus(prev => ({ ...prev, 'attendance': true }));
+      // Use queueMicrotask to avoid synchronous setState within effect
+      queueMicrotask(() => setOpenSubmenus(prev => ({ ...prev, 'attendance': true })));
     }
   }, [location.pathname]);
 
@@ -128,21 +123,19 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 shrink-0">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2075f8] to-[#1a64d4] flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
-              <Globe className="w-5 h-5 text-white" aria-hidden="true" />
-            </div>
+          <Link to="/" className="flex items-center gap-3 overflow-hidden">
+            <img src="/logo.svg" alt="หจก.แก้วอมรรัตน์" className="w-9 h-9 shrink-0 object-contain" />
             {!isCollapsed && (
               <div className="flex flex-col">
-                <span className="font-bold text-[15px] text-[#1d1d1d] whitespace-nowrap leading-tight">
+                <span className="font-bold text-[15px] text-[#00223A] whitespace-nowrap leading-tight">
                   หจก.แก้วอมรรัตน์
                 </span>
-                <span className="text-[10px] font-bold text-[#2075f8] tracking-widest leading-none mt-0.5">
+                <span className="text-[10px] font-bold text-[#044F88] tracking-widest leading-none mt-0.5">
                   IT SERVICES & SOLUTIONS
                 </span>
               </div>
             )}
-          </div>
+          </Link>
           {/* Close on mobile / Collapse on desktop */}
           <button
             onClick={() => {
@@ -205,18 +198,18 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                       'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group w-full text-left relative',
                       isCollapsed ? 'justify-center' : 'justify-between',
                       isActive && !isOpen
-                        ? 'bg-[#f0f5ff] text-[#2075f8] font-medium'
-                        : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
+                        ? 'bg-[#f0f5ff] text-[#044F88] font-medium'
+                        : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#044F88]'
                     )}
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
                       <Icon className={cn('w-5 h-5 shrink-0 transition-transform duration-200', (!isActive || isOpen) && 'group-hover:scale-110')} aria-hidden="true" />
                       {!isCollapsed && (
-                        <span className={cn('font-medium text-sm whitespace-nowrap truncate', isActive && 'text-[#2075f8]')}>{item.label}</span>
+                        <span className={cn('font-medium text-sm whitespace-nowrap truncate', isActive && 'text-[#044F88]')}>{item.label}</span>
                       )}
                     </div>
                     {!isCollapsed && (
-                      <div className={cn('shrink-0 transition-colors', isActive && !isOpen ? 'text-[#2075f8]' : 'text-gray-400 group-hover:text-[#2075f8]')}>
+                      <div className={cn('shrink-0 transition-colors', isActive && !isOpen ? 'text-[#044F88]' : 'text-gray-400 group-hover:text-[#044F88]')}>
                         {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
                     )}
@@ -251,8 +244,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                               className={cn(
                                 'sub-item relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium group',
                                 isSubActive
-                                  ? 'bg-[#2075f8] text-white shadow-sm shadow-blue-500/20'
-                                  : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
+                                  ? 'bg-[#044F88] text-white shadow-sm shadow-[#044F88]/20'
+                                  : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#044F88]'
                               )}
                             >
                               <SubIcon className={cn('w-4 h-4 shrink-0', !isSubActive && 'group-hover:scale-110')} aria-hidden="true" />
@@ -278,8 +271,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                   'menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
                   isCollapsed && 'justify-center',
                   isActive
-                    ? 'bg-[#2075f8] text-white shadow-md shadow-blue-500/20 font-medium'
-                    : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#2075f8]'
+                    ? 'bg-[#044F88] text-white shadow-md shadow-[#044F88]/20 font-medium'
+                    : 'text-[#6f6f6f] hover:bg-[#f0f5ff] hover:text-[#044F88]'
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >
@@ -288,7 +281,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                   <span className="text-sm whitespace-nowrap font-medium">{item.label}</span>
                 )}
                 {!isActive && !isCollapsed && (
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-[#2075f8] rounded-full transition-all duration-200 group-hover:h-5" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-[#044F88] rounded-full transition-all duration-200 group-hover:h-5" />
                 )}
               </Link>
             );
@@ -303,7 +296,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
           )}
         >
           <div className={cn('flex items-center gap-3', isCollapsed && 'justify-center')}>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#2075f8] to-[#1a64d4] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center shrink-0">
               <span className="text-white font-semibold text-sm" aria-hidden="true">
                 {user?.name?.substring(0, 2).toUpperCase() || 'AD'}
               </span>

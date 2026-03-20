@@ -7,16 +7,12 @@ import type { User } from '../types';
 export function QRLoginPage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(token ? 'loading' : 'error');
+  const [errorMsg, setErrorMsg] = useState(token ? '' : 'QR code ไม่ถูกต้อง');
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (!token) {
-      setStatus('error');
-      setErrorMsg('QR code ไม่ถูกต้อง');
-      return;
-    }
+    if (!token) return;
 
     qrLoginApi(token)
       .then((result) => {
@@ -50,11 +46,11 @@ export function QRLoginPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center">
         <div className="text-center text-white">
           <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-6" />
           <h2 className="text-xl font-semibold">กำลังเข้าสู่ระบบ...</h2>
-          <p className="text-blue-200 mt-2 text-sm">กรุณารอสักครู่</p>
+          <p className="text-[#044F88]/80 mt-2 text-sm">กรุณารอสักครู่</p>
         </div>
       </div>
     );

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useAttendance } from '../../contexts/AttendanceContext';
+import { useAttendance } from '../../contexts/useAttendance';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Users, Clock, AlertTriangle, FileCheck2, CalendarX, ArrowRight } from 'lucide-react';
@@ -79,7 +79,7 @@ function StatCard({ title, value, suffix = 'คน', icon: Icon, color, delay, h
                 'relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-full',
                 'hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300',
                 'cursor-pointer overflow-hidden group',
-                href && 'hover:border-[#2075f8]'
+                href && 'hover:border-[#044F88]'
             )}
             style={{ transformStyle: 'preserve-3d' }}
         >
@@ -96,7 +96,7 @@ function StatCard({ title, value, suffix = 'คน', icon: Icon, color, delay, h
                         <p className="text-sm text-gray-400 mt-2">{suffix}</p>
                     </div>
                     {href && (
-                        <div className="mt-4 flex items-center text-sm font-medium text-[#2075f8] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                        <div className="mt-4 flex items-center text-sm font-medium text-[#044F88] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
                             ตรวจสอบ <ArrowRight className="w-4 h-4 ml-1" />
                         </div>
                     )}
@@ -180,7 +180,7 @@ export function AdminAttendanceDashboard() {
                 />
                 <StatCard
                     title="รออนุมัติ OT" value={pendingOTs} suffix="รายการ" icon={FileCheck2}
-                    color="bg-gradient-to-br from-[#2075f8] to-[#1a64d4]" delay={0.2}
+                    color="bg-gradient-to-br from-[#044F88] to-[#00223A]" delay={0.2}
                     href="/admin/attendance/ot-approvals"
                 />
             </div>
@@ -192,7 +192,7 @@ export function AdminAttendanceDashboard() {
                         <h2 className="text-lg font-semibold text-[#1d1d1d]">การเช็คอินล่าสุดวันนี้</h2>
                         <p className="text-sm text-[#6f6f6f] mt-0.5">รายการลงเวลาเข้า-ออกงานประจำวัน</p>
                     </div>
-                    <Link to="/admin/attendance/logs" className="hidden sm:flex items-center text-sm font-medium text-[#2075f8] hover:text-[#1a64d4] transition-colors group">
+                    <Link to="/admin/attendance/logs" className="hidden sm:flex items-center text-sm font-medium text-[#044F88] hover:text-[#00223A] transition-colors group">
                         ดูประวัติทั้งหมด <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
@@ -225,22 +225,22 @@ export function AdminAttendanceDashboard() {
                                 todayLogs.map(log => {
                                     const emp = employees.find(e => e.id === log.employeeId);
                                     return (
-                                        <tr key={log.id} className="log-row hover:bg-[#e8f1fe]/30 transition-colors duration-300 group">
+                                        <tr key={log.id} className="log-row hover:bg-[#044F88]/30 transition-colors duration-300 group">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
                                                     {emp?.avatarUrl ? (
                                                         <img
                                                             src={emp.avatarUrl}
                                                             alt={emp.name}
-                                                            className="w-10 h-10 rounded-full object-cover shrink-0 bg-blue-50 ring-2 ring-white shadow-sm"
+                                                            className="w-10 h-10 rounded-full object-cover shrink-0 bg-[#044F88]/5 ring-2 ring-white shadow-sm"
                                                         />
                                                     ) : (
-                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0 ring-2 ring-white shadow-sm">
+                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#044F88] to-[#00223A] flex items-center justify-center text-white text-sm font-bold shrink-0 ring-2 ring-white shadow-sm">
                                                             {emp?.name.charAt(0) || '?'}
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <p className="font-semibold text-[#1d1d1d] group-hover:text-[#2075f8] transition-colors">{emp?.name || 'ไม่ทราบชื่อ'}</p>
+                                                        <p className="font-semibold text-[#1d1d1d] group-hover:text-[#044F88] transition-colors">{emp?.name || 'ไม่ทราบชื่อ'}</p>
                                                         {emp?.nickname && <p className="text-xs text-[#6f6f6f]">({emp.nickname})</p>}
                                                         <p className="text-xs text-[#6f6f6f] sm:hidden mt-0.5">{emp?.department}</p>
                                                     </div>
@@ -274,7 +274,7 @@ export function AdminAttendanceDashboard() {
                 {/* Mobile view history button */}
                 {todayLogs.length > 0 && (
                     <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 sm:hidden">
-                        <Link to="/admin/attendance/logs" className="flex justify-center items-center w-full text-sm font-medium text-[#2075f8] bg-white border border-blue-100 hover:border-blue-200 hover:bg-blue-50/50 rounded-xl py-3 shadow-sm transition-all">
+                        <Link to="/admin/attendance/logs" className="flex justify-center items-center w-full text-sm font-medium text-[#044F88] bg-white border border-[#044F88]/10 hover:border-[#044F88]/20 hover:bg-[#044F88]/5/50 rounded-xl py-3 shadow-sm transition-all">
                             ดูประวัติทั้งหมด <ArrowRight className="w-4 h-4 ml-1" />
                         </Link>
                     </div>
