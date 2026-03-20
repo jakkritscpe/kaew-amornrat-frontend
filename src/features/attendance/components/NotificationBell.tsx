@@ -5,6 +5,8 @@ import { useAdminNotifications } from '../../../hooks/useAdminNotifications';
 import { EVENT_CONFIG } from '../../../types/notifications';
 import type { NotificationEvent } from '../../../types/notifications';
 import { useTranslation } from '@/i18n';
+import { useAdminTheme } from '@/hooks/useAdminTheme';
+import { cn } from '@/lib/utils';
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
@@ -27,6 +29,7 @@ interface Props {
 
 export function NotificationBell({ token }: Props) {
   const { t } = useTranslation();
+  const { dark } = useAdminTheme();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { notifications, unreadCount, connected, markAllRead, clearAll } =
@@ -67,13 +70,14 @@ export function NotificationBell({ token }: Props) {
       {/* Bell Button */}
       <button
         onClick={handleOpen}
-        className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors"
+        data-tour="notifications"
+        className={cn('relative p-2 rounded-xl transition-colors', dark ? 'hover:bg-white/10' : 'hover:bg-gray-100')}
         title={t('notifications.title')}
       >
         {unreadCount > 0 ? (
           <BellRing className="w-5 h-5 text-[#044F88] animate-bounce" />
         ) : (
-          <Bell className="w-5 h-5 text-gray-500" />
+          <Bell className={cn('w-5 h-5', dark ? 'text-white/50' : 'text-gray-500')} />
         )}
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -84,11 +88,11 @@ export function NotificationBell({ token }: Props) {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+        <div className={cn('absolute right-0 mt-2 w-80 rounded-2xl shadow-2xl border z-50 overflow-hidden', dark ? 'bg-[#1e293b] border-white/10' : 'bg-white border-gray-100')}>
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div className={cn('flex items-center justify-between px-4 py-3 border-b', dark ? 'border-white/10' : 'border-gray-100')}>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-800 text-sm">{t('notifications.title')}</span>
+              <span className={cn('font-semibold text-sm', dark ? 'text-white' : 'text-gray-800')}>{t('notifications.title')}</span>
               <span className={`flex items-center gap-1 text-xs ${connected ? 'text-green-500' : 'text-red-400'}`}>
                 {connected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
                 {connected ? t('notifications.connected') : t('notifications.offline')}
@@ -102,7 +106,7 @@ export function NotificationBell({ token }: Props) {
           {/* List */}
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+              <div className={cn('flex flex-col items-center justify-center py-10', dark ? 'text-white/30' : 'text-gray-400')}>
                 <Bell className="w-8 h-8 mb-2 opacity-30" />
                 <p className="text-sm">{t('notifications.noNotifications')}</p>
               </div>
@@ -110,11 +114,11 @@ export function NotificationBell({ token }: Props) {
               notifications.map((n) => {
                 const cfg = EVENT_CONFIG[n.type];
                 return (
-                  <div key={n.id} className="flex gap-3 px-4 py-3 hover:bg-gray-50 border-b border-gray-50 last:border-0">
+                  <div key={n.id} className={cn('flex gap-3 px-4 py-3 border-b last:border-0', dark ? 'hover:bg-white/[0.04] border-white/5' : 'hover:bg-gray-50 border-gray-50')}>
                     <span className="text-lg mt-0.5">{cfg.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{n.employeeName}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{formatMeta(n, t)}</p>
+                      <p className={cn('text-sm font-medium truncate', dark ? 'text-white' : 'text-gray-800')}>{n.employeeName}</p>
+                      <p className={cn('text-xs mt-0.5', dark ? 'text-white/50' : 'text-gray-500')}>{formatMeta(n, t)}</p>
                     </div>
                     <span className="text-[10px] text-gray-400 whitespace-nowrap mt-1">
                       {formatTime(n.timestamp)}

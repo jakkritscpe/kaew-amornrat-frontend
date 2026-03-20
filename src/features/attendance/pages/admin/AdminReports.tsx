@@ -294,7 +294,7 @@ export function AdminReports() {
                 </div>
                 <div className="flex items-center gap-3">
                     {/* ── Mode toggle ── */}
-                    <div className={cn('flex rounded-lg p-0.5', dark ? 'bg-white/[0.06]' : 'bg-slate-100')}>
+                    <div data-tour="report-mode-toggle" className={cn('flex rounded-lg p-0.5', dark ? 'bg-white/[0.06]' : 'bg-slate-100')}>
                         <button
                             onClick={() => setMode('late')}
                             className={cn(
@@ -322,7 +322,7 @@ export function AdminReports() {
                     </div>
 
                     {/* ── Month nav ── */}
-                    <div className="flex items-center gap-1.5">
+                    <div data-tour="report-month-nav" className="flex items-center gap-1.5">
                         <Button variant="outline" size="icon" onClick={prevMonth} className="h-9 w-9">
                             <ChevronLeft className="w-4 h-4" />
                         </Button>
@@ -357,7 +357,7 @@ export function AdminReports() {
             </div>
 
             {/* ── Monthly report table ── */}
-            <Card className={cn('overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'border-slate-200 shadow-sm')}>
+            <Card data-tour="report-monthly-table" className={cn('overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'border-slate-200 shadow-sm')}>
                 <div className={cn('px-5 py-4 border-b flex items-center justify-between', dark ? 'border-white/10' : 'border-slate-100')}>
                     <h3 className={cn('font-semibold flex items-center gap-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                         <cfg.iconMonthly className={cn('w-5 h-5', cfg.iconMonthlyColor)} />
@@ -428,7 +428,7 @@ export function AdminReports() {
             </Card>
 
             {/* ── Yearly chart + ranking ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div data-tour="report-yearly-chart" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Bar chart */}
                 <Card className={cn('overflow-hidden', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'border-slate-200 shadow-sm')}>
                     <div className={cn('px-5 py-4 border-b', dark ? 'border-white/10' : 'border-slate-100')}>
