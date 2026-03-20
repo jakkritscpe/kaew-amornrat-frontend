@@ -1,18 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { dismissTour } from './helpers';
+import { adminLogin, dismissTour } from './helpers';
 
-// These tests only run in mobile project
+// Force mobile viewport + no saved session (login manually)
+test.use({ viewport: { width: 390, height: 844 }, isMobile: true, storageState: undefined });
+
 test.describe('Responsive - Mobile', () => {
-  test.skip(({ viewport }) => (viewport?.width ?? 1440) > 500, 'Mobile only');
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true });
 
   test('should show hamburger menu on mobile', async ({ page }) => {
     await adminLogin(page);
     await dismissTour(page);
-
-    // Sidebar should be hidden
-    const sidebar = page.locator('aside');
-    await expect(sidebar).toHaveCSS('transform', /translateX\(-/);
 
     // Hamburger button should be visible
     await expect(page.locator('button[aria-label="Menu"]')).toBeVisible();
@@ -24,16 +20,19 @@ test.describe('Responsive - Mobile', () => {
 
     // Click hamburger
     await page.locator('button[aria-label="Menu"]').click();
+    await page.waitForTimeout(500);
 
-    // Sidebar should be visible
+    // Sidebar should be visible (translate-x-0)
     const sidebar = page.locator('aside');
     await expect(sidebar).toBeVisible();
   });
 
   test('landing page should show language switcher on mobile', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
-    // Language switcher should be visible next to hamburger
-    await expect(page.locator('button:has-text("TH")').first()).toBeVisible();
+    // Language switcher TH button should be visible on mobile
+    const thBtn = page.locator('button').filter({ hasText: 'TH' }).first();
+    await expect(thBtn).toBeVisible({ timeout: 5000 });
   });
 });

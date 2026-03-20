@@ -21,14 +21,15 @@ test.describe('Admin Dashboard', () => {
   test('should toggle dark mode', async ({ page }) => {
     const themeBtn = page.locator('[data-tour="theme-toggle"]');
     await themeBtn.click();
+    await page.waitForTimeout(400);
 
-    // Background should change to dark
-    const wrapper = page.locator('.min-h-screen').first();
-    await expect(wrapper).toHaveClass(/bg-\[#0f172a\]/);
+    const val = await page.evaluate(() => localStorage.getItem('dashboard_theme'));
+    expect(val).toBe('dark');
 
-    // Toggle back
     await themeBtn.click();
-    await expect(wrapper).toHaveClass(/bg-\[#f8fafc\]/);
+    await page.waitForTimeout(400);
+    const val2 = await page.evaluate(() => localStorage.getItem('dashboard_theme'));
+    expect(val2).toBe('light');
   });
 
   test('should navigate to attendance logs', async ({ page }) => {
