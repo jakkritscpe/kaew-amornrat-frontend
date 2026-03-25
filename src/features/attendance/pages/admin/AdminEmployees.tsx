@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useAttendance } from '../../contexts/useAttendance';
 import { QRCodeSVG } from 'qrcode.react';
-import { regenerateQRApi } from '../../../../lib/api/auth-api';
+import { regenerateQRApi, getEmployeeQRTokenApi } from '../../../../lib/api/auth-api';
 import { verifyPinApi } from '../../../../lib/api/employees-api';
 import { toast } from 'sonner';
 import { gsap } from 'gsap';
@@ -173,6 +173,7 @@ export function AdminEmployees() {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showQRModal, setShowQRModal] = useState<string | null>(null);
+    const [qrUrl, setQrUrl] = useState<string | null>(null);
     const [confirmRegenerate, setConfirmRegenerate] = useState(false);
     const [copied, setCopied] = useState(false);
     const selectedEmp = employees.find(e => e.id === showQRModal) ?? null;
@@ -520,18 +521,16 @@ export function AdminEmployees() {
     };
 
     const copyQRLink = () => {
-        const url = selectedEmp?.qrToken
-            ? `${window.location.origin}/employee/qr-login/${selectedEmp.qrToken}`
-            : '';
-        if (!url) return;
-        navigator.clipboard.writeText(url);
+        if (!qrUrl) return;
+        navigator.clipboard.writeText(qrUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
     const handleRegenerateQR = async (employeeId: string) => {
         try {
-            await regenerateQRApi(employeeId);
+            const result = await regenerateQRApi(employeeId);
+            setQrUrl(result.qrUrl);
             await refreshAll();
             setConfirmRegenerate(false);
             toast.success(t('admin.employees.regenerateSuccess'));
@@ -541,7 +540,8 @@ export function AdminEmployees() {
     };
 
     useEffect(() => {
-        if (!showQRModal) return;
+        if (!showQRModal) { setQrUrl(null); return; }
+        getEmployeeQRTokenApi(showQRModal).then(r => setQrUrl(r.qrUrl)).catch(() => setQrUrl(null));
 
         // Lock body scroll (prevents background scroll on iOS)
         const prev = document.body.style.overflow;
@@ -833,11 +833,7 @@ export function AdminEmployees() {
                                             <span className="absolute bottom-0 left-0 w-5 h-5 border-b-[3px] border-l-[3px] border-[#044F88] rounded-bl-lg" />
                                             <span className="absolute bottom-0 right-0 w-5 h-5 border-b-[3px] border-r-[3px] border-[#044F88] rounded-br-lg" />
                                             <QRCodeSVG
-                                                value={
-                                                    selectedEmp?.qrToken
-                                                        ? `${window.location.origin}/employee/qr-login/${selectedEmp.qrToken}`
-                                                        : `${window.location.origin}/employee/qr-login/`
-                                                }
+                                                value={qrUrl ?? `${window.location.origin}/employee/qr-login/`}
                                                 size={192}
                                                 level="H"
                                                 includeMargin

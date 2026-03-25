@@ -22,11 +22,11 @@ export async function qrLoginApi(token: string): Promise<{ token: string; user: 
   return api.post<{ token: string; user: AuthUser }>('/api/auth/qr-login', { token });
 }
 
-export async function getEmployeeQRTokenApi(employeeId: string): Promise<{ qrUrl: string; qrToken: string; employeeName: string }> {
+export async function getEmployeeQRTokenApi(employeeId: string): Promise<{ qrUrl: string; employeeName: string }> {
   return api.get(`/api/employees/${employeeId}/qr-token`);
 }
 
-export async function regenerateQRApi(employeeId: string): Promise<{ qrUrl: string; qrToken: string }> {
+export async function regenerateQRApi(employeeId: string): Promise<{ qrUrl: string; expiresAt: string }> {
   return api.post(`/api/employees/${employeeId}/regenerate-qr`, {});
 }
 
