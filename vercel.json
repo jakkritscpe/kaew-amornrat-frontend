@@ -3,6 +3,14 @@
         { "source": "/robots.txt", "destination": "/robots.txt" },
         { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
         {
+            "source": "/api/:path*",
+            "destination": "https://kaew-amornrat-backend-api.onrender.com/api/:path*"
+        },
+        {
+            "source": "/ws",
+            "destination": "https://kaew-amornrat-backend-api.onrender.com/ws"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }
