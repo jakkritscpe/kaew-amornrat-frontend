@@ -1,23 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
 import { AuthContext } from './AuthContextObject';
 import { loginApi, logoutApi, getMeApi } from '../../../lib/api/auth-api';
-import { USER_KEY } from '../../../lib/api-client';
+import { USER_KEY, EMPLOYEE_KEY } from '../../../lib/api-client';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    // Ref tracks whether user was authenticated — prevents redirect loop on initial load
+    // (initial getMeApi() 401 = "not logged in", not "session expired")
+    const userRef = useRef<User | null>(null);
 
     useEffect(() => {
-        // Redirect to login on any 401 from any API call (expired cookie mid-session)
+        // Only redirect on 401 if user WAS authenticated (mid-session cookie expiry).
+        // Without this guard, the initial getMeApi() call (which returns 401 when not
+        // logged in) would trigger a redirect → reload → 401 → infinite loop.
         const handleUnauthorized = () => {
+            if (!userRef.current) return;
             setUser(null);
+            userRef.current = null;
+            localStorage.removeItem(USER_KEY);
+            localStorage.removeItem(EMPLOYEE_KEY);
             window.location.href = '/';
         };
         window.addEventListener('auth:unauthorized', handleUnauthorized);
         return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
     }, []);
+
+    // Keep ref in sync with state so the event handler always sees the latest value
+    useEffect(() => { userRef.current = user; }, [user]);
 
     useEffect(() => {
         // Restore session by calling /api/auth/me — uses HttpOnly cookie automatically.
