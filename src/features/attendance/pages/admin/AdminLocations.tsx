@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import { useAttendance } from '../../contexts/useAttendance';
+import type { WorkLocation } from '../../types';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import {
-    Plus, X, Search, MapPin, Map as MapIcon, Navigation, Loader2, Crosshair,
+    Plus, X, Search, MapPin, Map as MapIcon, Navigation, Loader2, Crosshair, Pencil, Trash2, AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -127,13 +128,16 @@ function LocationPicker({
 export function AdminLocations() {
     const { t } = useTranslation();
     const { dark } = useAdminTheme();
-    const { locations, addLocation } = useAttendance();
+    const { locations, addLocation, updateLocation, removeLocation } = useAttendance();
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [editTarget, setEditTarget] = useState<WorkLocation | null>(null);
     const [form, setForm] = useState({ name: '', lat: 13.7563, lng: 100.5018, radiusMeters: 300 });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [gettingLocation, setGettingLocation] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<WorkLocation | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const statRef = useRef<HTMLDivElement>(null);
@@ -144,13 +148,20 @@ export function AdminLocations() {
 
     // ── Handlers ─────────────────────────────────────────────────────────────
 
-    const openModal = useCallback(() => {
-        setForm({ name: '', lat: 13.7563, lng: 100.5018, radiusMeters: 300 });
-        setShowAddModal(true);
+    const openModal = useCallback((loc?: WorkLocation) => {
+        if (loc) {
+            setEditTarget(loc);
+            setForm({ name: loc.name, lat: loc.lat, lng: loc.lng, radiusMeters: loc.radiusMeters });
+        } else {
+            setEditTarget(null);
+            setForm({ name: '', lat: 13.7563, lng: 100.5018, radiusMeters: 300 });
+        }
+        setShowModal(true);
     }, []);
 
     const closeModal = useCallback(() => {
-        setShowAddModal(false);
+        setShowModal(false);
+        setEditTarget(null);
     }, []);
 
     const handlePositionChange = useCallback((lat: number, lng: number) => {
@@ -180,13 +191,18 @@ export function AdminLocations() {
         );
     }, []);
 
-    const handleCreate = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isSubmitting) return;
         try {
             setIsSubmitting(true);
-            await addLocation({ ...form });
-            toast.success(t('admin.locations.addSuccess', { name: form.name }));
+            if (editTarget) {
+                await updateLocation(editTarget.id, { ...form });
+                toast.success(t('admin.locations.editSuccess', { name: form.name }));
+            } else {
+                await addLocation({ ...form });
+                toast.success(t('admin.locations.addSuccess', { name: form.name }));
+            }
             closeModal();
         } catch (err) {
             toast.error(err instanceof Error ? err.message : t('common.genericError'));
@@ -195,9 +211,23 @@ export function AdminLocations() {
         }
     };
 
+    const handleDelete = async () => {
+        if (!deleteTarget || isDeleting) return;
+        setIsDeleting(true);
+        try {
+            await removeLocation(deleteTarget.id);
+            toast.success(t('admin.locations.deleteSuccess', { name: deleteTarget.name }));
+            setDeleteTarget(null);
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : t('common.genericError'));
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     // Escape to close + body scroll lock
     useEffect(() => {
-        if (!showAddModal) return;
+        if (!showModal) return;
         const prev = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
         const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !isSubmitting) closeModal(); };
@@ -206,7 +236,7 @@ export function AdminLocations() {
             window.removeEventListener('keydown', onKey);
             document.body.style.overflow = prev;
         };
-    }, [showAddModal, isSubmitting, closeModal]);
+    }, [showModal, isSubmitting, closeModal]);
 
     // ── GSAP animations ───────────────────────────────────────────────────────
 
@@ -259,7 +289,7 @@ export function AdminLocations() {
                 </div>
                 <Button
                     data-tour="add-location"
-                    onClick={openModal}
+                    onClick={() => openModal()}
                     className="w-full sm:w-auto bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm hover:shadow-md transition-all h-10 rounded-lg shrink-0"
                 >
                     <Plus className="w-4 h-4 mr-2" /> {t('admin.locations.addLocation')}
@@ -315,13 +345,13 @@ export function AdminLocations() {
 
                     <div className={cn('overflow-y-auto flex-1 p-3 space-y-2', dark ? 'bg-white/[0.02]' : 'bg-gray-50/30')}>
                         {filtered.map(loc => (
-                            <div key={loc.id} className={cn('loc-card p-4 rounded-xl cursor-pointer transition-colors duration-300 border group', dark ? 'bg-white/[0.06] border-white/10 hover:bg-[#044F88]/20 hover:border-[#044F88]/20 shadow-none' : 'bg-white hover:bg-[#044F88]/30 border-gray-100 hover:border-[#044F88]/20 shadow-sm')}>
+                            <div key={loc.id} className={cn('loc-card p-4 rounded-xl transition-colors duration-300 border group', dark ? 'bg-white/[0.06] border-white/10 hover:bg-[#044F88]/10 hover:border-[#044F88]/20 shadow-none' : 'bg-white hover:bg-[#044F88]/5 border-gray-100 hover:border-[#044F88]/20 shadow-sm')}>
                                 <div className="flex items-start gap-3">
                                     <div className="w-10 h-10 rounded-full bg-[#044F88]/5 flex items-center justify-center shrink-0 group-hover:bg-[#044F88] transition-colors duration-300">
                                         <MapPin className="w-5 h-5 text-[#044F88] group-hover:text-white transition-colors duration-300" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className={cn('font-bold text-sm leading-tight group-hover:text-[#044F88] transition-colors', dark ? 'text-white' : 'text-[#1d1d1d]')}>{loc.name}</p>
+                                        <p className={cn('font-bold text-sm leading-tight', dark ? 'text-white' : 'text-[#1d1d1d]')}>{loc.name}</p>
                                         <div className={cn('mt-2 flex flex-wrap gap-2 text-[10px] font-mono', dark ? 'text-white/40' : 'text-[#6f6f6f]')}>
                                             <span className={cn('px-2 py-0.5 rounded-md', dark ? 'bg-white/[0.06]' : 'bg-gray-100')}>Lat: {loc.lat}</span>
                                             <span className={cn('px-2 py-0.5 rounded-md', dark ? 'bg-white/[0.06]' : 'bg-gray-100')}>Lng: {loc.lng}</span>
@@ -329,6 +359,25 @@ export function AdminLocations() {
                                         <div className="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 tracking-wide uppercase">
                                             {t('admin.locations.radius')} {loc.radiusMeters} {t('admin.locations.meters')}
                                         </div>
+                                    </div>
+                                    {/* Edit / Delete buttons */}
+                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={() => openModal(loc)}
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#044F88] hover:bg-[#044F88]/10 transition-colors"
+                                            aria-label={t('admin.locations.editLabel')}
+                                        >
+                                            <Pencil className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setDeleteTarget(loc)}
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                            aria-label={t('admin.locations.deleteLabel')}
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -378,7 +427,37 @@ export function AdminLocations() {
             </div>
 
             {/* ════ Modal เพิ่มสถานที่ — Portal to body (z-[2000] > Leaflet z-indices) ════ */}
-            {typeof document !== 'undefined' && showAddModal && createPortal(
+            {/* ════ Delete Confirm Dialog ════ */}
+            {deleteTarget && (
+                <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" onClick={() => !isDeleting && setDeleteTarget(null)}>
+                    <div className={cn('rounded-2xl shadow-2xl w-full max-w-sm p-6', dark ? 'bg-[#1e293b]' : 'bg-white')} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-start gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                                <AlertTriangle className="w-5 h-5 text-red-500" />
+                            </div>
+                            <div>
+                                <p className={cn('font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.locations.deleteConfirmTitle')}</p>
+                                <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>
+                                    {t('admin.locations.deleteConfirmDesc', { name: deleteTarget.name })}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={() => setDeleteTarget(null)} disabled={isDeleting}
+                                className="flex-1 h-10 rounded-xl border border-gray-200 text-sm font-medium text-[#6f6f6f] hover:bg-gray-50 transition-colors disabled:opacity-50">
+                                {t('common.cancel')}
+                            </button>
+                            <button onClick={handleDelete} disabled={isDeleting}
+                                className="flex-1 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                                {isDeleting ? t('common.deleting') : t('admin.locations.deleteBtn')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {typeof document !== 'undefined' && showModal && createPortal(
                 <div
                     role="dialog"
                     aria-modal="true"
@@ -393,7 +472,9 @@ export function AdminLocations() {
                         {/* ── Header ── */}
                         <div className={cn('flex items-center justify-between px-6 sm:px-8 py-5 border-b shrink-0', dark ? 'border-white/10' : 'border-gray-100')}>
                             <div>
-                                <h2 className={cn('text-xl font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.locations.addTitle')}</h2>
+                                <h2 className={cn('text-xl font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>
+                                    {editTarget ? t('admin.locations.editTitle') : t('admin.locations.addTitle')}
+                                </h2>
                                 <p className={cn('text-sm mt-0.5', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.locations.addSubtitle')}</p>
                             </div>
                             <button
@@ -408,7 +489,7 @@ export function AdminLocations() {
 
                         {/* ── Body: form (left/bottom) + map (right/top) ── */}
                         <form
-                            onSubmit={handleCreate}
+                            onSubmit={handleSubmit}
                             className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden"
                         >
                             {/* Map — top on mobile, right on desktop */}
@@ -559,7 +640,9 @@ export function AdminLocations() {
                                     >
                                         {isSubmitting
                                             ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('common.saving')}</>
-                                            : <><MapPin className="w-4 h-4 mr-2" /> {t('admin.locations.saveLocation')}</>
+                                            : editTarget
+                                                ? <><Pencil className="w-4 h-4 mr-2" /> {t('admin.locations.saveEdit')}</>
+                                                : <><MapPin className="w-4 h-4 mr-2" /> {t('admin.locations.saveLocation')}</>
                                         }
                                     </Button>
                                 </div>

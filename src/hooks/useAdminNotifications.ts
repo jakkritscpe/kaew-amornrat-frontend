@@ -13,7 +13,7 @@ function getWsUrl(): string {
   return `${proto}://${window.location.host}/ws`;
 }
 
-export function useAdminNotifications(token: string | null) {
+export function useAdminNotifications(enabled: boolean) {
   const [notifications, setNotifications] = useState<NotificationEvent[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [connected, setConnected] = useState(false);
@@ -23,17 +23,13 @@ export function useAdminNotifications(token: string | null) {
   const connectRef = useRef<() => void>(() => {});
 
   const connect = useCallback(() => {
-    if (!token) return;
+    if (!enabled) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    // Token is sent as the first message after connection — NOT in the URL
+    // Auth is via HttpOnly cookie sent automatically with the upgrade request.
+    // No first-message auth needed.
     const ws = new WebSocket(getWsUrl());
     wsRef.current = ws;
-
-    ws.onopen = () => {
-      // Authenticate via first message (avoids token appearing in server logs/URLs)
-      ws.send(JSON.stringify({ type: 'auth', token }));
-    };
 
     ws.onmessage = (evt) => {
       if (evt.data === 'pong') return;
@@ -62,7 +58,7 @@ export function useAdminNotifications(token: string | null) {
     };
 
     ws.onerror = () => ws.close();
-  }, [token]);
+  }, [enabled]);
 
   useEffect(() => {
     connectRef.current = connect;

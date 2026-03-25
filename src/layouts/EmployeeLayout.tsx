@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Clock, Map, History, FileText } from 'lucide-react';
+import { Clock, Map, History, FileText, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { TOKEN_KEY, EMPLOYEE_KEY } from '@/lib/api-client';
+import { EMPLOYEE_KEY } from '@/lib/api-client';
+import { logoutApi } from '@/lib/api/auth-api';
 import { useTranslation } from '@/i18n';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export function EmployeeLayout() {
     const { t } = useTranslation();
+    const [loggingOut, setLoggingOut] = useState(false);
 
     const navItems = [
         { to: '/employee/attendance/today', icon: Clock, label: t('nav.today') },
@@ -18,17 +20,23 @@ export function EmployeeLayout() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem(TOKEN_KEY);
-        if (!token) navigate('/employee/login', { replace: true });
+        if (!localStorage.getItem(EMPLOYEE_KEY)) navigate('/employee/login', { replace: true });
     }, [navigate]);
 
     const employeeRaw = localStorage.getItem(EMPLOYEE_KEY);
     const employee = employeeRaw ? JSON.parse(employeeRaw) : null;
     const initial = employee?.name?.charAt(0)?.toUpperCase() ?? '?';
 
+    const handleLogout = async () => {
+        setLoggingOut(true);
+        try { await logoutApi(); } catch { /* ignore */ }
+        localStorage.removeItem(EMPLOYEE_KEY);
+        navigate('/employee/login', { replace: true });
+    };
+
     return (
         <div className="flex flex-col h-[100svh] bg-[#f1f5f9] overflow-hidden">
-            {/* ── Identity bar (inside blue hero of each page, so layout bar is minimal) ── */}
+            {/* ── Identity bar ── */}
             <header className="shrink-0 bg-[#044F88] px-4 pt-4 pb-2 max-w-lg md:max-w-3xl mx-auto w-full flex items-center justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[10px] font-semibold text-[#044F88]/80 uppercase tracking-widest">{t('employee.layout.attendanceSystem')}</p>
@@ -41,6 +49,15 @@ export function EmployeeLayout() {
                     <div className="w-9 h-9 rounded-xl bg-white/20 ring-2 ring-white/30 flex items-center justify-center text-white font-bold text-sm select-none">
                         {initial}
                     </div>
+                    <button
+                        onClick={handleLogout}
+                        disabled={loggingOut}
+                        className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 flex items-center justify-center transition-colors touch-manipulation"
+                        title={t('nav.logout')}
+                        aria-label={t('nav.logout')}
+                    >
+                        <LogOut className="w-4 h-4 text-white/80" />
+                    </button>
                 </div>
             </header>
 

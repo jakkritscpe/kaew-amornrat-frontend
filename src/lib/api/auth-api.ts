@@ -1,4 +1,4 @@
-import { api, setToken, clearToken } from '../api-client';
+import { api } from '../api-client';
 
 export interface AuthUser {
   id: string;
@@ -11,19 +11,15 @@ export interface AuthUser {
 }
 
 export async function loginApi(email: string, password: string): Promise<{ token: string; user: AuthUser }> {
-  const result = await api.post<{ token: string; user: AuthUser }>('/api/auth/login', { email, password });
-  setToken(result.token);
-  return result;
+  return api.post<{ token: string; user: AuthUser }>('/api/auth/login', { email, password });
 }
 
 export async function logoutApi() {
-  clearToken();
+  await api.post('/api/auth/logout', {});
 }
 
 export async function qrLoginApi(token: string): Promise<{ token: string; user: AuthUser }> {
-  const result = await api.post<{ token: string; user: AuthUser }>('/api/auth/qr-login', { token });
-  setToken(result.token);
-  return result;
+  return api.post<{ token: string; user: AuthUser }>('/api/auth/qr-login', { token });
 }
 
 export async function getEmployeeQRTokenApi(employeeId: string): Promise<{ qrUrl: string; qrToken: string; employeeName: string }> {
