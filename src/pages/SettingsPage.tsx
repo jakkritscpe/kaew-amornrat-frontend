@@ -202,7 +202,6 @@ export function SettingsPage() {
 
     // PIN modal state
     const [showPinModal, setShowPinModal] = useState(false);
-    const [pinStep, setPinStep] = useState<'new' | 'confirm'>('new');
     const [pinNew, setPinNew] = useState('');
     const [pinConfirm, setPinConfirm] = useState('');
     const [pinCurrent, setPinCurrent] = useState('');
@@ -211,8 +210,7 @@ export function SettingsPage() {
 
     const openPinModal = () => {
         setShowPinModal(true);
-        setPinStep('new');
-        setPinNew(''); setPinConfirm(''); setPinCurrent(''); setPinModalError('');
+setPinNew(''); setPinConfirm(''); setPinCurrent(''); setPinModalError('');
     };
     const closePinModal = () => setShowPinModal(false);
 
