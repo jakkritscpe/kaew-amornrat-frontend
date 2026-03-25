@@ -182,6 +182,7 @@ export function SettingsPage() {
                 { id: 'attendance/ot-approvals', label: t('settings.rbac.menuLabels.attendanceOtApprovals') },
                 { id: 'attendance/ot-calculator', label: t('settings.rbac.menuLabels.attendanceOtCalculator') },
                 { id: 'attendance/reports', label: t('settings.rbac.menuLabels.attendanceReports') },
+                { id: 'attendance/holidays', label: t('settings.rbac.menuLabels.attendanceHolidays') },
             ],
         },
     ];

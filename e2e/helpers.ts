@@ -1,6 +1,9 @@
 import { type Page, expect } from '@playwright/test';
 
-export const ADMIN = { email: 'admin@repair-hub.local', password: 'admin1234' };
+export const ADMIN = {
+  email: process.env.E2E_ADMIN_EMAIL ?? 'admin@repair-hub.local',
+  password: process.env.E2E_ADMIN_PASSWORD ?? 'admin1234',
+};
 export const MANAGER = { email: 'manager@repair-hub.local', password: 'admin1234' };
 export const EMPLOYEE = { email: 'somchai@repair-hub.local', password: 'emp1234' };
 

@@ -48,6 +48,7 @@ const AdminOTApprovals = lazy(() => import('./features/attendance/pages/admin/Ad
 const AdminOTCalculator = lazy(() => import('./features/attendance/pages/admin/AdminOTCalculator').then(m => ({ default: m.AdminOTCalculator })));
 const AdminReports = lazy(() => import('./features/attendance/pages/admin/AdminReports').then(m => ({ default: m.AdminReports })));
 const AdminAttendanceLogDetail = lazy(() => import('./features/attendance/pages/admin/AdminAttendanceLogDetail').then(m => ({ default: m.AdminAttendanceLogDetail })));
+const AdminHolidays = lazy(() => import('./features/attendance/pages/admin/AdminHolidays').then(m => ({ default: m.AdminHolidays })));
 
 // Employee pages
 const EmployeeLoginPage = lazy(() => import('./features/auth/pages/EmployeeLoginPage').then(m => ({ default: m.EmployeeLoginPage })));
@@ -89,6 +90,7 @@ function App() {
                     <Route path="attendance/ot-approvals" element={<AdminOTApprovals />} />
                     <Route path="attendance/ot-calculator" element={<AdminOTCalculator />} />
                     <Route path="attendance/reports" element={<AdminReports />} />
+                    <Route path="attendance/holidays" element={<AdminHolidays />} />
                   </Route>
                 </Route>
 

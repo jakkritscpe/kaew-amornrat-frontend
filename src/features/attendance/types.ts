@@ -1,4 +1,14 @@
 export type Role = 'admin' | 'employee' | 'manager';
+
+export interface Holiday {
+  id: string;
+  date: string; // YYYY-MM-DD
+  name: string;
+  description?: string | null;
+  isRecurring: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 export type AttendanceStatus = 'present' | 'late' | 'absent' | 'on_leave';
 export type OTRequestStatus = 'pending' | 'approved' | 'rejected';
 

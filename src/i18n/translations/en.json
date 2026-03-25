@@ -58,7 +58,8 @@
     "closeMenu": "Close Menu",
     "expandMenu": "Expand Menu",
     "collapseMenu": "Collapse Menu",
-    "mainMenu": "Main Menu"
+    "mainMenu": "Main Menu",
+    "holidays": "Holidays"
   },
   "auth": {
     "email": "Email",
@@ -112,37 +113,72 @@
       "computer": {
         "name": "Computer",
         "desc": "Computer and laptop repair, parts replacement",
-        "features": ["Hardware repair", "Parts upgrade", "Software installation", "Virus removal"]
+        "features": [
+          "Hardware repair",
+          "Parts upgrade",
+          "Software installation",
+          "Virus removal"
+        ]
       },
       "cctv": {
         "name": "CCTV",
         "desc": "Security camera installation and security systems",
-        "features": ["HD camera installation", "DVR/NVR systems", "Mobile viewing", "Playback recording"]
+        "features": [
+          "HD camera installation",
+          "DVR/NVR systems",
+          "Mobile viewing",
+          "Playback recording"
+        ]
       },
       "server": {
         "name": "Server",
         "desc": "Server installation and maintenance",
-        "features": ["Server setup", "User permissions", "Data backup", "Monitoring"]
+        "features": [
+          "Server setup",
+          "User permissions",
+          "Data backup",
+          "Monitoring"
+        ]
       },
       "network": {
         "name": "Network LAN WiFi",
         "desc": "LAN and WiFi installation with full coverage",
-        "features": ["LAN cabling", "WiFi setup", "Signal optimization", "Full area coverage"]
+        "features": [
+          "LAN cabling",
+          "WiFi setup",
+          "Signal optimization",
+          "Full area coverage"
+        ]
       },
       "firewall": {
         "name": "Firewall",
         "desc": "Network security systems",
-        "features": ["Firewall configuration", "Attack prevention", "Access control", "Security reports"]
+        "features": [
+          "Firewall configuration",
+          "Attack prevention",
+          "Access control",
+          "Security reports"
+        ]
       },
       "nas": {
         "name": "NAS",
         "desc": "Centralized data storage systems",
-        "features": ["NAS setup", "Permission management", "File sharing", "Remote access"]
+        "features": [
+          "NAS setup",
+          "Permission management",
+          "File sharing",
+          "Remote access"
+        ]
       },
       "backup": {
         "name": "Backup Data",
         "desc": "Data backup systems to prevent data loss",
-        "features": ["Automatic backup", "Data recovery", "Cloud backup", "Data loss prevention"]
+        "features": [
+          "Automatic backup",
+          "Data recovery",
+          "Cloud backup",
+          "Data loss prevention"
+        ]
       }
     },
     "contact": {
@@ -464,6 +500,39 @@
       "csvCountOnTime": "On Time Count (days)",
       "csvDatesLate": "Dates Late",
       "csvDatesOnTime": "Dates On Time"
+    },
+    "holidays": {
+      "title": "Manage Holidays",
+      "subtitle": "Configure annual and special holidays",
+      "addHoliday": "Add Holiday",
+      "noData": "No holidays in the system yet",
+      "noDataHint": "Click \"Add Holiday\" to add a new holiday",
+      "totalCount": "Total {n} items",
+      "formTitleAdd": "Add Holiday",
+      "formTitleEdit": "Edit Holiday",
+      "dateLabel": "Date",
+      "nameLabel": "Holiday Name",
+      "namePlaceholder": "e.g. Songkran, New Year",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Additional details (optional)",
+      "isRecurringLabel": "Annual Holiday (every year)",
+      "isRecurringHint": "If enabled, this holiday will apply every year on the same month and day",
+      "saveAdd": "Add Holiday",
+      "saveEdit": "Save Changes",
+      "addSuccess": "Holiday \"{name}\" added successfully",
+      "editSuccess": "\"{name}\" updated successfully",
+      "deleteConfirmTitle": "Delete Holiday",
+      "deleteConfirmMsg": "Remove \"{name}\" from the system?",
+      "deleteSuccess": "Holiday \"{name}\" deleted successfully",
+      "deleteFail": "Unable to delete holiday. Please try again.",
+      "editLabel": "Edit holiday",
+      "deleteLabel": "Delete holiday",
+      "yearFilter": "Year",
+      "recurring": "Annual",
+      "oneTime": "One-time",
+      "filterAll": "All",
+      "filterRecurring": "Annual",
+      "filterOneTime": "One-time"
     }
   },
   "employee": {
@@ -597,7 +666,8 @@
         "attendanceLocations": "Locations (GPS)",
         "attendanceOtApprovals": "OT Approvals",
         "attendanceOtCalculator": "OT Calculator",
-        "attendanceReports": "Attendance Reports"
+        "attendanceReports": "Attendance Reports",
+        "attendanceHolidays": "Holidays"
       }
     },
     "accounts": {
