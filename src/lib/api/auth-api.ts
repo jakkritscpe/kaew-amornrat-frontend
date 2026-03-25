@@ -10,16 +10,16 @@ export interface AuthUser {
   accessibleMenus?: string[];
 }
 
-export async function loginApi(email: string, password: string): Promise<{ token: string; user: AuthUser }> {
-  return api.post<{ token: string; user: AuthUser }>('/api/auth/login', { email, password });
+export async function loginApi(email: string, password: string): Promise<{ user: AuthUser }> {
+  return api.post<{ user: AuthUser }>('/api/auth/login', { email, password });
 }
 
 export async function logoutApi() {
   await api.post('/api/auth/logout', {});
 }
 
-export async function qrLoginApi(token: string): Promise<{ token: string; user: AuthUser }> {
-  return api.post<{ token: string; user: AuthUser }>('/api/auth/qr-login', { token });
+export async function qrLoginApi(token: string): Promise<{ user: AuthUser }> {
+  return api.post<{ user: AuthUser }>('/api/auth/qr-login', { token });
 }
 
 export async function getEmployeeQRTokenApi(employeeId: string): Promise<{ qrUrl: string; employeeName: string }> {
