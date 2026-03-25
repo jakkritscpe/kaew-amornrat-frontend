@@ -1,4 +1,4 @@
-import { api } from '../api-client';
+import { api, buildParams } from '../api-client';
 import type { Employee } from '../../features/attendance/types';
 
 type BackendEmployee = Omit<Employee, 'otRateConfig'> & {
@@ -23,8 +23,7 @@ function mapEmployee(e: BackendEmployee): Employee {
 type PaginatedResponse<T> = { data: T[]; pagination: unknown };
 
 export async function getEmployeesApi(filter?: { department?: string; role?: string; search?: string }): Promise<Employee[]> {
-  const params = new URLSearchParams(filter as Record<string, string>).toString();
-  const res = await api.get<PaginatedResponse<BackendEmployee>>(`/api/employees${params ? `?${params}` : ''}`);
+  const res = await api.get<PaginatedResponse<BackendEmployee>>(`/api/employees${buildParams({ limit: '1000', ...filter })}`);
   return res.data.map(mapEmployee);
 }
 
@@ -50,4 +49,13 @@ export async function deleteEmployeeApi(id: string): Promise<void> {
 export async function updateEmployeeMenusApi(id: string, accessibleMenus: string[]): Promise<Employee> {
   const row = await api.put<BackendEmployee>(`/api/employees/${id}/menus`, { accessibleMenus });
   return mapEmployee(row);
+}
+
+export async function verifyPinApi(pin: string): Promise<boolean> {
+  const res = await api.post<{ verified: boolean }>('/api/employees/verify-pin', { pin });
+  return res.verified;
+}
+
+export async function setPinApi(pin: string, currentPin?: string): Promise<void> {
+  await api.post('/api/employees/set-pin', { pin, ...(currentPin ? { currentPin } : {}) });
 }

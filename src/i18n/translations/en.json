@@ -21,7 +21,8 @@
     "meters": "meters",
     "point": "point",
     "retry": "Retry",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "deleting": "Deleting..."
   },
   "status": {
     "present": "Present",
@@ -304,6 +305,8 @@
       "pinDesc": "Please enter your 4-digit PIN to verify your identity",
       "pinWrong": "Incorrect PIN ({n} attempts remaining)",
       "pinLocked": "Locked — please try again later",
+      "pinNotSet": "PIN not set. Please set your PIN in Settings first.",
+      "pinVerifying": "Verifying PIN...",
       "formTitleEdit": "Edit Employee Information",
       "formTitleAdd": "Add New Employee",
       "formDescEdit": "Update employee information in the system",
@@ -373,7 +376,16 @@
       "saveLocation": "Save Location",
       "addSuccess": "Successfully added \"{name}\"",
       "gpsNotSupported": "Browser does not support GPS",
-      "gpsAccessDenied": "Unable to access GPS. Please allow location access."
+      "gpsAccessDenied": "Unable to access GPS. Please allow location access.",
+      "editTitle": "Edit Location",
+      "editLabel": "Edit location",
+      "deleteLabel": "Delete location",
+      "saveEdit": "Save Changes",
+      "editSuccess": "\"{name}\" updated successfully",
+      "deleteConfirmTitle": "Confirm Delete Location",
+      "deleteConfirmDesc": "Delete \"{name}\" from the system? Employees assigned to this location will be unlinked.",
+      "deleteSuccess": "\"{name}\" deleted successfully",
+      "deleteBtn": "Delete Location"
     },
     "otApprovals": {
       "title": "Overtime (OT) Approvals",
@@ -617,6 +629,19 @@
       "deleteSuccess": "Account \"{name}\" deleted",
       "deleteFailed": "Deletion failed",
       "loadFailed": "Failed to load data"
+    },
+    "security": {
+      "title": "Security — PIN Code",
+      "desc": "Set a 4-digit PIN to confirm edit/delete employee actions",
+      "setPin": "Set / Change PIN",
+      "modalTitle": "Set PIN Code",
+      "currentPinLabel": "Current PIN (if set)",
+      "currentPinHint": "Leave blank if first-time setup",
+      "newPinLabel": "New PIN (4 digits)",
+      "confirmPinLabel": "Confirm New PIN",
+      "pinMismatch": "PINs do not match. Please try again.",
+      "pinSaved": "PIN code saved",
+      "savePinBtn": "Save PIN"
     },
     "compensation": {
       "title": "OT Compensation Settings",

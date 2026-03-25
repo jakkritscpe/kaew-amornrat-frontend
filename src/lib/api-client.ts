@@ -1,20 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
-export const TOKEN_KEY = 'attendance_token';
 export const EMPLOYEE_KEY = 'attendance_employee';
 export const USER_KEY = 'repairhub_user';
-
-function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setToken(token: string) {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
-}
 
 export interface ApiError {
   status: number;
@@ -28,22 +15,44 @@ export function createApiError(status: number, message: string): ApiError & Erro
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers,
+    credentials: 'include', // Send HttpOnly auth cookie automatically
+  });
   const json = await res.json() as { success: boolean; data?: T; error?: string };
 
   if (!res.ok || !json.success) {
-    if (res.status === 401) clearToken();
+    if (res.status === 401) {
+      // Clear local profile data and notify AuthContext to log out
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(EMPLOYEE_KEY);
+      window.dispatchEvent(new Event('auth:unauthorized'));
+    }
     throw createApiError(res.status, json.error ?? 'Request failed');
   }
 
   return json.data as T;
+}
+
+/**
+ * Build a URL query string from a filter object, skipping undefined/null/empty values.
+ * Returns a string starting with "?" or an empty string if there are no params.
+ */
+export function buildParams(filter?: Record<string, unknown>): string {
+  const cleaned: Record<string, string> = {};
+  if (filter) {
+    for (const [k, v] of Object.entries(filter)) {
+      if (v !== undefined && v !== null && v !== '') cleaned[k] = String(v);
+    }
+  }
+  const p = new URLSearchParams(cleaned).toString();
+  return p ? `?${p}` : '';
 }
 
 export const api = {

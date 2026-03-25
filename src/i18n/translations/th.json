@@ -21,7 +21,8 @@
     "meters": "เมตร",
     "point": "จุด",
     "retry": "ลองใหม่",
-    "saving": "กำลังบันทึก..."
+    "saving": "กำลังบันทึก...",
+    "deleting": "กำลังลบ..."
   },
   "status": {
     "present": "มาทำงาน",
@@ -304,6 +305,8 @@
       "pinDesc": "กรุณากรอกรหัส PIN 4 หลักเพื่อยืนยันสิทธิ์ของคุณ",
       "pinWrong": "PIN ไม่ถูกต้อง ({n} ครั้งที่เหลือ)",
       "pinLocked": "ถูกล็อค – ลองใหม่ภายหลัง",
+      "pinNotSet": "ยังไม่ได้ตั้งรหัส PIN กรุณาตั้งใน Settings ก่อน",
+      "pinVerifying": "กำลังตรวจสอบ PIN...",
       "formTitleEdit": "แก้ไขข้อมูลพนักงาน",
       "formTitleAdd": "เพิ่มพนักงานใหม่",
       "formDescEdit": "ปรับปรุงข้อมูลพนักงานในระบบให้เป็นปัจจุบัน",
@@ -373,7 +376,16 @@
       "saveLocation": "บันทึกสถานที่",
       "addSuccess": "เพิ่ม \"{name}\" สำเร็จ",
       "gpsNotSupported": "เบราว์เซอร์ไม่รองรับ GPS",
-      "gpsAccessDenied": "ไม่สามารถเข้าถึง GPS กรุณาอนุญาตตำแหน่ง"
+      "gpsAccessDenied": "ไม่สามารถเข้าถึง GPS กรุณาอนุญาตตำแหน่ง",
+      "editTitle": "แก้ไขสถานที่",
+      "editLabel": "แก้ไขสถานที่",
+      "deleteLabel": "ลบสถานที่",
+      "saveEdit": "บันทึกการแก้ไข",
+      "editSuccess": "แก้ไข \"{name}\" สำเร็จ",
+      "deleteConfirmTitle": "ยืนยันการลบสถานที่",
+      "deleteConfirmDesc": "ลบ \"{name}\" ออกจากระบบ? พนักงานที่ผูกกับสถานที่นี้จะถูกยกเลิกการเชื่อมต่อ",
+      "deleteSuccess": "ลบ \"{name}\" สำเร็จ",
+      "deleteBtn": "ลบสถานที่"
     },
     "otApprovals": {
       "title": "อนุมัติทำงานล่วงเวลา (OT)",
@@ -617,6 +629,19 @@
       "deleteSuccess": "ลบบัญชี \"{name}\" แล้ว",
       "deleteFailed": "ลบไม่สำเร็จ",
       "loadFailed": "โหลดข้อมูลไม่สำเร็จ"
+    },
+    "security": {
+      "title": "ความปลอดภัย — รหัส PIN",
+      "desc": "ตั้งรหัส PIN 4 หลักสำหรับยืนยันการแก้ไข/ลบพนักงาน",
+      "setPin": "ตั้ง / เปลี่ยน PIN",
+      "modalTitle": "ตั้งรหัส PIN",
+      "currentPinLabel": "PIN ปัจจุบัน (ถ้ามี)",
+      "currentPinHint": "เว้นว่างถ้าตั้งครั้งแรก",
+      "newPinLabel": "PIN ใหม่ (4 หลัก)",
+      "confirmPinLabel": "ยืนยัน PIN ใหม่",
+      "pinMismatch": "PIN ไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง",
+      "pinSaved": "ตั้งรหัส PIN แล้ว",
+      "savePinBtn": "บันทึก PIN"
     },
     "compensation": {
       "title": "การตั้งค่าค่าตอบแทนและ OT",

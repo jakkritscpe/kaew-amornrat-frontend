@@ -23,17 +23,13 @@ function formatMeta(event: NotificationEvent, t: (key: string) => string): strin
   return '';
 }
 
-interface Props {
-  token: string | null;
-}
-
-export function NotificationBell({ token }: Props) {
+export function NotificationBell() {
   const { t } = useTranslation();
   const { dark } = useAdminTheme();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { notifications, unreadCount, connected, markAllRead, clearAll } =
-    useAdminNotifications(token);
+    useAdminNotifications(true);
 
   // Show toast on new notification
   const prevCountRef = useRef(0);

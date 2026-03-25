@@ -1,4 +1,26 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, Component, type ReactNode } from 'react';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex min-h-screen items-center justify-center p-8 text-center">
+          <div>
+            <h2 className="text-lg font-semibold">เกิดข้อผิดพลาด</h2>
+            <p className="mt-2 text-sm text-muted-foreground">กรุณารีเฟรชหน้าเพจ</p>
+            <button className="mt-4 text-sm underline" onClick={() => window.location.reload()}>รีเฟรช</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { AuthProvider } from './features/auth/contexts/AuthContext';
@@ -48,6 +70,7 @@ function App() {
   return (
     <AuthProvider>
           <AttendanceProvider>
+            <ErrorBoundary>
             <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<LandingPage />} />
@@ -86,6 +109,7 @@ function App() {
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
+            </ErrorBoundary>
           </AttendanceProvider>
     </AuthProvider>
   );

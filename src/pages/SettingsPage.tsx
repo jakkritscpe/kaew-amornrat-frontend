@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import {
     Shield, Check, DollarSign, Users, Plus, Pencil, Trash2,
-    Loader2, X, Eye, EyeOff, ShieldAlert, AlertTriangle, UserCog,
+    Loader2, X, Eye, EyeOff, ShieldAlert, AlertTriangle, UserCog, KeyRound,
 } from 'lucide-react';
 import { useAttendance } from '../features/attendance/contexts/useAttendance';
-import { getEmployeesApi, createEmployeeApi, updateEmployeeApi, deleteEmployeeApi, updateEmployeeMenusApi } from '../lib/api/employees-api';
+import { getEmployeesApi, createEmployeeApi, updateEmployeeApi, deleteEmployeeApi, updateEmployeeMenusApi, setPinApi } from '../lib/api/employees-api';
 import type { Employee } from '../features/attendance/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -200,6 +200,37 @@ export function SettingsPage() {
     const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null);
     const [deleting, setDeleting] = useState(false);
 
+    // PIN modal state
+    const [showPinModal, setShowPinModal] = useState(false);
+    const [pinStep, setPinStep] = useState<'new' | 'confirm'>('new');
+    const [pinNew, setPinNew] = useState('');
+    const [pinConfirm, setPinConfirm] = useState('');
+    const [pinCurrent, setPinCurrent] = useState('');
+    const [pinSaving, setPinSaving] = useState(false);
+    const [pinModalError, setPinModalError] = useState('');
+
+    const openPinModal = () => {
+        setShowPinModal(true);
+        setPinStep('new');
+        setPinNew(''); setPinConfirm(''); setPinCurrent(''); setPinModalError('');
+    };
+    const closePinModal = () => setShowPinModal(false);
+
+    const handleSetPin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (pinNew !== pinConfirm) { setPinModalError(t('settings.security.pinMismatch')); return; }
+        setPinSaving(true); setPinModalError('');
+        try {
+            await setPinApi(pinNew, pinCurrent || undefined);
+            toast.success(t('settings.security.pinSaved'));
+            closePinModal();
+        } catch (err) {
+            setPinModalError(err instanceof Error ? err.message : t('common.genericError'));
+        } finally {
+            setPinSaving(false);
+        }
+    };
+
     const loadRbacAdmins = async () => {
         setLoadingRbac(true);
         try {
@@ -309,6 +340,23 @@ export function SettingsPage() {
 
     return (
         <div className="space-y-6">
+            {/* ── Security card ── */}
+            <div className={cn('rounded-2xl border p-5 flex items-center justify-between gap-4', dark ? 'bg-white/[0.06] border-white/10' : 'bg-white shadow-sm border-gray-100')}>
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-[#044F88]/5 rounded-xl text-[#044F88]">
+                        <KeyRound className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <p className={cn('font-bold text-sm', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('settings.security.title')}</p>
+                        <p className={cn('text-xs mt-0.5', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('settings.security.desc')}</p>
+                    </div>
+                </div>
+                <button onClick={openPinModal}
+                    className="shrink-0 h-9 px-4 rounded-xl bg-[#044F88] hover:bg-[#00223A] text-white text-sm font-semibold transition-colors">
+                    {t('settings.security.setPin')}
+                </button>
+            </div>
+
             {/* ── Tab bar ── */}
             <div data-tour="settings-tabs" className={cn('rounded-2xl border p-1.5 flex gap-1', dark ? 'bg-white/[0.06] border-white/10 shadow-none' : 'bg-white border-gray-100 shadow-sm')}>
                 {tabs.map(t => {
@@ -586,6 +634,55 @@ export function SettingsPage() {
                     onClose={() => setModalTarget(null)}
                     onSaved={loadAdminAccounts}
                 />
+            )}
+
+            {/* ── Set PIN Modal ── */}
+            {showPinModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closePinModal}>
+                    <div className={cn('rounded-2xl shadow-2xl w-full max-w-sm', dark ? 'bg-[#1e293b]' : 'bg-white')} onClick={e => e.stopPropagation()}>
+                        <div className={cn('flex items-center justify-between px-6 py-5 border-b', dark ? 'border-white/10' : 'border-gray-100')}>
+                            <div className="flex items-center gap-2">
+                                <KeyRound className="w-4 h-4 text-[#044F88]" />
+                                <h3 className={cn('font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('settings.security.modalTitle')}</h3>
+                            </div>
+                            <button onClick={closePinModal} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSetPin} className="px-6 py-5 space-y-4">
+                            <Field label={t('settings.security.currentPinLabel')}>
+                                <input type="password" inputMode="numeric" maxLength={4} value={pinCurrent}
+                                    onChange={e => setPinCurrent(e.target.value.replace(/\D/g, ''))}
+                                    placeholder={t('settings.security.currentPinHint')}
+                                    className={inputCls} />
+                            </Field>
+                            <Field label={t('settings.security.newPinLabel')}>
+                                <input required type="password" inputMode="numeric" maxLength={4} value={pinNew}
+                                    onChange={e => { setPinNew(e.target.value.replace(/\D/g, '')); setPinModalError(''); }}
+                                    placeholder="••••"
+                                    className={inputCls} />
+                            </Field>
+                            <Field label={t('settings.security.confirmPinLabel')}>
+                                <input required type="password" inputMode="numeric" maxLength={4} value={pinConfirm}
+                                    onChange={e => { setPinConfirm(e.target.value.replace(/\D/g, '')); setPinModalError(''); }}
+                                    placeholder="••••"
+                                    className={inputCls} />
+                            </Field>
+                            {pinModalError && <p className="text-sm text-red-500 font-medium">{pinModalError}</p>}
+                            <div className="flex gap-2 pt-1">
+                                <button type="button" onClick={closePinModal}
+                                    className="flex-1 h-10 rounded-xl border border-gray-200 text-sm font-medium text-[#6f6f6f] hover:bg-gray-50 transition-colors">
+                                    {t('common.cancel')}
+                                </button>
+                                <button type="submit" disabled={pinSaving || pinNew.length < 4 || pinConfirm.length < 4}
+                                    className="flex-1 h-10 rounded-xl bg-[#044F88] hover:bg-[#00223A] text-white text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                    {pinSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                                    {pinSaving ? t('common.saving') : t('settings.security.savePinBtn')}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
 
             {/* ── Delete Confirm Modal ── */}

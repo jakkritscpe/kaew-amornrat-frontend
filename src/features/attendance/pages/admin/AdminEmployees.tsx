@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useAttendance } from '../../contexts/useAttendance';
 import { QRCodeSVG } from 'qrcode.react';
 import { regenerateQRApi } from '../../../../lib/api/auth-api';
+import { verifyPinApi } from '../../../../lib/api/employees-api';
 import { toast } from 'sonner';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -202,7 +203,7 @@ export function AdminEmployees() {
     const [pinInput, setPinInput] = useState('');
     const [pinError, setPinError] = useState('');
     const [pinAttempts, setPinAttempts] = useState(0);
-    const ADMIN_PIN = '1234';
+    const [isPinVerifying, setIsPinVerifying] = useState(false);
     const PIN_REFS = [
         useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
         useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
@@ -377,37 +378,48 @@ export function AdminEmployees() {
 
     const handlePinDigit = async (digit: string) => {
         const locked = pinAttempts >= 3;
-        if (locked || isDeleting) return;
+        if (locked || isDeleting || isPinVerifying) return;
         const next = (pinInput + digit).slice(0, 4);
         setPinInput(next);
         setPinError('');
         if (next.length < 4) PIN_REFS[next.length]?.current?.focus();
         if (next.length === 4) {
-            if (next === ADMIN_PIN) {
-                if (secureActionType === 'delete') {
-                    setIsDeleting(true);
-                    try {
-                        const target = employees.find(e => e.id === secureActionId);
-                        await removeEmployee(secureActionId!);
-                        toast.success(t('admin.employees.deleteSuccess', { name: target?.name ?? '' }));
+            setIsPinVerifying(true);
+            try {
+                const valid = await verifyPinApi(next);
+                if (valid) {
+                    if (secureActionType === 'delete') {
+                        setIsDeleting(true);
+                        try {
+                            const target = employees.find(e => e.id === secureActionId);
+                            await removeEmployee(secureActionId!);
+                            toast.success(t('admin.employees.deleteSuccess', { name: target?.name ?? '' }));
+                            closeSecureAction();
+                        } catch (err) {
+                            toast.error(err instanceof Error ? err.message : t('admin.employees.deleteFail'));
+                            setPinInput('');
+                            PIN_REFS[0]?.current?.focus();
+                        } finally {
+                            setIsDeleting(false);
+                        }
+                    } else if (secureActionType === 'edit') {
+                        openEditForm(secureActionId!);
                         closeSecureAction();
-                    } catch (err) {
-                        toast.error(err instanceof Error ? err.message : t('admin.employees.deleteFail'));
-                        setPinInput('');
-                        PIN_REFS[0]?.current?.focus();
-                    } finally {
-                        setIsDeleting(false);
                     }
-                } else if (secureActionType === 'edit') {
-                    openEditForm(secureActionId!);
-                    closeSecureAction();
                 }
-            } else {
-                const newAttempts = pinAttempts + 1;
-                setPinAttempts(newAttempts);
+            } catch (err: unknown) {
+                const status = (err as { status?: number }).status;
+                if (status === 428) {
+                    setPinError(t('admin.employees.pinNotSet'));
+                } else {
+                    const newAttempts = pinAttempts + 1;
+                    setPinAttempts(newAttempts);
+                    setPinError(newAttempts >= 3 ? t('admin.employees.pinLocked') : t('admin.employees.pinWrong', { n: String(3 - newAttempts) }));
+                }
                 setPinInput('');
                 PIN_REFS[0]?.current?.focus();
-                setPinError(newAttempts >= 3 ? t('admin.employees.pinLocked') : t('admin.employees.pinWrong', { n: String(3 - newAttempts) }));
+            } finally {
+                setIsPinVerifying(false);
             }
         }
     };
@@ -967,10 +979,10 @@ export function AdminEmployees() {
                                                 {pinError && <p className={cn('text-sm mb-4 font-medium', locked ? 'text-[#6f6f6f]' : 'text-red-500')}>{pinError}</p>}
 
                                                 {/* Numpad */}
-                                                {isDeleting ? (
+                                                {isDeleting || isPinVerifying ? (
                                                     <div className="flex flex-col items-center gap-3 mb-6 py-4">
-                                                        <Loader2 className="w-8 h-8 text-red-400 animate-spin" />
-                                                        <p className="text-sm text-[#6f6f6f]">{t('admin.employees.deletingEmployee')}</p>
+                                                        <Loader2 className={cn('w-8 h-8 animate-spin', isDeleting ? 'text-red-400' : 'text-[#044F88]')} />
+                                                        <p className="text-sm text-[#6f6f6f]">{isDeleting ? t('admin.employees.deletingEmployee') : t('admin.employees.pinVerifying')}</p>
                                                     </div>
                                                 ) : (
                                                     <div className="grid grid-cols-3 gap-3 mb-6">

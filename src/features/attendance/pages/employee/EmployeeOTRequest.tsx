@@ -3,8 +3,8 @@ import { useAttendance } from '../../contexts/useAttendance';
 import { Input } from '@/components/ui/input';
 import { Clock, Calendar, FileText, CheckCircle2, XCircle, Hourglass, Send, Zap, History } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatDate, cn, decodeJwt } from '@/lib/utils';
-import { EMPLOYEE_KEY, TOKEN_KEY } from '@/lib/api-client';
+import { formatDate, cn } from '@/lib/utils';
+import { EMPLOYEE_KEY } from '@/lib/api-client';
 import { useTranslation } from '@/i18n';
 
 function getEmployeeId(): string {
@@ -13,13 +13,6 @@ function getEmployeeId(): string {
         if (emp) {
             const parsed = JSON.parse(emp);
             if (parsed?.id) return parsed.id;
-        }
-    } catch { /* ignore */ }
-    try {
-        const token = localStorage.getItem(TOKEN_KEY);
-        if (token) {
-            const payload = decodeJwt(token);
-            if (payload?.sub) return payload.sub as string;
         }
     } catch { /* ignore */ }
     return '';

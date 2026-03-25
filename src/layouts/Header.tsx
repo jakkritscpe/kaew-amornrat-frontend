@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { Menu, Sun, Moon, HelpCircle } from 'lucide-react';
 import { NotificationBell } from '../features/attendance/components/NotificationBell';
-import { TOKEN_KEY } from '../lib/api-client';
 import { cn } from '@/lib/utils';
 
 interface HeaderProps {
@@ -15,8 +14,6 @@ interface HeaderProps {
 
 export default function Header({ title, onMenuClick, dark, onToggleTheme, onHelpClick }: HeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
-  const token = localStorage.getItem(TOKEN_KEY);
-
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(headerRef.current,
@@ -76,7 +73,7 @@ export default function Header({ title, onMenuClick, dark, onToggleTheme, onHelp
             {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
         )}
-        <NotificationBell token={token} />
+        <NotificationBell />
       </div>
     </header>
   );

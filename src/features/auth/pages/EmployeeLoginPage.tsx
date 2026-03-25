@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { loginApi } from '../../../lib/api/auth-api';
-import { setToken, EMPLOYEE_KEY } from '../../../lib/api-client';
+import { EMPLOYEE_KEY } from '../../../lib/api-client';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
 
@@ -34,7 +34,6 @@ export function EmployeeLoginPage() {
     setLoading(true);
     try {
       const result = await loginApi(email, password);
-      setToken(result.token);
       localStorage.setItem(EMPLOYEE_KEY, JSON.stringify(result.user));
       navigate('/employee/attendance/today');
     } catch (err) {
