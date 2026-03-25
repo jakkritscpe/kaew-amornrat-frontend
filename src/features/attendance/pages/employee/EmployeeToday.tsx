@@ -182,7 +182,7 @@ export function EmployeeToday() {
             </div>
 
             {/* ── White floating card ── */}
-            <div className="flex-1 bg-white rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 pt-5 pb-6 space-y-4 relative z-10">
+            <div className="flex-1 bg-white dark:bg-[#1e293b] rounded-t-3xl -mt-6 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 pt-5 pb-6 space-y-4 relative z-10">
 
                 {/* Error */}
                 {actionError && (
@@ -195,13 +195,13 @@ export function EmployeeToday() {
                 {/* Done state */}
                 {isCheckedOut ? (
                     <div className="flex flex-col items-center text-center py-6 gap-3">
-                        <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
                             <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                         </div>
                         <div>
-                            <p className="font-bold text-[#1d1d1d] text-xl">{t('employee.today.doneForToday')}</p>
-                            <p className="text-[#6f6f6f] text-sm mt-1">
-                                {t('employee.today.finishedAt')} <span className="font-semibold text-[#1d1d1d]">{formatTime(todayLog?.checkOutTime)}</span> น.
+                            <p className="font-bold text-[#1d1d1d] dark:text-white text-xl">{t('employee.today.doneForToday')}</p>
+                            <p className="text-[#6f6f6f] dark:text-white/60 text-sm mt-1">
+                                {t('employee.today.finishedAt')} <span className="font-semibold text-[#1d1d1d] dark:text-white">{formatTime(todayLog?.checkOutTime)}</span> น.
                             </p>
                         </div>
                     </div>
@@ -229,10 +229,10 @@ export function EmployeeToday() {
 
                 {/* Location coords */}
                 {!checkingLoc && !geoError && currentLoc && (
-                    <div className="flex items-center gap-2 px-4 py-2.5 bg-[#f8fafc] rounded-xl border border-gray-100 text-xs">
+                    <div className="flex items-center gap-2 px-4 py-2.5 bg-[#f8fafc] dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10 text-xs">
                         <MapPin className="w-3.5 h-3.5 text-[#044F88] shrink-0" />
-                        <span className="text-[#6f6f6f]">{t('employee.today.position')}</span>
-                        <span className="font-mono text-[#1d1d1d] font-medium ml-auto">
+                        <span className="text-[#6f6f6f] dark:text-white/60">{t('employee.today.position')}</span>
+                        <span className="font-mono text-[#1d1d1d] dark:text-white font-medium ml-auto">
                             {currentLoc.lat.toFixed(5)}, {currentLoc.lng.toFixed(5)}
                         </span>
                     </div>
@@ -241,7 +241,7 @@ export function EmployeeToday() {
                 {/* Stats grid */}
                 {todayLog && (
                     <div className="pt-1">
-                        <p className="text-[11px] font-bold text-[#6f6f6f] uppercase tracking-widest mb-3 px-1">{t('employee.today.todaySummary')}</p>
+                        <p className="text-[11px] font-bold text-[#6f6f6f] dark:text-white/50 uppercase tracking-widest mb-3 px-1">{t('employee.today.todaySummary')}</p>
                         <div className="grid grid-cols-2 gap-3">
                             <StatCard label={t('employee.today.timeIn')}   value={formatTime(todayLog.checkInTime)}                  icon={Clock4}  iconBg="bg-[#044F88]/5"    iconColor="text-[#044F88]" />
                             <StatCard label={t('employee.today.timeOut')}    value={formatTime(todayLog.checkOutTime)}                 icon={LogOut}  iconBg="bg-orange-50"  iconColor="text-orange-500" />
@@ -263,17 +263,17 @@ export function EmployeeToday() {
                 />
 
                 {/* Bottom sheet */}
-                <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
+                <div className="relative w-full max-w-md bg-white dark:bg-[#1e293b] rounded-t-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
 
                     {/* Handle bar */}
                     <div className="flex justify-center pt-3 pb-1">
-                        <div className="w-10 h-1 rounded-full bg-gray-200" />
+                        <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-white/20" />
                     </div>
 
                     {/* Header */}
                     <div className={cn(
                         'flex items-center justify-between px-5 py-4',
-                        !isCheckedIn ? 'bg-[#044F88]/5' : 'bg-orange-50'
+                        !isCheckedIn ? 'bg-[#044F88]/5 dark:bg-[#044F88]/20' : 'bg-orange-50 dark:bg-orange-500/10'
                     )}>
                         <div className="flex items-center gap-3">
                             <div className={cn(
@@ -285,17 +285,17 @@ export function EmployeeToday() {
                                     : <LogOut className="w-5 h-5 text-white" />}
                             </div>
                             <div>
-                                <p className="font-bold text-[#1d1d1d] text-base leading-tight">
+                                <p className="font-bold text-[#1d1d1d] dark:text-white text-base leading-tight">
                                     {!isCheckedIn ? t('employee.today.confirmCheckIn') : t('employee.today.confirmCheckOut')}
                                 </p>
-                                <p className="text-xs text-[#6f6f6f] mt-0.5">
+                                <p className="text-xs text-[#6f6f6f] dark:text-white/60 mt-0.5">
                                     {!isCheckedIn ? t('employee.today.recordTimeIn') : t('employee.today.recordTimeOut')}
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={() => setShowConfirm(false)}
-                            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"
+                            className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-white/60 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -304,32 +304,32 @@ export function EmployeeToday() {
                     {/* Info rows */}
                     <div className="px-5 py-4 space-y-3">
                         {/* Time */}
-                        <div className="flex items-center justify-between bg-[#f8fafc] rounded-2xl px-4 py-3">
+                        <div className="flex items-center justify-between bg-[#f8fafc] dark:bg-white/5 rounded-2xl px-4 py-3">
                             <div className="flex items-center gap-2.5">
                                 <Clock4 className={cn('w-4 h-4', !isCheckedIn ? 'text-[#044F88]' : 'text-orange-500')} />
-                                <span className="text-sm text-[#6f6f6f] font-medium">{t('employee.today.time')}</span>
+                                <span className="text-sm text-[#6f6f6f] dark:text-white/60 font-medium">{t('employee.today.time')}</span>
                             </div>
                             <div className="text-right">
-                                <p className="font-bold text-[#1d1d1d] text-base tabular-nums">
+                                <p className="font-bold text-[#1d1d1d] dark:text-white text-base tabular-nums">
                                     {format(confirmTime, 'HH:mm:ss')}
                                 </p>
-                                <p className="text-[11px] text-[#6f6f6f] tabular-nums">
+                                <p className="text-[11px] text-[#6f6f6f] dark:text-white/50 tabular-nums">
                                     {format(confirmTime, 'd MMM yyyy', { locale: th })}
                                 </p>
                             </div>
                         </div>
 
                         {/* GPS */}
-                        <div className="flex items-center justify-between bg-[#f8fafc] rounded-2xl px-4 py-3">
+                        <div className="flex items-center justify-between bg-[#f8fafc] dark:bg-white/5 rounded-2xl px-4 py-3">
                             <div className="flex items-center gap-2.5">
                                 <MapPin className="w-4 h-4 text-emerald-600" />
-                                <span className="text-sm text-[#6f6f6f] font-medium">{t('employee.today.gpsPosition')}</span>
+                                <span className="text-sm text-[#6f6f6f] dark:text-white/60 font-medium">{t('employee.today.gpsPosition')}</span>
                             </div>
                             <div className="text-right">
-                                <p className="font-mono text-xs font-semibold text-[#1d1d1d]">
+                                <p className="font-mono text-xs font-semibold text-[#1d1d1d] dark:text-white">
                                     {currentLoc.lat.toFixed(5)}
                                 </p>
-                                <p className="font-mono text-xs font-semibold text-[#1d1d1d]">
+                                <p className="font-mono text-xs font-semibold text-[#1d1d1d] dark:text-white">
                                     {currentLoc.lng.toFixed(5)}
                                 </p>
                             </div>
@@ -340,7 +340,7 @@ export function EmployeeToday() {
                     <div className="px-5 pb-8 pt-1 flex gap-3">
                         <button
                             onClick={() => setShowConfirm(false)}
-                            className="flex-1 py-4 rounded-2xl bg-gray-100 text-[#1d1d1d] font-bold text-base hover:bg-gray-200 transition-colors active:scale-[0.97]"
+                            className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/10 text-[#1d1d1d] dark:text-white font-bold text-base hover:bg-gray-200 dark:hover:bg-white/20 transition-colors active:scale-[0.97]"
                         >
                             {t('common.cancel')}
                         </button>
@@ -370,13 +370,13 @@ function StatCard({ label, value, icon: Icon, iconBg, iconColor }: {
     label: string; value: string; icon: React.ElementType; iconBg: string; iconColor: string;
 }) {
     return (
-        <div className="bg-[#f8fafc] rounded-2xl border border-gray-100 p-4 flex items-center gap-3">
+        <div className="bg-[#f8fafc] dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 p-4 flex items-center gap-3">
             <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', iconBg)}>
                 <Icon className={cn('w-4 h-4', iconColor)} />
             </div>
             <div className="min-w-0">
-                <p className="text-[10px] text-[#6f6f6f] font-semibold uppercase tracking-wide">{label}</p>
-                <p className="text-[15px] font-bold text-[#1d1d1d] tabular-nums mt-0.5 leading-none">{value}</p>
+                <p className="text-[10px] text-[#6f6f6f] dark:text-white/50 font-semibold uppercase tracking-wide">{label}</p>
+                <p className="text-[15px] font-bold text-[#1d1d1d] dark:text-white tabular-nums mt-0.5 leading-none">{value}</p>
             </div>
         </div>
     );

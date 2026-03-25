@@ -778,12 +778,12 @@ export function AdminEmployees() {
                         >
                             <div
                                 ref={qrModalRef}
-                                className="bg-white w-full rounded-t-3xl max-h-[90svh] overflow-y-auto overscroll-contain will-change-transform shadow-2xl sm:w-auto sm:min-w-[360px] sm:max-w-sm sm:rounded-3xl sm:max-h-[calc(100svh-2rem)]"
+                                className={cn('w-full rounded-t-3xl max-h-[90svh] overflow-y-auto overscroll-contain will-change-transform shadow-2xl sm:w-auto sm:min-w-[360px] sm:max-w-sm sm:rounded-3xl sm:max-h-[calc(100svh-2rem)]', dark ? 'bg-[#1e293b]' : 'bg-white')}
                                 onClick={e => e.stopPropagation()}
                             >
                                 {/* Drag handle – mobile only */}
                                 <div className="flex justify-center pt-2.5 pb-1 sm:hidden">
-                                    <div className="w-9 h-1 rounded-full bg-gray-300" />
+                                    <div className={cn('w-9 h-1 rounded-full', dark ? 'bg-white/20' : 'bg-gray-300')} />
                                 </div>
                                 {/* ── Branded header with employee identity ── */}
                                 <div className="relative bg-gradient-to-br from-[#044F88] to-[#00223A] px-6 pt-5 pb-10">
@@ -825,7 +825,7 @@ export function AdminEmployees() {
 
                                 {/* ── QR card — lifts over header ── */}
                                 <div className="px-5 -mt-6">
-                                    <div className="bg-white p-5 flex flex-col items-center gap-3">
+                                    <div className={cn('p-5 flex flex-col items-center gap-3', dark ? 'bg-[#1e293b]' : 'bg-white')}>
                                         {/* QR with corner-bracket frame */}
                                         <div className="relative p-3">
                                             <span className="absolute top-0 left-0 w-5 h-5 border-t-[3px] border-l-[3px] border-[#044F88] rounded-tl-lg" />
@@ -840,7 +840,7 @@ export function AdminEmployees() {
                                                 ref={qrRef}
                                             />
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-xs text-[#6f6f6f]">
+                                        <div className={cn('flex items-center gap-1.5 text-xs', dark ? 'text-white/60' : 'text-[#6f6f6f]')}>
                                             <QrCode className="w-3.5 h-3.5 text-[#044F88]" />
                                             {t('admin.employees.scanToLogin')}
                                         </div>
@@ -862,10 +862,10 @@ export function AdminEmployees() {
                                             variant="outline"
                                             onClick={copyQRLink}
                                             className={cn(
-                                                'rounded-xl h-12 sm:h-11 text-sm font-medium gap-2 transition-all border-gray-200 touch-manipulation',
+                                                'rounded-xl h-12 sm:h-11 text-sm font-medium gap-2 transition-all border-gray-200 dark:border-white/10 touch-manipulation',
                                                 copied
-                                                    ? 'border-emerald-300 text-emerald-600 bg-emerald-50 hover:bg-emerald-50'
-                                                    : 'text-[#1d1d1d] hover:bg-gray-50'
+                                                    ? 'border-emerald-300 text-emerald-600 bg-emerald-50 hover:bg-emerald-50 dark:bg-emerald-500/10 dark:border-emerald-500/30'
+                                                    : 'text-[#1d1d1d] dark:text-white hover:bg-gray-50 dark:hover:bg-white/5'
                                             )}
                                         >
                                             {copied
@@ -876,17 +876,17 @@ export function AdminEmployees() {
                                     </div>
 
                                     {/* Danger zone: Regenerate */}
-                                    <div className="border-t border-gray-100 pt-3">
+                                    <div className={cn('border-t pt-3', dark ? 'border-white/10' : 'border-gray-100')}>
                                         {!confirmRegenerate ? (
                                             <button
                                                 onClick={() => setConfirmRegenerate(true)}
-                                                className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors py-2.5 rounded-xl"
+                                                className={cn('w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors py-2.5 rounded-xl')}
                                             >
                                                 <RefreshCw className="w-3.5 h-3.5" />
                                                 {t('admin.employees.regenerateQr')}
                                             </button>
                                         ) : (
-                                            <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-3">
+                                            <div className={cn('border rounded-xl p-4 space-y-3', dark ? 'bg-red-500/10 border-red-500/20' : 'bg-red-50 border-red-100')}>
                                                 <div className="flex items-start gap-2.5">
                                                     <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                                                     <div>
@@ -898,7 +898,7 @@ export function AdminEmployees() {
                                                     <Button
                                                         variant="outline"
                                                         onClick={() => setConfirmRegenerate(false)}
-                                                        className="h-9 text-sm rounded-lg border-gray-200"
+                                                        className={cn('h-9 text-sm rounded-lg', dark ? 'border-white/10' : 'border-gray-200')}
                                                     >
                                                         {t('common.cancel')}
                                                     </Button>
@@ -928,18 +928,18 @@ export function AdminEmployees() {
                                     {/* Step bar */}
                                     {isDelete && (
                                         <div className="flex h-1.5">
-                                            <div className={`flex-1 transition-colors duration-300 ${secureStep === 'confirm' ? 'bg-red-400' : 'bg-red-100'}`} />
-                                            <div className={`flex-1 transition-colors duration-300 ${secureStep === 'pin' ? 'bg-red-500' : 'bg-gray-100'}`} />
+                                            <div className={`flex-1 transition-colors duration-300 ${secureStep === 'confirm' ? 'bg-red-400' : (dark ? 'bg-red-500/20' : 'bg-red-100')}`} />
+                                            <div className={`flex-1 transition-colors duration-300 ${secureStep === 'pin' ? 'bg-red-500' : (dark ? 'bg-white/10' : 'bg-gray-100')}`} />
                                         </div>
                                     )}
                                     <div className="p-8 text-center">
                                         {secureStep === 'confirm' && isDelete ? (
                                             <>
-                                                <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
+                                                <div className={cn('w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5', dark ? 'bg-red-500/10' : 'bg-red-50')}>
                                                     <Trash2 className="w-8 h-8 text-red-500" />
                                                 </div>
-                                                <h3 className="text-xl font-bold text-[#1d1d1d] mb-2">{t('admin.employees.deleteConfirmTitle')}</h3>
-                                                <p className="text-[15px] text-[#6f6f6f] mb-8 leading-relaxed">
+                                                <h3 className={cn('text-xl font-bold mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.employees.deleteConfirmTitle')}</h3>
+                                                <p className={cn('text-[15px] mb-8 leading-relaxed', dark ? 'text-white/60' : 'text-[#6f6f6f]')}>
                                                     {t('admin.employees.deleteConfirmMsg', { name: `${target?.name ?? ''}${target?.nickname ? ` (${target.nickname})` : ''}` })}
                                                     <span className="text-red-500 font-medium text-sm mt-2 block">{t('admin.employees.deleteWarning')}</span>
                                                 </p>
@@ -953,18 +953,18 @@ export function AdminEmployees() {
                                             </>
                                         ) : (
                                             <>
-                                                <div className={cn('w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5', locked ? 'bg-gray-100' : (isDelete ? 'bg-red-50' : 'bg-[#044F88/10]'))}>
+                                                <div className={cn('w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5', locked ? (dark ? 'bg-white/10' : 'bg-gray-100') : (isDelete ? (dark ? 'bg-red-500/10' : 'bg-red-50') : 'bg-[#044F88/10]'))}>
                                                     <CheckCircle2 className={cn('w-8 h-8', locked ? 'text-gray-400' : (isDelete ? 'text-red-500' : 'text-[#044F88]'))} />
                                                 </div>
-                                                <h3 className="text-xl font-bold text-[#1d1d1d] mb-2">{t('admin.employees.pinTitle')}</h3>
-                                                <p className="text-sm text-[#6f6f6f] mb-6">{t('admin.employees.pinDesc')}</p>
+                                                <h3 className={cn('text-xl font-bold mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.employees.pinTitle')}</h3>
+                                                <p className={cn('text-sm mb-6', dark ? 'text-white/60' : 'text-[#6f6f6f]')}>{t('admin.employees.pinDesc')}</p>
 
                                                 {/* PIN dots */}
                                                 <div className="flex justify-center gap-4 mb-6">
                                                     {['d0', 'd1', 'd2', 'd3'].map((id, i) => (
                                                         <div key={id} className={cn(
                                                             'w-14 h-14 rounded-2xl border-2 flex items-center justify-center text-2xl font-bold transition-all duration-200',
-                                                            i < pinInput.length ? (isDelete ? 'border-red-400 bg-red-50 text-red-500 scale-105' : 'border-[#044F88]/80 bg-[#044F88]/5 text-[#044F88] scale-105') : 'border-gray-200 bg-gray-50',
+                                                            i < pinInput.length ? (isDelete ? 'border-red-400 bg-red-50 text-red-500 scale-105' : 'border-[#044F88]/80 bg-[#044F88]/5 text-[#044F88] scale-105') : (dark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-gray-50'),
                                                             locked && 'opacity-40',
                                                         )}>
                                                             {i < pinInput.length ? '●' : ''}
@@ -972,13 +972,13 @@ export function AdminEmployees() {
                                                     ))}
                                                 </div>
 
-                                                {pinError && <p className={cn('text-sm mb-4 font-medium', locked ? 'text-[#6f6f6f]' : 'text-red-500')}>{pinError}</p>}
+                                                {pinError && <p className={cn('text-sm mb-4 font-medium', locked ? (dark ? 'text-white/60' : 'text-[#6f6f6f]') : 'text-red-500')}>{pinError}</p>}
 
                                                 {/* Numpad */}
                                                 {isDeleting || isPinVerifying ? (
                                                     <div className="flex flex-col items-center gap-3 mb-6 py-4">
                                                         <Loader2 className={cn('w-8 h-8 animate-spin', isDeleting ? 'text-red-400' : 'text-[#044F88]')} />
-                                                        <p className="text-sm text-[#6f6f6f]">{isDeleting ? t('admin.employees.deletingEmployee') : t('admin.employees.pinVerifying')}</p>
+                                                        <p className={cn('text-sm', dark ? 'text-white/60' : 'text-[#6f6f6f]')}>{isDeleting ? t('admin.employees.deletingEmployee') : t('admin.employees.pinVerifying')}</p>
                                                     </div>
                                                 ) : (
                                                     <div className="grid grid-cols-3 gap-3 mb-6">
@@ -987,20 +987,20 @@ export function AdminEmployees() {
                                                                 k === '⌫' ? (
                                                                     <button key="backspace" type="button" disabled={locked}
                                                                         onClick={handlePinBackspace}
-                                                                        className="h-14 rounded-2xl bg-gray-100 hover:bg-gray-200 text-[#6f6f6f] font-bold text-xl transition-colors disabled:opacity-30 touch-manipulation">
+                                                                        className={cn('h-14 rounded-2xl font-bold text-xl transition-colors disabled:opacity-30 touch-manipulation', dark ? 'bg-white/10 hover:bg-white/15 text-white/60' : 'bg-gray-100 hover:bg-gray-200 text-[#6f6f6f]')}>
                                                                         {k}
                                                                     </button>
                                                                 ) : (
                                                                     <button key={k} type="button" disabled={locked || pinInput.length >= 4}
                                                                         onClick={() => handlePinDigit(k)}
-                                                                        className="h-14 rounded-2xl bg-white border border-gray-200 shadow-sm hover:border-[#044F88] hover:text-[#044F88] text-[#1d1d1d] font-semibold text-xl transition-all disabled:opacity-30 touch-manipulation">
+                                                                        className={cn('h-14 rounded-2xl border shadow-sm font-semibold text-xl transition-all disabled:opacity-30 touch-manipulation hover:border-[#044F88] hover:text-[#044F88]', dark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-[#1d1d1d]')}>
                                                                         {k}
                                                                     </button>
                                                                 )
                                                         )}
                                                     </div>
                                                 )}
-                                                <Button variant="ghost" className="w-full text-[#6f6f6f] font-medium" disabled={isDeleting} onClick={closeSecureAction}>{t('common.cancel')}</Button>
+                                                <Button variant="ghost" className={cn('w-full font-medium', dark ? 'text-white/60' : 'text-[#6f6f6f]')} disabled={isDeleting} onClick={closeSecureAction}>{t('common.cancel')}</Button>
                                             </>
                                         )}
                                     </div>
@@ -1020,7 +1020,7 @@ export function AdminEmployees() {
                                         <h2 className={cn('text-xl font-bold', dark ? 'text-white' : 'text-[#1d1d1d]')}>{isEditing ? t('admin.employees.formTitleEdit') : t('admin.employees.formTitleAdd')}</h2>
                                         <p className={cn('text-sm mt-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{isEditing ? t('admin.employees.formDescEdit') : t('admin.employees.formDescAdd')}</p>
                                     </div>
-                                    <button type="button" onClick={closeFormModal} className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-[#1d1d1d] transition-colors">
+                                    <button type="button" onClick={closeFormModal} className={cn('w-10 h-10 rounded-full flex items-center justify-center transition-colors', dark ? 'text-white/40 hover:bg-white/10 hover:text-white' : 'text-gray-400 hover:bg-gray-100 hover:text-[#1d1d1d]')}>
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -1030,15 +1030,16 @@ export function AdminEmployees() {
 
                                         {/* LEFT: Avatar */}
                                         <div className="w-full md:w-56 shrink-0 flex flex-col items-center gap-4">
-                                            <p className="text-sm font-semibold text-[#1d1d1d] self-start">
-                                                {t('admin.employees.avatar')} <span className="text-gray-400 font-normal text-xs">{t('admin.employees.avatarOptional')}</span>
+                                            <p className={cn('text-sm font-semibold self-start', dark ? 'text-white' : 'text-[#1d1d1d]')}>
+                                                {t('admin.employees.avatar')} <span className={cn('font-normal text-xs', dark ? 'text-white/40' : 'text-gray-400')}>{t('admin.employees.avatarOptional')}</span>
                                             </p>
 
                                             {/* Avatar circle — camera / preview / placeholder */}
                                             <div className="relative w-48 h-48">
                                                 <div className={cn(
-                                                    'w-48 h-48 rounded-full overflow-hidden border-2 border-dashed bg-white flex items-center justify-center shadow-sm transition-colors',
-                                                    isProcessingImage ? 'border-[#044F88]/30' : 'border-gray-200 hover:border-[#044F88]/30',
+                                                    'w-48 h-48 rounded-full overflow-hidden border-2 border-dashed flex items-center justify-center shadow-sm transition-colors',
+                                                    dark ? 'bg-white/5' : 'bg-white',
+                                                    isProcessingImage ? 'border-[#044F88]/30' : dark ? 'border-white/20 hover:border-[#044F88]/30' : 'border-gray-200 hover:border-[#044F88]/30',
                                                 )}>
                                                     {avatarMode === 'camera' ? (
                                                         <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
@@ -1054,7 +1055,7 @@ export function AdminEmployees() {
 
                                                 {/* Processing overlay */}
                                                 {isProcessingImage && (
-                                                    <div className="absolute inset-0 rounded-full bg-white/75 flex flex-col items-center justify-center gap-2">
+                                                    <div className={cn('absolute inset-0 rounded-full flex flex-col items-center justify-center gap-2', dark ? 'bg-[#1e293b]/80' : 'bg-white/75')}>
                                                         <Loader2 className="w-8 h-8 text-[#044F88] animate-spin" />
                                                         <span className="text-xs font-medium text-[#044F88]">{t('admin.employees.processing')}</span>
                                                     </div>
@@ -1096,7 +1097,7 @@ export function AdminEmployees() {
                                                         onClick={startCamera}
                                                         disabled={isProcessingImage}
                                                         variant="outline"
-                                                        className="w-full text-[#1d1d1d] border-gray-200 hover:bg-gray-50 rounded-xl h-10 disabled:opacity-60"
+                                                        className={cn('w-full rounded-xl h-10 disabled:opacity-60', dark ? 'text-white border-white/10 hover:bg-white/10' : 'text-[#1d1d1d] border-gray-200 hover:bg-gray-50')}
                                                     >
                                                         <SwitchCamera className="w-4 h-4 mr-2 text-[#044F88]" /> {t('admin.employees.fromCamera')}
                                                     </Button>
@@ -1105,7 +1106,7 @@ export function AdminEmployees() {
                                                         onClick={() => avatarInputRef.current?.click()}
                                                         disabled={isProcessingImage}
                                                         variant="outline"
-                                                        className="w-full text-[#1d1d1d] border-gray-200 hover:bg-gray-50 rounded-xl h-10 disabled:opacity-60"
+                                                        className={cn('w-full rounded-xl h-10 disabled:opacity-60', dark ? 'text-white border-white/10 hover:bg-white/10' : 'text-[#1d1d1d] border-gray-200 hover:bg-gray-50')}
                                                     >
                                                         {isProcessingImage
                                                             ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('admin.employees.processingDots')}</>
@@ -1141,70 +1142,70 @@ export function AdminEmployees() {
                                             {/* Name + Nickname */}
                                             <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
                                                 <div>
-                                                    <label htmlFor="emp-name" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                                    <label htmlFor="emp-name" className={cn('text-sm font-semibold block mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                         {t('admin.employees.nameLabel')} <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input id="emp-name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="John Doe" required autoComplete="name" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="John Doe" required autoComplete="name" spellCheck={false} className={cn('h-11 rounded-xl focus:border-[#044F88]', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')} />
                                                 </div>
                                                 <div>
-                                                    <label htmlFor="emp-nickname" className="text-sm font-semibold text-[#1d1d1d] block mb-2">{t('admin.employees.nicknameLabel')}</label>
-                                                    <Input id="emp-nickname" name="nickname" value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} placeholder="Jay" autoComplete="nickname" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                    <label htmlFor="emp-nickname" className={cn('text-sm font-semibold block mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.employees.nicknameLabel')}</label>
+                                                    <Input id="emp-nickname" name="nickname" value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} placeholder="Jay" autoComplete="nickname" spellCheck={false} className={cn('h-11 rounded-xl focus:border-[#044F88]', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')} />
                                                 </div>
                                             </div>
 
                                             {/* Email */}
                                             <div>
-                                                <label htmlFor="emp-email" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                                <label htmlFor="emp-email" className={cn('text-sm font-semibold block mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                     {t('admin.employees.emailLabel')} <span className="text-red-500">*</span>
                                                 </label>
-                                                <Input id="emp-email" name="email" type="email" inputMode="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" required autoComplete="email" spellCheck={false} className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                <Input id="emp-email" name="email" type="email" inputMode="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" required autoComplete="email" spellCheck={false} className={cn('h-11 rounded-xl focus:border-[#044F88]', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')} />
                                             </div>
 
                                             <div>
-                                                <label htmlFor="emp-password" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                                <label htmlFor="emp-password" className={cn('text-sm font-semibold block mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                     {isEditing ? t('admin.employees.passwordNewLabel') : t('admin.employees.passwordLabel')} {!isEditing && <span className="text-red-500">*</span>}
-                                                    {isEditing && <span className="text-xs text-gray-400 ml-1">{t('admin.employees.passwordHint')}</span>}
+                                                    {isEditing && <span className={cn('text-xs ml-1', dark ? 'text-white/40' : 'text-gray-400')}>{t('admin.employees.passwordHint')}</span>}
                                                 </label>
-                                                <Input id="emp-password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="******" required={!isEditing} minLength={6} autoComplete="new-password" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                <Input id="emp-password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="******" required={!isEditing} minLength={6} autoComplete="new-password" className={cn('h-11 rounded-xl focus:border-[#044F88]', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')} />
                                             </div>
 
                                             {/* Department + Position */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label htmlFor="emp-department" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                                    <label htmlFor="emp-department" className={cn('text-sm font-semibold block mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                         {t('admin.employees.departmentLabel')} <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input id="emp-department" name="department" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="Engineering" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-department" name="department" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="Engineering" required autoComplete="organization-title" className={cn('h-11 rounded-xl focus:border-[#044F88]', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')} />
                                                 </div>
                                                 <div>
-                                                    <label htmlFor="emp-position" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                                    <label htmlFor="emp-position" className={cn('text-sm font-semibold block mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                         {t('admin.employees.positionLabel')} <span className="text-red-500">*</span>
                                                     </label>
-                                                    <Input id="emp-position" name="position" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="Developer" required autoComplete="organization-title" className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]" />
+                                                    <Input id="emp-position" name="position" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="Developer" required autoComplete="organization-title" className={cn('h-11 rounded-xl focus:border-[#044F88]', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')} />
                                                 </div>
                                             </div>
 
                                             {/* Shift */}
                                             <div>
-                                                <label className="text-sm font-semibold text-[#1d1d1d] block mb-2">
+                                                <label className={cn('text-sm font-semibold block mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                     {t('admin.employees.shiftLabel')} <span className="text-red-500">*</span>
                                                 </label>
                                                 <div className="flex items-center gap-3">
-                                                    <Input id="shift-start" name="shiftStartTime" type="time" value={form.shiftStartTime} onChange={e => setForm({ ...form, shiftStartTime: e.target.value })} required className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-[#1d1d1d] text-center" />
-                                                    <span className="text-gray-400 font-medium">-</span>
-                                                    <Input id="shift-end" name="shiftEndTime" type="time" value={form.shiftEndTime} onChange={e => setForm({ ...form, shiftEndTime: e.target.value })} required className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-[#1d1d1d] text-center" />
+                                                    <Input id="shift-start" name="shiftStartTime" type="time" value={form.shiftStartTime} onChange={e => setForm({ ...form, shiftStartTime: e.target.value })} required className={cn('h-11 rounded-xl focus:border-[#044F88] tabular-nums text-center', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')} />
+                                                    <span className={cn('font-medium', dark ? 'text-white/40' : 'text-gray-400')}>-</span>
+                                                    <Input id="shift-end" name="shiftEndTime" type="time" value={form.shiftEndTime} onChange={e => setForm({ ...form, shiftEndTime: e.target.value })} required className={cn('h-11 rounded-xl focus:border-[#044F88] tabular-nums text-center', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')} />
                                                 </div>
                                             </div>
 
                                             {/* Location Zone */}
                                             <div>
-                                                <label htmlFor="emp-location" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                                    <MapPin className="w-4 h-4 inline-block mr-1 text-[#6f6f6f]" />
-                                                    {t('admin.employees.locationLabel')} <span className="text-gray-400 font-normal text-xs">{t('admin.employees.avatarOptional')}</span>
+                                                <label htmlFor="emp-location" className={cn('text-sm font-semibold block mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
+                                                    <MapPin className={cn('w-4 h-4 inline-block mr-1', dark ? 'text-white/50' : 'text-[#6f6f6f]')} />
+                                                    {t('admin.employees.locationLabel')} <span className={cn('font-normal text-xs', dark ? 'text-white/40' : 'text-gray-400')}>{t('admin.employees.avatarOptional')}</span>
                                                 </label>
                                                 <select
                                                     id="emp-location"
-                                                    className="w-full h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#044F88]/20 focus:border-[#044F88] transition-shadow"
+                                                    className={cn('w-full h-11 rounded-xl border px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#044F88]/20 focus:border-[#044F88] transition-shadow', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')}
                                                     value={form.locationId}
                                                     onChange={e => setForm({ ...form, locationId: e.target.value })}
                                                 >
@@ -1217,37 +1218,38 @@ export function AdminEmployees() {
                                             </div>
 
                                             {/* ── Compensation ── */}
-                                            <div className="border-t border-gray-100 pt-6 mt-4">
-                                                <h4 className="text-base font-bold text-[#1d1d1d] mb-4 flex items-center gap-2">
+                                            <div className={cn('border-t pt-6 mt-4', dark ? 'border-white/10' : 'border-gray-100')}>
+                                                <h4 className={cn('text-base font-bold mb-4 flex items-center gap-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                     <DollarSign className="w-5 h-5 text-emerald-500" />
                                                     {t('admin.employees.otRateTitle')}
                                                 </h4>
 
                                                 {/* Base Wage */}
                                                 <div className="mb-5">
-                                                    <label htmlFor="emp-base-wage" className="text-sm font-semibold text-[#1d1d1d] block mb-2">
-                                                        {t('admin.employees.wageLabel')} <span className="text-gray-400 font-normal text-xs">{t('admin.employees.avatarOptional')}</span>
+                                                    <label htmlFor="emp-base-wage" className={cn('text-sm font-semibold block mb-2', dark ? 'text-white' : 'text-[#1d1d1d]')}>
+                                                        {t('admin.employees.wageLabel')} <span className={cn('font-normal text-xs', dark ? 'text-white/40' : 'text-gray-400')}>{t('admin.employees.avatarOptional')}</span>
                                                     </label>
                                                     <Input
                                                         id="emp-base-wage" type="number" min="0" step="100"
                                                         value={form.baseWage}
                                                         onChange={e => setForm({ ...form, baseWage: e.target.value })}
                                                         placeholder="15000"
-                                                        className="h-11 rounded-xl border-gray-200 focus:border-emerald-500 bg-white font-medium"
+                                                        className={cn('h-11 rounded-xl focus:border-emerald-500 font-medium', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white')}
+
                                                     />
                                                 </div>
 
                                                 {/* OT Rate Toggle */}
                                                 <div className="space-y-4">
-                                                    <label className="text-sm font-semibold text-[#1d1d1d] block">{t('admin.employees.otRateTitle')}</label>
-                                                    <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 transition-colors">
+                                                    <label className={cn('text-sm font-semibold block', dark ? 'text-white' : 'text-[#1d1d1d]')}>{t('admin.employees.otRateTitle')}</label>
+                                                    <label className={cn('flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-colors', dark ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-gray-100 bg-white hover:bg-gray-50')}>
                                                         <input
                                                             type="checkbox"
                                                             className="w-5 h-5 rounded border-gray-300 text-[#044F88] focus:ring-[#044F88] cursor-pointer"
                                                             checked={form.otUseDefault}
                                                             onChange={e => setForm({ ...form, otUseDefault: e.target.checked })}
                                                         />
-                                                        <span className="text-sm font-medium text-[#1d1d1d]">
+                                                        <span className={cn('text-sm font-medium', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                             {t('admin.employees.otUseDefault')}
                                                             <span className="ml-2 text-xs font-bold text-[#044F88] bg-[#044F88]/5 border border-[#044F88]/10 px-2 py-0.5 rounded-full">
                                                                 {companySettings.defaultOtRateValue} {companySettings.defaultOtRateType === 'multiplier' ? t('admin.employees.otMultiplierUnit') : t('admin.employees.otFixedUnit')}
@@ -1256,12 +1258,12 @@ export function AdminEmployees() {
                                                     </label>
 
                                                     {!form.otUseDefault && (
-                                                        <div className="p-4 rounded-xl border border-[#044F88]/10 bg-[#044F88]/5/50 space-y-4 animate-in slide-in-from-top-2">
+                                                        <div className={cn('p-4 rounded-xl border space-y-4 animate-in slide-in-from-top-2', dark ? 'border-white/10 bg-white/5' : 'border-[#044F88]/10 bg-[#044F88]/5/50')}>
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                 <div>
-                                                                    <label className="text-xs font-semibold text-[#6f6f6f] block mb-1.5">{t('admin.employees.otCalcType')}</label>
+                                                                    <label className={cn('text-xs font-semibold block mb-1.5', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.employees.otCalcType')}</label>
                                                                     <select
-                                                                        className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm text-[#1d1d1d] font-medium focus:outline-none focus:ring-2 focus:ring-[#044F88]/20 focus:border-[#044F88] transition-shadow"
+                                                                        className={cn('w-full h-11 rounded-lg border px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#044F88]/20 focus:border-[#044F88] transition-shadow', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')}
                                                                         value={form.otType}
                                                                         onChange={e => setForm({ ...form, otType: e.target.value as 'multiplier' | 'fixed' })}
                                                                     >
@@ -1270,7 +1272,7 @@ export function AdminEmployees() {
                                                                     </select>
                                                                 </div>
                                                                 <div>
-                                                                    <label className="text-xs font-semibold text-[#6f6f6f] block mb-1.5">{t('admin.employees.otValueLabel')}</label>
+                                                                    <label className={cn('text-xs font-semibold block mb-1.5', dark ? 'text-white/50' : 'text-[#6f6f6f]')}>{t('admin.employees.otValueLabel')}</label>
                                                                     <div className="relative">
                                                                         <Input
                                                                             type="number" step="0.1" min="0"
@@ -1296,7 +1298,7 @@ export function AdminEmployees() {
                                     <div className={cn('px-8 py-5 border-t flex items-center justify-between shrink-0', dark ? 'border-white/10 bg-[#1e293b]' : 'border-gray-100 bg-white')}>
                                         <p className="text-sm font-medium text-gray-400"><span className="text-red-500 mr-1">*</span>{t('admin.employees.required')}</p>
                                         <div className="flex gap-3">
-                                            <Button type="button" variant="outline" onClick={closeFormModal} disabled={isSubmitting} className="rounded-xl h-11 px-5 border-gray-200 text-[#1d1d1d] hover:bg-gray-50 font-semibold text-sm disabled:opacity-50">{t('common.cancel')}</Button>
+                                            <Button type="button" variant="outline" onClick={closeFormModal} disabled={isSubmitting} className={cn('rounded-xl h-11 px-5 font-semibold text-sm disabled:opacity-50', dark ? 'border-white/10 text-white hover:bg-white/10' : 'border-gray-200 text-[#1d1d1d] hover:bg-gray-50')}>{t('common.cancel')}</Button>
                                             <Button type="submit" disabled={isSubmitting} className="rounded-xl h-11 px-8 bg-gradient-to-r from-[#044F88] to-[#00223A] hover:from-[#00223A] hover:to-[#00223A] text-white shadow-sm font-semibold text-sm disabled:opacity-70 min-w-[160px]">
                                                 {isSubmitting
                                                     ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t('common.saving')}</>

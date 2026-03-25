@@ -86,10 +86,10 @@ function AdminModal({ editTarget, onClose, onSaved }: AdminModalProps) {
             <div className={cn('rounded-2xl shadow-2xl w-full max-w-md', dark ? 'bg-[#1e293b]' : 'bg-white')} onClick={e => e.stopPropagation()}>
                 <div className={cn('flex items-center justify-between px-6 py-5 border-b', dark ? 'border-white/10' : 'border-gray-100')}>
                     <div>
-                        <h3 className="font-bold text-[#1d1d1d]">{isEdit ? t('settings.accounts.editTitle') : t('settings.accounts.addTitle')}</h3>
-                        <p className="text-xs text-[#6f6f6f] mt-0.5">{t('settings.accounts.formDesc')}</p>
+                        <h3 className="font-bold text-[#1d1d1d] dark:text-white">{isEdit ? t('settings.accounts.editTitle') : t('settings.accounts.addTitle')}</h3>
+                        <p className="text-xs text-[#6f6f6f] dark:text-white/60 mt-0.5">{t('settings.accounts.formDesc')}</p>
                     </div>
-                    <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors">
+                    <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
@@ -152,7 +152,7 @@ function AdminModal({ editTarget, onClose, onSaved }: AdminModalProps) {
     );
 }
 
-const inputCls = 'w-full h-10 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#044F88]/25 focus:border-[#044F88] focus:bg-white transition-colors';
+const inputCls = 'w-full h-10 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-sm text-[#1d1d1d] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#044F88]/25 focus:border-[#044F88] focus:bg-white dark:focus:bg-white/10 transition-colors';
 
 function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
     return (

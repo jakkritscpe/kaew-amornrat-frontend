@@ -432,7 +432,7 @@ export function AdminLocations() {
                 <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" onClick={() => !isDeleting && setDeleteTarget(null)}>
                     <div className={cn('rounded-2xl shadow-2xl w-full max-w-sm p-6', dark ? 'bg-[#1e293b]' : 'bg-white')} onClick={e => e.stopPropagation()}>
                         <div className="flex items-start gap-3 mb-5">
-                            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                            <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', dark ? 'bg-red-500/10' : 'bg-red-50')}>
                                 <AlertTriangle className="w-5 h-5 text-red-500" />
                             </div>
                             <div>
@@ -444,7 +444,7 @@ export function AdminLocations() {
                         </div>
                         <div className="flex gap-2">
                             <button onClick={() => setDeleteTarget(null)} disabled={isDeleting}
-                                className="flex-1 h-10 rounded-xl border border-gray-200 text-sm font-medium text-[#6f6f6f] hover:bg-gray-50 transition-colors disabled:opacity-50">
+                                className={cn('flex-1 h-10 rounded-xl border text-sm font-medium transition-colors disabled:opacity-50', dark ? 'border-white/10 text-white/60 hover:bg-white/5' : 'border-gray-200 text-[#6f6f6f] hover:bg-gray-50')}>
                                 {t('common.cancel')}
                             </button>
                             <button onClick={handleDelete} disabled={isDeleting}
@@ -496,7 +496,7 @@ export function AdminLocations() {
                             <div className={cn('order-1 md:order-2 md:flex-1 h-[260px] sm:h-[300px] md:h-auto relative border-b md:border-b-0 md:border-l shrink-0 md:shrink', dark ? 'border-white/10' : 'border-gray-100')}>
                                 {/* Hint chip */}
                                 <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[500] pointer-events-none">
-                                    <div className="bg-white/90 backdrop-blur-sm border border-gray-200 text-xs text-[#1d1d1d] font-medium px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                                    <div className={cn('backdrop-blur-sm border text-xs font-medium px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap', dark ? 'bg-[#1e293b]/90 border-white/10 text-white' : 'bg-white/90 border-gray-200 text-[#1d1d1d]')}>
                                         <Crosshair className="w-3 h-3 text-[#044F88] shrink-0" />
                                         {t('admin.locations.clickOrDrag')}
                                     </div>
@@ -538,14 +538,14 @@ export function AdminLocations() {
                                             required
                                             autoFocus
                                             placeholder={t('admin.locations.namePlaceholder')}
-                                            className="h-11 rounded-xl border-gray-200 focus:border-[#044F88] bg-white text-[#1d1d1d]"
+                                            className={cn('h-11 rounded-xl focus:border-[#044F88]', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-[#1d1d1d]')}
                                         />
                                     </div>
 
                                     {/* Radius slider */}
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
-                                            <label className="text-sm font-semibold text-[#1d1d1d]">
+                                            <label className={cn('text-sm font-semibold', dark ? 'text-white' : 'text-[#1d1d1d]')}>
                                                 {t('admin.locations.radiusLabel')} <span className="text-red-500">*</span>
                                             </label>
                                             <span className="text-sm font-bold text-[#044F88] tabular-nums bg-[#044F88]/5 px-2.5 py-0.5 rounded-lg border border-[#044F88]/10">
@@ -565,7 +565,7 @@ export function AdminLocations() {
                                             <span>50 {t('admin.locations.meters')}</span>
                                             <span>2,000 {t('admin.locations.meters')}</span>
                                         </div>
-                                        <p className="text-xs text-[#00223A] bg-[#044F88]/5 border border-[#044F88]/10 px-3 py-2 rounded-xl mt-3 font-medium leading-relaxed">
+                                        <p className={cn('text-xs border px-3 py-2 rounded-xl mt-3 font-medium leading-relaxed', dark ? 'text-[#044F88] bg-[#044F88]/10 border-[#044F88]/20' : 'text-[#00223A] bg-[#044F88]/5 border-[#044F88]/10')}>
                                             💡 {t('admin.locations.radiusHint')}
                                         </p>
                                     </div>
@@ -587,7 +587,7 @@ export function AdminLocations() {
                                                         if (!isNaN(v)) setForm(f => ({ ...f, lat: v }));
                                                     }}
                                                     required
-                                                    className="h-10 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-sm font-mono"
+                                                    className={cn('h-10 rounded-xl focus:border-[#044F88] tabular-nums text-sm font-mono', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white')}
                                                 />
                                             </div>
                                             <div>
@@ -601,7 +601,7 @@ export function AdminLocations() {
                                                         if (!isNaN(v)) setForm(f => ({ ...f, lng: v }));
                                                     }}
                                                     required
-                                                    className="h-10 rounded-xl border-gray-200 focus:border-[#044F88] bg-white tabular-nums text-sm font-mono"
+                                                    className={cn('h-10 rounded-xl focus:border-[#044F88] tabular-nums text-sm font-mono', dark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white')}
                                                 />
                                             </div>
                                         </div>
@@ -613,7 +613,7 @@ export function AdminLocations() {
                                         variant="outline"
                                         onClick={handleGetCurrentLocation}
                                         disabled={gettingLocation || isSubmitting}
-                                        className="w-full h-10 rounded-xl border-gray-200 text-[#1d1d1d] hover:bg-[#044F88]/5 hover:border-[#044F88]/30 hover:text-[#044F88] transition-all font-medium text-sm disabled:opacity-60"
+                                        className={cn('w-full h-10 rounded-xl hover:bg-[#044F88]/5 hover:border-[#044F88]/30 hover:text-[#044F88] transition-all font-medium text-sm disabled:opacity-60', dark ? 'border-white/10 text-white' : 'border-gray-200 text-[#1d1d1d]')}
                                     >
                                         {gettingLocation
                                             ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('admin.locations.findingLocation')}</>
@@ -629,7 +629,7 @@ export function AdminLocations() {
                                         variant="outline"
                                         onClick={closeModal}
                                         disabled={isSubmitting}
-                                        className="flex-1 rounded-xl h-11 border-gray-200 text-[#1d1d1d] hover:bg-gray-50 font-semibold text-sm disabled:opacity-50"
+                                        className={cn('flex-1 rounded-xl h-11 font-semibold text-sm disabled:opacity-50', dark ? 'border-white/10 text-white hover:bg-white/5' : 'border-gray-200 text-[#1d1d1d] hover:bg-gray-50')}
                                     >
                                         {t('common.cancel')}
                                     </Button>

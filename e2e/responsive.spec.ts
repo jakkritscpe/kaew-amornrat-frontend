@@ -1,13 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { adminLogin, dismissTour } from './helpers';
+import { dismissTour } from './helpers';
 
-// Force mobile viewport + no saved session (login manually)
-test.use({ viewport: { width: 390, height: 844 }, isMobile: true, storageState: undefined });
+// Uses saved admin session from mobile project (no manual login needed)
 
 test.describe('Responsive - Mobile', () => {
 
   test('should show hamburger menu on mobile', async ({ page }) => {
-    await adminLogin(page);
+    await page.goto('/admin/attendance/dashboard');
     await dismissTour(page);
 
     // Hamburger button should be visible
@@ -15,7 +14,7 @@ test.describe('Responsive - Mobile', () => {
   });
 
   test('should open mobile sidebar', async ({ page }) => {
-    await adminLogin(page);
+    await page.goto('/admin/attendance/dashboard');
     await dismissTour(page);
 
     // Click hamburger
