@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Keep ref in sync with state so the event handler always sees the latest value
     useEffect(() => { userRef.current = user; }, [user]);
 
+
     useEffect(() => {
         // Restore session by calling /api/auth/me — uses HttpOnly cookie automatically.
         // No localStorage token needed.
