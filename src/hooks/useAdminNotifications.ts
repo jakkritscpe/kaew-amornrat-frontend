@@ -1,16 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { NotificationEvent } from '../types/notifications';
+import { apiRequest } from '../lib/api-client';
 
 const MAX_NOTIFICATIONS = 50;
 const RECONNECT_DELAY_MS = [1000, 2000, 5000, 10000]; // exponential backoff
 
-function getWsUrl(): string {
-  const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
+// Direct WS URL to backend (bypasses Vercel proxy which doesn't support WebSocket)
+function getWsBackendUrl(token: string): string {
+  const apiUrl = import.meta.env.VITE_WS_URL as string | undefined;
   if (apiUrl) {
-    return apiUrl.replace(/^https/, 'wss').replace(/^http/, 'ws') + '/ws';
+    return `${apiUrl}/ws?token=${encodeURIComponent(token)}`;
   }
+  // Local dev: same-origin via Vite proxy (token still used for consistency)
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  return `${proto}://${window.location.host}/ws`;
+  return `${proto}://${window.location.host}/ws?token=${encodeURIComponent(token)}`;
+}
+
+async function fetchWsToken(): Promise<string> {
+  const data = await apiRequest<{ token: string }>('/api/auth/ws-token');
+  return data.token;
 }
 
 export function useAdminNotifications(enabled: boolean) {
@@ -22,13 +30,22 @@ export function useAdminNotifications(enabled: boolean) {
   const pingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const connectRef = useRef<() => void>(() => {});
 
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     if (!enabled) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    // Auth is via HttpOnly cookie sent automatically with the upgrade request.
-    // No first-message auth needed.
-    const ws = new WebSocket(getWsUrl());
+    let token: string;
+    try {
+      token = await fetchWsToken();
+    } catch {
+      // Not authenticated or server error — retry with backoff
+      const delay = RECONNECT_DELAY_MS[Math.min(retryRef.current, RECONNECT_DELAY_MS.length - 1)];
+      retryRef.current++;
+      setTimeout(() => connectRef.current(), delay);
+      return;
+    }
+
+    const ws = new WebSocket(getWsBackendUrl(token));
     wsRef.current = ws;
 
     ws.onmessage = (evt) => {
