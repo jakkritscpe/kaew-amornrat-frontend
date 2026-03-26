@@ -556,9 +556,9 @@ export function AdminReports() {
                         const pct = employees.length > 0 ? Math.round((empCount / employees.length) * 100) : 0;
                         const deptFiltered = monthlyLogs.filter(l => l.status === filterStatus && empMap.get(l.employeeId)?.department === dept).length;
                         return (
-                            <div key={dept}>
+                            <div key={dept || '__no_dept__'}>
                                 <div className="flex justify-between text-sm mb-1.5">
-                                    <span className={cn('font-medium', dark ? 'text-white' : 'text-[#1d1d1d]')}>{dept}</span>
+                                    <span className={cn('font-medium', dark ? 'text-white' : 'text-[#1d1d1d]')}>{dept || t('admin.reports.unknown')}</span>
                                     <span className={dark ? 'text-white/40' : 'text-[#6f6f6f]'}>
                                         {empCount} {t('common.person')}
                                         {deptFiltered > 0 && (

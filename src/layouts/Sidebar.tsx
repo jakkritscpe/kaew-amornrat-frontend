@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, startTransition } from 'react';
 import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -246,7 +246,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
                             <Link
                               key={subItem.id}
                               to={`/admin/${subItem.id}`}
-                              onClick={onMobileClose}
+                              onClick={() => startTransition(onMobileClose)}
                               className={cn(
                                 'sub-item relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium group',
                                 isSubActive
@@ -271,7 +271,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
               <Link
                 key={item.id}
                 to={`/admin/${item.id}`}
-                onClick={onMobileClose}
+                onClick={() => startTransition(onMobileClose)}
                 title={isCollapsed ? item.label : undefined}
                 className={cn(
                   'menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
