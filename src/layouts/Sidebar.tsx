@@ -18,7 +18,6 @@ import {
   ChevronDown,
   ChevronUp,
   Calculator,
-  CalendarDays,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '../features/auth/hooks/useAuth';
@@ -57,7 +56,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, onM
         { id: 'attendance/ot-approvals', label: t('nav.otApprovals'), icon: FileCheck2 },
         { id: 'attendance/ot-calculator', label: t('nav.otCalculator'), icon: Calculator },
         { id: 'attendance/reports', label: t('nav.reports'), icon: BarChart3 },
-        { id: 'attendance/holidays', label: t('nav.holidays'), icon: CalendarDays },
       ]
     },
     { id: 'settings', label: t('nav.settings'), icon: Settings },
