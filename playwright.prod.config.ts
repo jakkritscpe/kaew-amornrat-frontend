@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
@@ -22,14 +23,17 @@ export default defineConfig({
     {
       name: 'desktop',
       dependencies: ['setup'],
+      // responsive.spec.ts tests hamburger/mobile sidebar — only valid on mobile viewport
+      testIgnore: [/auth\.spec\.ts/, /responsive\.spec\.ts/],
       use: { viewport: { width: 1440, height: 900 }, storageState: './e2e/.auth/admin.json' },
     },
     {
       name: 'mobile',
       dependencies: ['setup'],
+      testIgnore: /auth\.spec\.ts/,
       use: { viewport: { width: 390, height: 844 }, isMobile: true, storageState: './e2e/.auth/admin.json' },
     },
-    // Auth tests don't use saved session
+    // Auth tests: independent, no saved session, no dependency on setup
     {
       name: 'auth',
       testMatch: /auth\.spec\.ts/,

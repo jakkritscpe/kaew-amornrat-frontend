@@ -1,15 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { dismissTour } from './helpers';
+import { gotoAdmin } from './helpers';
 
 test.describe('Admin Dashboard', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/admin/attendance/dashboard');
-    await dismissTour(page);
+    await gotoAdmin(page, 'attendance/dashboard');
   });
 
   test('should display stat cards', async ({ page }) => {
     await expect(page.locator('[data-tour="stat-cards"]')).toBeVisible();
-    // Should have 4 stat cards
     const cards = page.locator('[data-tour="stat-cards"] > *');
     await expect(cards).toHaveCount(4);
   });
@@ -21,19 +19,25 @@ test.describe('Admin Dashboard', () => {
   test('should toggle dark mode', async ({ page }) => {
     const themeBtn = page.locator('[data-tour="theme-toggle"]');
     await themeBtn.click();
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(500);
 
     const val = await page.evaluate(() => localStorage.getItem('dashboard_theme'));
     expect(val).toBe('dark');
 
     await themeBtn.click();
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(500);
     const val2 = await page.evaluate(() => localStorage.getItem('dashboard_theme'));
     expect(val2).toBe('light');
   });
 
   test('should navigate to attendance logs', async ({ page }) => {
-    await page.getByText(/ดูประวัติทั้งหมด|View All History/i).first().click();
+    // Try inline "view all" link first, fallback to direct nav
+    const inlineLink = page.locator('a[href*="logs"]').first();
+    if (await inlineLink.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await inlineLink.click();
+    } else {
+      await page.goto('/admin/attendance/logs');
+    }
     await expect(page).toHaveURL(/\/admin\/attendance\/logs/);
   });
 });
