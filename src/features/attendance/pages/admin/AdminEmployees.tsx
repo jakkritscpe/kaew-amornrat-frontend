@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useAttendance } from '../../contexts/useAttendance';
 import { QRCodeSVG } from 'qrcode.react';
-import { regenerateQRApi } from '../../../../lib/api/auth-api';
+import { regenerateQRApi, getEmployeeQRTokenApi } from '../../../../lib/api/auth-api';
+import { verifyPinApi } from '../../../../lib/api/employees-api';
 import { toast } from 'sonner';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -172,6 +173,7 @@ export function AdminEmployees() {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showQRModal, setShowQRModal] = useState<string | null>(null);
+    const [qrUrl, setQrUrl] = useState<string | null>(null);
     const [confirmRegenerate, setConfirmRegenerate] = useState(false);
     const [copied, setCopied] = useState(false);
     const selectedEmp = employees.find(e => e.id === showQRModal) ?? null;
@@ -202,7 +204,7 @@ export function AdminEmployees() {
     const [pinInput, setPinInput] = useState('');
     const [pinError, setPinError] = useState('');
     const [pinAttempts, setPinAttempts] = useState(0);
-    const ADMIN_PIN = '1234';
+    const [isPinVerifying, setIsPinVerifying] = useState(false);
     const PIN_REFS = [
         useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
         useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
@@ -377,37 +379,48 @@ export function AdminEmployees() {
 
     const handlePinDigit = async (digit: string) => {
         const locked = pinAttempts >= 3;
-        if (locked || isDeleting) return;
+        if (locked || isDeleting || isPinVerifying) return;
         const next = (pinInput + digit).slice(0, 4);
         setPinInput(next);
         setPinError('');
         if (next.length < 4) PIN_REFS[next.length]?.current?.focus();
         if (next.length === 4) {
-            if (next === ADMIN_PIN) {
-                if (secureActionType === 'delete') {
-                    setIsDeleting(true);
-                    try {
-                        const target = employees.find(e => e.id === secureActionId);
-                        await removeEmployee(secureActionId!);
-                        toast.success(t('admin.employees.deleteSuccess', { name: target?.name ?? '' }));
+            setIsPinVerifying(true);
+            try {
+                const valid = await verifyPinApi(next);
+                if (valid) {
+                    if (secureActionType === 'delete') {
+                        setIsDeleting(true);
+                        try {
+                            const target = employees.find(e => e.id === secureActionId);
+                            await removeEmployee(secureActionId!);
+                            toast.success(t('admin.employees.deleteSuccess', { name: target?.name ?? '' }));
+                            closeSecureAction();
+                        } catch (err) {
+                            toast.error(err instanceof Error ? err.message : t('admin.employees.deleteFail'));
+                            setPinInput('');
+                            PIN_REFS[0]?.current?.focus();
+                        } finally {
+                            setIsDeleting(false);
+                        }
+                    } else if (secureActionType === 'edit') {
+                        openEditForm(secureActionId!);
                         closeSecureAction();
-                    } catch (err) {
-                        toast.error(err instanceof Error ? err.message : t('admin.employees.deleteFail'));
-                        setPinInput('');
-                        PIN_REFS[0]?.current?.focus();
-                    } finally {
-                        setIsDeleting(false);
                     }
-                } else if (secureActionType === 'edit') {
-                    openEditForm(secureActionId!);
-                    closeSecureAction();
                 }
-            } else {
-                const newAttempts = pinAttempts + 1;
-                setPinAttempts(newAttempts);
+            } catch (err: unknown) {
+                const status = (err as { status?: number }).status;
+                if (status === 428) {
+                    setPinError(t('admin.employees.pinNotSet'));
+                } else {
+                    const newAttempts = pinAttempts + 1;
+                    setPinAttempts(newAttempts);
+                    setPinError(newAttempts >= 3 ? t('admin.employees.pinLocked') : t('admin.employees.pinWrong', { n: String(3 - newAttempts) }));
+                }
                 setPinInput('');
                 PIN_REFS[0]?.current?.focus();
-                setPinError(newAttempts >= 3 ? t('admin.employees.pinLocked') : t('admin.employees.pinWrong', { n: String(3 - newAttempts) }));
+            } finally {
+                setIsPinVerifying(false);
             }
         }
     };
@@ -508,18 +521,16 @@ export function AdminEmployees() {
     };
 
     const copyQRLink = () => {
-        const url = selectedEmp?.qrToken
-            ? `${window.location.origin}/employee/qr-login/${selectedEmp.qrToken}`
-            : '';
-        if (!url) return;
-        navigator.clipboard.writeText(url);
+        if (!qrUrl) return;
+        navigator.clipboard.writeText(qrUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
     const handleRegenerateQR = async (employeeId: string) => {
         try {
-            await regenerateQRApi(employeeId);
+            const result = await regenerateQRApi(employeeId);
+            setQrUrl(result.qrUrl);
             await refreshAll();
             setConfirmRegenerate(false);
             toast.success(t('admin.employees.regenerateSuccess'));
@@ -529,7 +540,8 @@ export function AdminEmployees() {
     };
 
     useEffect(() => {
-        if (!showQRModal) return;
+        if (!showQRModal) { setQrUrl(null); return; }
+        getEmployeeQRTokenApi(showQRModal).then(r => setQrUrl(r.qrUrl)).catch(() => setQrUrl(null));
 
         // Lock body scroll (prevents background scroll on iOS)
         const prev = document.body.style.overflow;
@@ -821,11 +833,7 @@ export function AdminEmployees() {
                                             <span className="absolute bottom-0 left-0 w-5 h-5 border-b-[3px] border-l-[3px] border-[#044F88] rounded-bl-lg" />
                                             <span className="absolute bottom-0 right-0 w-5 h-5 border-b-[3px] border-r-[3px] border-[#044F88] rounded-br-lg" />
                                             <QRCodeSVG
-                                                value={
-                                                    selectedEmp?.qrToken
-                                                        ? `${window.location.origin}/employee/qr-login/${selectedEmp.qrToken}`
-                                                        : `${window.location.origin}/employee/qr-login/`
-                                                }
+                                                value={qrUrl ?? `${window.location.origin}/employee/qr-login/`}
                                                 size={192}
                                                 level="H"
                                                 includeMargin
@@ -967,10 +975,10 @@ export function AdminEmployees() {
                                                 {pinError && <p className={cn('text-sm mb-4 font-medium', locked ? 'text-[#6f6f6f]' : 'text-red-500')}>{pinError}</p>}
 
                                                 {/* Numpad */}
-                                                {isDeleting ? (
+                                                {isDeleting || isPinVerifying ? (
                                                     <div className="flex flex-col items-center gap-3 mb-6 py-4">
-                                                        <Loader2 className="w-8 h-8 text-red-400 animate-spin" />
-                                                        <p className="text-sm text-[#6f6f6f]">{t('admin.employees.deletingEmployee')}</p>
+                                                        <Loader2 className={cn('w-8 h-8 animate-spin', isDeleting ? 'text-red-400' : 'text-[#044F88]')} />
+                                                        <p className="text-sm text-[#6f6f6f]">{isDeleting ? t('admin.employees.deletingEmployee') : t('admin.employees.pinVerifying')}</p>
                                                     </div>
                                                 ) : (
                                                     <div className="grid grid-cols-3 gap-3 mb-6">

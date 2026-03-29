@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { qrLoginApi } from '../../../lib/api/auth-api';
-import { setToken, EMPLOYEE_KEY, USER_KEY } from '../../../lib/api-client';
+import { EMPLOYEE_KEY, USER_KEY } from '../../../lib/api-client';
 import type { User } from '../types';
 import { useTranslation } from '@/i18n';
 
@@ -18,7 +18,6 @@ export function QRLoginPage() {
 
     qrLoginApi(token)
       .then((result) => {
-        setToken(result.token);
         localStorage.setItem(EMPLOYEE_KEY, JSON.stringify(result.user));
 
         const role = result.user.role;

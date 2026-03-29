@@ -13,6 +13,7 @@ export interface AttendanceContextType {
   otRequests: OTRequest[];
   companySettings: CompanySettings;
   loading: boolean;
+  retrying: boolean;
   error: string | null;
 
   refreshAll: () => Promise<void>;

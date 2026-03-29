@@ -11,11 +11,21 @@ import { EMPLOYEE_KEY } from '@/lib/api-client';
 
 type ShiftUrgency = 'early' | 'warning' | 'late' | 'veryLate';
 
+function getBangkokMinutes(date: Date): number {
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Bangkok',
+        hour: 'numeric', minute: 'numeric', hour12: false,
+    }).formatToParts(date);
+    const h = parseInt(parts.find(p => p.type === 'hour')!.value);
+    const m = parseInt(parts.find(p => p.type === 'minute')!.value);
+    return h * 60 + m;
+}
+
 function getShiftUrgency(shiftStartTime: string | undefined, now: Date): ShiftUrgency {
     if (!shiftStartTime) return 'early';
     const [h, m] = shiftStartTime.split(':').map(Number);
     const shiftMinutes = h * 60 + m;
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const nowMinutes = getBangkokMinutes(now);
     const diff = nowMinutes - shiftMinutes;
     if (diff < 0) return 'early';       // ก่อนเวลากะ
     if (diff < 15) return 'warning';     // เลยกะ < 15 นาที (ใกล้สาย)

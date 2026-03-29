@@ -2,58 +2,53 @@ import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
 import { AuthContext } from './AuthContextObject';
-import { loginApi } from '../../../lib/api/auth-api';
-import { setToken, clearToken, TOKEN_KEY, USER_KEY } from '../../../lib/api-client';
-import { decodeJwt } from '../../../lib/utils';
+import { loginApi, logoutApi, getMeApi } from '../../../lib/api/auth-api';
+import { USER_KEY } from '../../../lib/api-client';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Path 1: normal admin login → repairhub_user exists
-        const storedUser = localStorage.getItem(USER_KEY);
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch {
-                localStorage.removeItem(USER_KEY);
-            }
-            setIsLoading(false);
-            return;
-        }
+        // Redirect to login on any 401 from any API call (expired cookie mid-session)
+        const handleUnauthorized = () => {
+            setUser(null);
+            window.location.href = '/';
+        };
+        window.addEventListener('auth:unauthorized', handleUnauthorized);
+        return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    }, []);
 
-        // Path 2: admin/manager JWT token → decode and restore session
-        const token = localStorage.getItem(TOKEN_KEY);
-        if (token) {
-            const payload = decodeJwt(token);
-            const isValid = payload
-                && typeof payload.exp === 'number'
-                && Date.now() / 1000 < payload.exp;
-
-            if (isValid) {
-                const backendRole = payload!.role as string;
-                if (backendRole === 'admin' || backendRole === 'manager') {
-                    const adminUser: User = {
-                        id: payload!.sub as string,
-                        username: payload!.email as string,
-                        name: payload!.name as string,
-                        role: backendRole === 'admin' ? 'super_admin' : 'admin',
-                        employeeId: payload!.sub as string,
-                    };
-                    setUser(adminUser);
+    useEffect(() => {
+        // Restore session by calling /api/auth/me — uses HttpOnly cookie automatically.
+        // No localStorage token needed.
+        getMeApi()
+            .then((u) => {
+                const restored: User = {
+                    id: u.id,
+                    username: u.email,
+                    name: u.name,
+                    role: u.role === 'admin' ? 'super_admin' : u.role === 'manager' ? 'admin' : 'technician',
+                    employeeId: u.id,
+                    accessibleMenus: u.accessibleMenus || [],
+                };
+                // Only keep admin/manager sessions in this context (employees use EmployeeLayout)
+                if (u.role === 'admin' || u.role === 'manager') {
+                    setUser(restored);
+                    localStorage.setItem(USER_KEY, JSON.stringify(restored));
                 }
-            }
-        }
-
-        setIsLoading(false);
+            })
+            .catch(() => {
+                // No valid session — clear any stale profile data
+                localStorage.removeItem(USER_KEY);
+            })
+            .finally(() => setIsLoading(false));
     }, []);
 
     const loginWithCredentials = async (email: string, password: string) => {
         setIsLoading(true);
         try {
             const result = await loginApi(email, password);
-            setToken(result.token);
             const loggedInUser: User = {
                 id: result.user.id,
                 username: result.user.email,
@@ -69,9 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        try { await logoutApi(); } catch { /* ignore */ }
         setUser(null);
-        clearToken();
         localStorage.removeItem(USER_KEY);
         localStorage.removeItem('attendance_employee');
         window.location.href = '/';

@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { EmployeeNoSessionPage } from '../pages/EmployeeNoSessionPage';
-import { TOKEN_KEY } from '../../../lib/api-client';
+import { EMPLOYEE_KEY } from '../../../lib/api-client';
 
 export function ProtectedRoute() {
     const { user, isAuthenticated, isLoading } = useAuth();
@@ -17,8 +17,9 @@ export function ProtectedRoute() {
 
     // For employee routes - check attendance_token directly (QR-based login)
     if (location.pathname.startsWith('/employee')) {
-        const employeeToken = localStorage.getItem(TOKEN_KEY);
-        if (!employeeToken) {
+        // Employees are identified by their profile in localStorage (set at QR/email login)
+        const employeeData = localStorage.getItem(EMPLOYEE_KEY);
+        if (!employeeData) {
             return <EmployeeNoSessionPage />;
         }
         return <Outlet />;

@@ -1,4 +1,4 @@
-import { api, setToken, clearToken } from '../api-client';
+import { api } from '../api-client';
 
 export interface AuthUser {
   id: string;
@@ -10,27 +10,23 @@ export interface AuthUser {
   accessibleMenus?: string[];
 }
 
-export async function loginApi(email: string, password: string): Promise<{ token: string; user: AuthUser }> {
-  const result = await api.post<{ token: string; user: AuthUser }>('/api/auth/login', { email, password });
-  setToken(result.token);
-  return result;
+export async function loginApi(email: string, password: string): Promise<{ user: AuthUser }> {
+  return api.post<{ user: AuthUser }>('/api/auth/login', { email, password });
 }
 
 export async function logoutApi() {
-  clearToken();
+  await api.post('/api/auth/logout', {});
 }
 
-export async function qrLoginApi(token: string): Promise<{ token: string; user: AuthUser }> {
-  const result = await api.post<{ token: string; user: AuthUser }>('/api/auth/qr-login', { token });
-  setToken(result.token);
-  return result;
+export async function qrLoginApi(token: string): Promise<{ user: AuthUser }> {
+  return api.post<{ user: AuthUser }>('/api/auth/qr-login', { token });
 }
 
-export async function getEmployeeQRTokenApi(employeeId: string): Promise<{ qrUrl: string; qrToken: string; employeeName: string }> {
+export async function getEmployeeQRTokenApi(employeeId: string): Promise<{ qrUrl: string; employeeName: string }> {
   return api.get(`/api/employees/${employeeId}/qr-token`);
 }
 
-export async function regenerateQRApi(employeeId: string): Promise<{ qrUrl: string; qrToken: string }> {
+export async function regenerateQRApi(employeeId: string): Promise<{ qrUrl: string; expiresAt: string }> {
   return api.post(`/api/employees/${employeeId}/regenerate-qr`, {});
 }
 

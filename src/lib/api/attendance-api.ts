@@ -1,4 +1,4 @@
-import { api } from '../api-client';
+import { api, buildParams } from '../api-client';
 import type { AttendanceLog } from '../../features/attendance/types';
 
 type PaginatedResponse<T> = { data: T[]; pagination: { page: number; limit: number; total: number; totalPages: number } };
@@ -7,14 +7,7 @@ export async function getLogsApi(filter?: {
   employeeId?: string; date?: string; startDate?: string; endDate?: string;
   status?: string; page?: number; limit?: number;
 }): Promise<AttendanceLog[]> {
-  const cleaned: Record<string, string> = {};
-  if (filter) {
-    for (const [k, v] of Object.entries(filter)) {
-      if (v !== undefined && v !== null && v !== '') cleaned[k] = String(v);
-    }
-  }
-  const params = new URLSearchParams(cleaned).toString();
-  const res = await api.get<PaginatedResponse<AttendanceLog>>(`/api/attendance/logs${params ? `?${params}` : ''}`);
+  const res = await api.get<PaginatedResponse<AttendanceLog>>(`/api/attendance/logs${buildParams(filter)}`);
   return res.data;
 }
 
